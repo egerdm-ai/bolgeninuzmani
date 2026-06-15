@@ -169,7 +169,13 @@ export function PortfolioDetailView({
 
         <MarketContextCard portfolio={portfolio} />
 
+        <PortfolioMatchPanel portfolio={portfolio} mode={mode} />
+
+        <PdfCtaCard portfolio={portfolio} mode={mode} onRequest={() => setRequestOpen(true)} />
+
         {mode === "owner" && <DataScoreCard portfolio={portfolio} />}
+
+        {mode === "owner" && <PortfolioAnalyticsCard portfolio={portfolio} />}
 
         <OwnerCard owner={portfolio.owner} />
 
