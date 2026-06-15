@@ -398,6 +398,15 @@ function NewPortfolioWizard() {
               </div>
               <p className="mt-1.5 text-xs text-gold">{Math.round(((step + 1) / steps.length) * 100)}% · Adım {step + 1}/{steps.length}</p>
             </div>
+            <div className="flex items-center gap-3 border-t border-border px-4 py-3">
+              <DataScoreRing score={dataScore} level={dataLevel} size={48} />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Portföy Veri Skoru</p>
+                <p className="mt-0.5 text-xs text-secondary-foreground">
+                  {dataLevel === "high" ? "Güçlü veri — yayına hazır" : dataLevel === "medium" ? "İyi, daha fazla detay ekleyin" : "Daha fazla bilgi ekleyin"}
+                </p>
+              </div>
+            </div>
           </SurfaceCard>
         </div>
       </div>
