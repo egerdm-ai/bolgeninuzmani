@@ -264,8 +264,11 @@ export const commercialFields: FieldDef[] = [
     { value: "empty", label: "Boş" },
     { value: "tenant", label: "Kiracılı" },
   ] },
-  { key: "transferFee", label: "Devir Bedeli", type: "number", unit: "₺" },
-  { key: "monthlyRent", label: "Aylık Kira Geliri", type: "number", unit: "₺" },
+  { key: "transferFee", label: "Devren Bedeli", type: "number", unit: "₺" },
+  { key: "monthlyRent", label: "Kira Getirisi", type: "number", unit: "₺" },
+  { key: "turnover", label: "Ciro Bilgisi", type: "number", unit: "₺/ay" },
+  { key: "truckAccess", label: "Tır Girişi", type: "boolean" },
+  { key: "inOsb", label: "OSB İçinde", type: "boolean" },
 ];
 
 export const tourismFields: FieldDef[] = [
