@@ -57,6 +57,7 @@ function Assistant() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [matches, setMatches] = useState<MatchResult[]>([]);
   const [experts, setExperts] = useState<Professional[]>([]);
+  const [notifyOnMatch, setNotifyOnMatch] = useState(true);
   const started = messages.length > 0;
 
   const ask = (q: string) => {
