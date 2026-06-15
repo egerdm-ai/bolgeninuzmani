@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as VUsernameRouteImport } from './routes/v.$username'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
@@ -41,6 +42,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const VUsernameRoute = VUsernameRouteImport.update({
+  id: '/v/$username',
+  path: '/v/$username',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PSlugRoute = PSlugRouteImport.update({
   id: '/p/$slug',
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
     | '/dashboard/professionals/$id'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard'
     | '/dashboard/portfolios/new'
     | '/dashboard/professionals/$id'
@@ -225,6 +236,7 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
     | '/dashboard/professionals/$id'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   PSlugRoute: typeof PSlugRoute
+  VUsernameRoute: typeof VUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -262,6 +275,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/v/$username': {
+      id: '/v/$username'
+      path: '/v/$username'
+      fullPath: '/v/$username'
+      preLoaderRoute: typeof VUsernameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/p/$slug': {
       id: '/p/$slug'
@@ -406,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   PSlugRoute: PSlugRoute,
+  VUsernameRoute: VUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

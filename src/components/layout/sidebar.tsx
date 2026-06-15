@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Crown,
   ChevronLeft,
+  Users2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { currentUser, detailRequests } from "@/lib/mock/data";
@@ -21,10 +22,11 @@ const newRequests = detailRequests.filter((r) => r.status === "new").length;
 
 const mainNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
-  { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
+  { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
+  { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
-  { label: "Kaydettiklerim", to: "/dashboard/favorites", icon: Bookmark },
+  { label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark },
   { label: "AI Concierge", to: "/dashboard/concierge", icon: Sparkles, accent: true },
 ] as const;
 
