@@ -36,7 +36,8 @@ export function ProfessionalCard({
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {professional.expertiseRegions.slice(0, 3).map((r) => (
+          <RegionExpertBadge region={topExpertRegion(professional)} />
+          {professional.expertiseRegions.slice(0, 2).map((r) => (
             <FeatureChip key={r} label={r} />
           ))}
         </div>
@@ -84,6 +85,9 @@ export function ProfessionalCard({
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3 text-gold" /> {professional.location}
           </p>
+          <div className="mt-2">
+            <RegionExpertBadge region={topExpertRegion(professional)} />
+          </div>
         </div>
 
         {/* Expertise regions */}
