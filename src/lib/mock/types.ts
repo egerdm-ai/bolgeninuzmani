@@ -228,3 +228,46 @@ export type Region = {
   mapX: number;
   mapY: number;
 };
+
+// ---------------------------------------------------------------------------
+// Notifications, region watches, saved-search notification settings.
+// ---------------------------------------------------------------------------
+
+export type NotificationFrequency = "instant" | "daily" | "weekly" | "off";
+
+export const notificationFrequencyLabels: Record<NotificationFrequency, string> = {
+  instant: "Anında",
+  daily: "Günlük Özet",
+  weekly: "Haftalık Özet",
+  off: "Kapalı",
+};
+
+export type NotificationKind =
+  | "match"
+  | "region"
+  | "portfolio"
+  | "request"
+  | "search";
+
+/** `link` is constrained to the static section routes so typed routing stays happy. */
+export type NotificationLink =
+  | "/dashboard/searches"
+  | "/dashboard/matches"
+  | "/dashboard/regions"
+  | "/dashboard/detail-requests"
+  | "/dashboard/portfolios";
+
+export type AppNotification = {
+  id: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  time: string;
+  read: boolean;
+  link: NotificationLink;
+};
+
+export type RegionWatch = {
+  slug: string;
+  frequency: NotificationFrequency;
+};
