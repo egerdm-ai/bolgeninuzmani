@@ -1,14 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck, FolderLock } from "lucide-react";
+import { ShieldCheck, FolderLock, MapPin, ArrowRight } from "lucide-react";
 import type { Professional } from "@/lib/mock/types";
 import { SurfaceCard } from "./cards";
 import { BrokerAvatar } from "./broker-avatar";
-import { RegionExpertBadge, MembershipBadge } from "./badges";
+import { MembershipBadge } from "./badges";
 import { FollowButton } from "./follow-button";
-import { Button } from "@/components/ui/button";
 
 /**
- * "Benzer Profesyoneller" — 3-4 compact peer cards. Mock similarity logic:
+ * "Benzer Profesyoneller" — compact list of peers. Mock similarity logic:
  * shared expertise types / regions (computed by the caller).
  */
 export function SimilarProfessionals({ professionals }: { professionals: Professional[] }) {
@@ -21,13 +20,17 @@ export function SimilarProfessionals({ professionals }: { professionals: Profess
           Aynı bölge ve portföy tipinde çalışan, ağda öne çıkan profesyoneller.
         </p>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+
+      <SurfaceCard className="divide-y divide-border p-0">
         {professionals.map((pro) => (
-          <SurfaceCard key={pro.id} className="p-4" hover>
+          <div
+            key={pro.id}
+            className="flex flex-wrap items-center gap-4 px-4 py-3.5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-surface-2"
+          >
             <Link
               to="/dashboard/professionals/$id"
               params={{ id: pro.id }}
-              className="flex items-center gap-3"
+              className="flex min-w-[200px] flex-1 items-center gap-3"
             >
               <BrokerAvatar
                 name={pro.fullName}
@@ -42,27 +45,30 @@ export function SimilarProfessionals({ professionals }: { professionals: Profess
                   <MembershipBadge tier={pro.membershipTier} label={pro.membershipBadge} />
                 </div>
                 <p className="truncate text-xs text-muted-foreground">{pro.title}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="size-3 text-gold" /> {pro.location}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <FolderLock className="size-3 text-gold" /> {pro.activePortfolios} aktif portföy
+                  </span>
+                </div>
               </div>
             </Link>
 
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <RegionExpertBadge region={pro.expertBadge} />
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                <FolderLock className="size-3 text-gold" /> {pro.activePortfolios} aktif portföy
-              </span>
+            <div className="flex items-center gap-2">
+              <FollowButton id={pro.id} name={pro.fullName} size="sm" />
+              <Link
+                to="/dashboard/professionals/$id"
+                params={{ id: pro.id }}
+                className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-gold transition-colors hover:bg-surface-3"
+              >
+                Profili Gör <ArrowRight className="size-3.5" />
+              </Link>
             </div>
-
-            <div className="mt-3 flex gap-2">
-              <Button asChild variant="outline" size="sm" className="flex-1">
-                <Link to="/dashboard/professionals/$id" params={{ id: pro.id }}>
-                  Profili Gör
-                </Link>
-              </Button>
-              <FollowButton id={pro.id} name={pro.fullName} size="sm" className="flex-1" />
-            </div>
-          </SurfaceCard>
+          </div>
         ))}
-      </div>
+      </SurfaceCard>
     </section>
   );
 }

@@ -1,7 +1,4 @@
 import {
-  Lock,
-  Phone,
-  Mail,
   MessageCircle,
   MapPin,
   Languages as LanguagesIcon,
@@ -12,15 +9,8 @@ import {
   CreditCard,
 } from "lucide-react";
 import type { Professional } from "@/lib/mock/types";
-import { SurfaceCard, InfoPanel } from "./cards";
+import { InfoPanel } from "./cards";
 import { RegionLinkChip } from "./region-link-chip";
-
-const lockedFields = [
-  { label: "Telefon", icon: Phone },
-  { label: "E-posta", icon: Mail },
-  { label: "WhatsApp", icon: MessageCircle },
-  { label: "Ofis Adresi", icon: MapPin },
-];
 
 /** Mock languages — elite advisors get an extra language. */
 function languagesFor(pro: Professional): string[] {
@@ -43,60 +33,33 @@ function socialLinksFor(pro: Professional) {
   ];
 }
 
-/** "Hakkında" — bio, specialty summary, languages, regions, locked contact, socials. */
+/** "Hakkında" — bio, specialty summary, languages, regions and social links. */
 export function ProfessionalAboutSection({ professional }: { professional: Professional }) {
   const languages = languagesFor(professional);
   const socials = socialLinksFor(professional);
 
   return (
     <section className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-6">
-        <InfoPanel title="Hakkında" className="self-start">
-          <p className="text-sm leading-relaxed text-secondary-foreground">{professional.bio}</p>
+      <InfoPanel title="Hakkında" className="self-start">
+        <p className="text-sm leading-relaxed text-secondary-foreground">{professional.bio}</p>
 
-          <div className="mt-4 space-y-3">
-            <Row icon={Compass} label="Uzmanlık">
-              {professional.expertiseTypes.join(", ")}
-            </Row>
-            <Row icon={LanguagesIcon} label="Diller">
-              {languages.join(", ")}
-            </Row>
-            <Row icon={MapPin} label="Çalışma Bölgeleri">
-              <span className="flex flex-wrap gap-1.5">
-                {professional.expertiseRegions.map((r) => (
-                  <RegionLinkChip key={r} region={r} withIcon />
-                ))}
-              </span>
-            </Row>
-          </div>
-        </InfoPanel>
+        <div className="mt-4 space-y-3">
+          <Row icon={Compass} label="Uzmanlık">
+            {professional.expertiseTypes.join(", ")}
+          </Row>
+          <Row icon={LanguagesIcon} label="Diller">
+            {languages.join(", ")}
+          </Row>
+          <Row icon={MapPin} label="Çalışma Bölgeleri">
+            <span className="flex flex-wrap gap-1.5">
+              {professional.expertiseRegions.map((r) => (
+                <RegionLinkChip key={r} region={r} withIcon />
+              ))}
+            </span>
+          </Row>
+        </div>
+      </InfoPanel>
 
-        {/* Locked contact */}
-        <SurfaceCard className="border-border-strong">
-          <div className="flex items-center gap-2">
-            <Lock className="size-4 text-gold" />
-            <h3 className="text-sm font-semibold text-foreground">İletişim Bilgileri</h3>
-          </div>
-          <div className="mt-3 space-y-2">
-            {lockedFields.map((f) => (
-              <div
-                key={f.label}
-                className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2"
-              >
-                <span className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <f.icon className="size-3.5 text-gold/70" /> {f.label}
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-md bg-background/60 px-2 py-0.5 text-xs text-secondary-foreground ring-1 ring-inset ring-border-strong">
-                  <Lock className="size-3" /> Kilitli
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-            Detay talebi veya karşılıklı onay sonrası görünür.
-          </p>
-        </SurfaceCard>
-      </div>
 
       {/* Social / contact area */}
       <InfoPanel title="Sosyal & Bağlantılar" className="self-start">
