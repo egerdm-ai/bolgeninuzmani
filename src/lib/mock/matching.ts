@@ -260,6 +260,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 64,
     responses: 0,
     savedBy: 2,
+    notify: "weekly",
+    clientLabel: "M. Demir",
+    lastMatchAt: "4 gün önce",
   },
   {
     id: "bs_004",
