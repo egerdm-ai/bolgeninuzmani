@@ -76,18 +76,22 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <QuickActionCard label="Portföy Oluştur" description="Yeni lüks portföy ekle" icon={Plus} accent />
-        <Link to="/dashboard/ai-import"><QuickActionCard label="AI ile Oluştur" description="WhatsApp / PDF'ten içe aktar" icon={UploadCloud} /></Link>
+        <Link to="/dashboard/portfolios/new"><QuickActionCard label="Portföy Oluştur" description="Yeni lüks portföy ekle" icon={Plus} accent /></Link>
+        <Link to="/dashboard/buyer-searches/new"><QuickActionCard label="Yeni Arayış" description="Alıcı için portföy eşleştir" icon={Target} /></Link>
         <Link to="/dashboard/search"><QuickActionCard label="Portföy Ara" description="Harita üzerinde keşfet" icon={Search} /></Link>
-        <Link to="/dashboard/detail-requests"><QuickActionCard label="Detay Talepleri" description="Gelen talepleri yönet" icon={Inbox} /></Link>
+        <Link to="/dashboard/assistant"><QuickActionCard label="VAULT Asistan" description="Akıllı eşleştirme & değerleme" icon={Sparkles} /></Link>
       </div>
 
       {/* KPIs */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Aktif Portföy" value={formatNumber(dashboardKpis.activePortfolios)} delta="+3 bu ay" icon={FolderLock} />
-        <KpiCard label="Toplam Görüntülenme" value={formatNumber(dashboardKpis.totalViews)} delta="+12% bu ay" icon={Eye} />
-        <KpiCard label="Detay Talepleri" value={formatNumber(dashboardKpis.detailRequests)} delta="+5 yeni" icon={Send} />
+        <KpiCard label="Aktif Portföy" value={formatNumber(networkAnalytics.activePortfolios)} delta="+3 bu ay" icon={FolderLock} />
+        <KpiCard label="Aktif Arayış" value={formatNumber(networkAnalytics.activeSearches)} delta="+2 bu hafta" icon={Target} />
+        <KpiCard label="Eşleşen Arayışlar" value={formatNumber(networkAnalytics.matchedSearches)} delta="Yeni eşleşmeler" icon={Sparkles} />
+        <KpiCard label="Gelen Detay Talepleri" value={formatNumber(networkAnalytics.detailRequests)} delta="+5 yeni" icon={Send} />
+        <KpiCard label="PDF İndirme" value={formatNumber(networkAnalytics.pdfDownloads)} delta="+18 bu ay" icon={Download} />
+        <KpiCard label="Profil Görüntülenme" value={formatNumber(networkAnalytics.profileViews)} delta="+12% bu ay" icon={Eye} />
         <KpiCard label="Kaydedilen Portföy" value={formatNumber(dashboardKpis.savedPortfolios)} delta="+4 bu ay" icon={Bookmark} />
+        <KpiCard label="En Aktif Bölge" value={networkAnalytics.topRegion} delta="Yüksek talep" deltaTone="muted" icon={MapPin} />
       </div>
 
       <div className="grid gap-7 lg:grid-cols-3">
