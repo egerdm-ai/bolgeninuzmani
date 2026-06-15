@@ -64,6 +64,10 @@ function RegionDetail() {
   const searches = buyerSearches.filter(
     (b) => b.region.toLocaleLowerCase("tr-TR") === region.name.toLocaleLowerCase("tr-TR"),
   );
+  const watching = isWatching(region.slug);
+  const freq = frequencyFor(region.slug) ?? "instant";
+  const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
+
 
   return (
     <PageContainer className="space-y-7">
