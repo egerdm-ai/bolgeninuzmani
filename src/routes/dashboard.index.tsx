@@ -140,17 +140,17 @@ function DashboardHome() {
 
         {/* Right rail */}
         <div className="space-y-7">
-          {/* AI Concierge CTA */}
+          {/* VAULT Asistan CTA */}
           <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
             <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
               <Sparkles className="size-5" />
             </span>
-            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">AI Concierge</h3>
+            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">VAULT Asistan</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Doğal dille portföy ve uzman arayın. "Bodrum'da 100M altı deniz manzaralı villa ara".
+              Arayıştan portföy bulun, portföyü arayışlarla eşleştirin ve bölge uzmanı önerileri alın.
             </p>
             <Button asChild className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-              <Link to="/dashboard/concierge"><Sparkles className="size-4" /> Concierge ile Ara</Link>
+              <Link to="/dashboard/assistant"><Sparkles className="size-4" /> Asistan ile Eşleştir</Link>
             </Button>
           </SurfaceCard>
 
