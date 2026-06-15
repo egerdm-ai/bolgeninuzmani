@@ -133,7 +133,15 @@ function ShareStudio() {
                   <Button onClick={() => copy(message, "msg")} variant="outline" className="flex-1 gap-1.5">
                     {copied === "msg" ? <Check className="size-4 text-success" /> : <Copy className="size-4" />} Kopyala
                   </Button>
-                  <Button className="flex-1 gap-1.5 bg-success/90 text-background hover:bg-success">
+                  <Button
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
+                      }
+                      toast.success("WhatsApp paylaşımı açıldı (demo)");
+                    }}
+                    className="flex-1 gap-1.5 bg-success/90 text-background hover:bg-success"
+                  >
                     <MessageCircle className="size-4" /> WhatsApp'ta Aç
                   </Button>
                 </div>
