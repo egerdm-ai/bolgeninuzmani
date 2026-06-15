@@ -27,7 +27,7 @@ export const currentUser: User = {
   id: "b_001", // aligned with professionals[0] so `myPortfolios` resolves correctly
   fullName: "Taylan Hersek",
   username: "taylan-hersek",
-  avatarUrl: "",
+  avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&crop=faces&w=320&h=320&q=80",
   title: "Private Real Estate Advisor",
   companyName: "Bodrum Luxury Team",
   location: "Bodrum, Muğla",
