@@ -425,6 +425,7 @@ export function getPortfolioById(id: string) {
   return portfolios.find((p) => p.id === id);
 }
 
+// TODO[backend]: replace with Supabase query — portfolios where owner_id = auth.uid() (portfolio CRUD).
 export const myPortfolios = portfolios.filter((p) => p.owner.id === currentUser.id);
 
 export const detailRequests: DetailRequest[] = [
