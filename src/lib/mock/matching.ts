@@ -332,6 +332,24 @@ export function getBuyerSearchById(id: string) {
   return buyerSearches.find((b) => b.id === id);
 }
 
+/**
+ * Mock-only: buyer searches ("Arayışlar") a professional is currently tracking.
+ * Matched by overlap between the professional's expertise regions and the
+ * search region. Falls back to the first two searches so every profile shows
+ * something. TODO[backend]: query buyer_searches where owner = professional.id.
+ */
+export function getBuyerSearchesByProfessional(pro: {
+  expertiseRegions: string[];
+}): BuyerSearch[] {
+  const regions = new Set(pro.expertiseRegions.map((r) => r.toLocaleLowerCase("tr")));
+  const matched = buyerSearches.filter((b) =>
+    regions.has(b.region.toLocaleLowerCase("tr")),
+  );
+  return matched.length ? matched : buyerSearches.slice(0, 2);
+}
+
+
+
 // ---------------------------------------------------------------------------
 // Matching engine (mock, UI-only, fully explainable).
 // TODO[backend]: replace with real vector / rule-based matching service.
