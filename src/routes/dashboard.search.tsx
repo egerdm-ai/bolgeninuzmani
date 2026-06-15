@@ -76,8 +76,13 @@ function SearchPage() {
           <Button asChild variant="outline" className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10">
             <Link to="/dashboard/assistant"><Sparkles className="size-4" /> VAULT Asistan</Link>
           </Button>
-          <Button variant="outline" className="gap-1.5" onClick={() => saveSearch("Bodrum Villa araması")}>
-            <BookmarkPlus className="size-4" /> Aramayı Kaydet
+          <Button
+            variant="outline"
+            className={cn("gap-1.5", saved && "border-gold/40 text-gold")}
+            onClick={() => (saved ? toast.info("Bu arayış zaten kaydedildi") : setSaveOpen(true))}
+          >
+            {saved ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
+            {saved ? "Arayış Kaydedildi" : "Arayış Olarak Kaydet"}
           </Button>
           <div className="flex rounded-lg border border-border bg-surface-2 p-0.5">
             <button
