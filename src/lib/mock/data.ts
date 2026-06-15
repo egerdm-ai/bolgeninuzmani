@@ -22,8 +22,9 @@ export const propertyImages = {
   hotel1,
 };
 
+// TODO[backend]: replace with Supabase auth session + profile query (currentUser must match a row in `profiles`).
 export const currentUser: User = {
-  id: "u_001",
+  id: "b_001", // aligned with brokers[0] so `myPortfolios` resolves correctly
   fullName: "Taylan Hersek",
   username: "taylan-hersek",
   avatarUrl: "",
@@ -336,7 +337,7 @@ export const portfolios: Portfolio[] = [
     documents: [
       { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
     ],
-    owner: brokers[3],
+    owner: brokers[0],
     visibility: "verified_members",
     requestRequired: true,
     viewCount: 388,
@@ -405,7 +406,7 @@ export const portfolios: Portfolio[] = [
     coverImage: villa1,
     images: [villa1, interior1],
     documents: [],
-    owner: brokers[2],
+    owner: brokers[0],
     visibility: "verified_members",
     requestRequired: true,
     viewCount: 1543,
@@ -424,6 +425,7 @@ export function getPortfolioById(id: string) {
   return portfolios.find((p) => p.id === id);
 }
 
+// TODO[backend]: replace with Supabase query — portfolios where owner_id = auth.uid() (portfolio CRUD).
 export const myPortfolios = portfolios.filter((p) => p.owner.id === currentUser.id);
 
 export const detailRequests: DetailRequest[] = [
