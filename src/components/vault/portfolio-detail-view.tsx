@@ -30,6 +30,9 @@ export function PortfolioDetailView({
   const [requestOpen, setRequestOpen] = useState(false);
   const unlocked = mode === "owner";
   const images = mode === "public" ? portfolio.images.slice(0, 2) : portfolio.images;
+  const ownerOthers = getPortfoliosByProfessional(portfolio.owner.id, { activeOnly: true })
+    .filter((x) => x.id !== portfolio.id)
+    .slice(0, 3);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
