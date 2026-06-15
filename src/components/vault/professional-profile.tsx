@@ -139,7 +139,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
             <div className="flex flex-wrap items-center gap-2 pb-1">
               <FollowButton id={professional.id} name={professional.fullName} />
               <ShareProfileButton username={professional.username} />
-              <Button onClick={showPortfolios} />
+              <HeroPortfolioCta onClick={showPortfolios} />
             </div>
           </div>
 
@@ -300,7 +300,7 @@ function AnalyticsRow({
 }
 
 /** Primary hero CTA — jumps to the Portföyleri tab. */
-function Button({ onClick }: { onClick: () => void }) {
+function HeroPortfolioCta({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
