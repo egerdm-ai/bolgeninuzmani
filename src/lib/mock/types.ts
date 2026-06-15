@@ -198,6 +198,12 @@ export type BuyerSearch = {
   views: number;
   responses: number;
   savedBy: number;
+  /** Notification setting for new matches on this saved search. */
+  notify?: NotificationFrequency;
+  /** Friendly customer label / nickname shown on the search card. */
+  clientLabel?: string;
+  /** Latest match relative time, e.g. "3 saat önce". */
+  lastMatchAt?: string;
 };
 
 /** A portfolio matched against a buyer search, with explanation. */
