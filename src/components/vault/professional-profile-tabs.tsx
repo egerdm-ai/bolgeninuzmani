@@ -5,7 +5,6 @@ export type ProfileTab =
   | "searches"
   | "about"
   | "regions"
-  | "links"
   | "similar";
 
 export const profileTabs: { id: ProfileTab; label: string }[] = [
@@ -13,7 +12,6 @@ export const profileTabs: { id: ProfileTab; label: string }[] = [
   { id: "searches", label: "Arayışları" },
   { id: "about", label: "Hakkında" },
   { id: "regions", label: "Uzmanlık Bölgeleri" },
-  { id: "links", label: "Diğer Linkler" },
   { id: "similar", label: "Benzer Profesyoneller" },
 ];
 
