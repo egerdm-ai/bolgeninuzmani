@@ -166,9 +166,21 @@ function DetailRequestsInbox() {
   const [requests, setRequests] = useState<DetailRequest[]>(detailRequests);
   const [tab, setTab] = useState<DetailRequestStatus | "all">("all");
   const [selectedId, setSelectedId] = useState<string>(detailRequests[0].id);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   const filtered = tab === "all" ? requests : requests.filter((r) => r.status === tab);
   const selected = requests.find((r) => r.id === selectedId) ?? filtered[0];
+
+  const handleSelect = (id: string) => {
+    setSelectedId(id);
+    // On mobile the detail panel sits below the list — scroll to it so the
+    // user sees that the selection changed.
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      requestAnimationFrame(() => {
+        detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  };
 
   const updateStatus = (id: string, status: DetailRequestStatus, msg: string) => {
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
