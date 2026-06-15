@@ -240,7 +240,8 @@ function DetailRequestsInbox() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] xl:grid-cols-[minmax(0,1fr)_540px]">
         {/* List */}
-        <div className="space-y-3">
+        <div ref={listRef} className="space-y-3">
+
           {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride talep yok.</p>}
           {filtered.map((r) => (
             <RequestListItem
