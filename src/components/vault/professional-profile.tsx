@@ -28,10 +28,8 @@ import { ProfessionalPortfolioCatalog } from "./professional-portfolio-catalog";
 import { ProfessionalSearchCard } from "./professional-search-card";
 import { ProfessionalAboutSection } from "./professional-about-section";
 import { ProfessionalExpertiseRegions } from "./professional-expertise-regions";
-import { ProfessionalLinksSection } from "./professional-links-section";
 import { SimilarProfessionals } from "./similar-professionals";
-import { ProfessionalQuickActions } from "./professional-quick-actions";
-import { LockedContactCard } from "./locked-contact-card";
+import { ContactCard } from "./locked-contact-card";
 import { useFollow } from "@/lib/follow-store";
 
 export function ProfessionalProfile({ professional }: { professional: Professional }) {
