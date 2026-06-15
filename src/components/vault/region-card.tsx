@@ -13,6 +13,8 @@ const demandLabel: Record<Region["demandLevel"], { label: string; cls: string }>
 
 export function RegionCard({ region }: { region: Region }) {
   const d = demandLabel[region.demandLevel];
+  const { isWatching, toggleWatch } = useRegionWatch();
+  const watching = isWatching(region.slug);
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-surface shadow-elegant transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-gold">
       {/* Mock map header */}
