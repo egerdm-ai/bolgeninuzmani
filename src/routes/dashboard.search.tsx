@@ -167,6 +167,48 @@ function SearchPage() {
       )}
 
       <DetailRequestModal portfolio={requestTarget} open={!!requestTarget} onOpenChange={(o) => !o && setRequestTarget(null)} />
+
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Arayış Olarak Kaydet</DialogTitle>
+            <DialogDescription>
+              Bu aramayı kaydedin; yeni eşleşen portföyler eklendiğinde bildirim alın.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Arayış adı</Label>
+              <Input value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Bildirim sıklığı</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {freqOptions.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setNotify(f)}
+                    className={cn(
+                      "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                      notify === f
+                        ? "border-gold/40 bg-gold/10 text-gold"
+                        : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {notificationFrequencyLabels[f]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>İptal</Button>
+            <Button onClick={confirmSave} className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <BookmarkPlus className="size-4" /> Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
