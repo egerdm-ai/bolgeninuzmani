@@ -504,7 +504,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Benzer Profesyoneller</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((s) => (
-              <ProfessionalCard key={s.id} professional={s} compact />
+              <ProfessionalMiniCard key={s.id} professional={s} />
             ))}
           </div>
         </div>
