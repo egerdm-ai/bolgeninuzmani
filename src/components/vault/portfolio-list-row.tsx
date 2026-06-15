@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Eye, Pencil, Share2, MoreVertical, Send } from "lucide-react";
+import { Eye, Pencil, Share2, MoreVertical, Send, PauseCircle, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import type { Portfolio } from "@/lib/mock/types";
 import { formatNumber, formatPrice, portfolioTypeLabels, statusLabels, statusTones } from "@/lib/format";
 import { StatusBadge } from "./badges";
@@ -64,10 +65,23 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem><Pencil className="size-4" /> Düzenle</DropdownMenuItem>
-            <DropdownMenuItem><Send className="size-4" /> Share Studio</DropdownMenuItem>
-            <DropdownMenuItem>Pasifleştir</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive focus:text-destructive">Sil</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.info("Portföy düzenleme (mock)", { description: portfolio.title })}>
+              <Pencil className="size-4" /> Düzenle
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }}>
+                <Send className="size-4" /> Share Studio
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => toast.success("Portföy pasifleştirildi (mock)", { description: portfolio.title })}>
+              <PauseCircle className="size-4" /> Pasifleştir
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => toast.error("Portföy silindi (mock)", { description: portfolio.title })}
+            >
+              <Trash2 className="size-4" /> Sil
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -13,16 +14,25 @@ export function AIButton({
   onClick?: () => void;
   size?: "sm" | "default" | "lg";
 }) {
+  const classes = cn(
+    "group relative gap-2 border-gold/40 bg-gold/5 text-gold hover:bg-gold/10 hover:text-gold-light",
+    className,
+  );
+
+  // When no explicit handler is supplied, default to the VAULT Asistan import flow.
+  if (!onClick) {
+    return (
+      <Button asChild size={size} variant="outline" className={classes}>
+        <Link to="/dashboard/assistant">
+          <Sparkles className="size-4 transition-transform group-hover:scale-110" />
+          {children}
+        </Link>
+      </Button>
+    );
+  }
+
   return (
-    <Button
-      onClick={onClick}
-      size={size}
-      variant="outline"
-      className={cn(
-        "group relative gap-2 border-gold/40 bg-gold/5 text-gold hover:bg-gold/10 hover:text-gold-light",
-        className,
-      )}
-    >
+    <Button onClick={onClick} size={size} variant="outline" className={classes}>
       <Sparkles className="size-4 transition-transform group-hover:scale-110" />
       {children}
     </Button>
