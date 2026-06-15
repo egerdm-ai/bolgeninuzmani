@@ -19,7 +19,7 @@ function Regions() {
     <PageContainer className="space-y-7">
       <PageHeader
         title="Bölgeler"
-        subtitle="VAULT ağı içindeki bölgeleri, aktif portföyleri ve bölge uzmanlarını keşfedin."
+        subtitle="Takip ettiğiniz bölgelerdeki yeni portföyleri, arayışları ve bölge uzmanlarını keşfedin."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
