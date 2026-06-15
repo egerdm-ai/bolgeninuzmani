@@ -337,7 +337,7 @@ export const portfolios: Portfolio[] = [
     documents: [
       { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
     ],
-    owner: brokers[3],
+    owner: brokers[0],
     visibility: "verified_members",
     requestRequired: true,
     viewCount: 388,
@@ -406,7 +406,7 @@ export const portfolios: Portfolio[] = [
     coverImage: villa1,
     images: [villa1, interior1],
     documents: [],
-    owner: brokers[2],
+    owner: brokers[0],
     visibility: "verified_members",
     requestRequired: true,
     viewCount: 1543,
