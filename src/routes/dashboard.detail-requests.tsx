@@ -178,14 +178,17 @@ function DetailRequestsInbox() {
       const panel = detailRef.current;
       const list = listRef.current;
       if (!panel || !list) return;
-      // Only auto-scroll when columns are stacked (mobile/tablet): the panel
-      // sits well below the list. Side-by-side layouts share a row top.
-      const stacked = panel.offsetTop > list.offsetTop + 40;
+      // Only auto-scroll when the columns are stacked (mobile/tablet): the
+      // detail panel renders well below the list. On side-by-side (desktop)
+      // layouts both columns share the same row top, so we leave scroll alone.
+      const listTop = list.getBoundingClientRect().top;
+      const panelTop = panel.getBoundingClientRect().top;
+      const stacked = panelTop > listTop + 80;
       if (!stacked) return;
-      const top = panel.getBoundingClientRect().top + window.scrollY - 72;
-      window.scrollTo({ top, behavior: "smooth" });
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
   };
+
 
 
 
