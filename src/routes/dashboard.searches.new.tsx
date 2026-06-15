@@ -346,6 +346,15 @@ function NewSearch() {
           )}
         </div>
       </div>
+
+      <FilterModal
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        filters={filters}
+        setFilter={setFilter}
+        resultCount={matches?.length ?? 0}
+        onClear={() => setFilters({ category: "konut", subcategory: "villa", currency: "TRY" })}
+      />
     </PageContainer>
   );
 }
