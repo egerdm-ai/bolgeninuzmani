@@ -174,7 +174,6 @@ export function ProfessionalProfile({ professional }: { professional: Profession
 
           {activeTab === "portfolios" && (
             <ProfessionalPortfolioCatalog
-              professional={professional}
               portfolios={allPortfolios}
               regionFilter={regionFilter}
               onRegionChange={setRegionFilter}
