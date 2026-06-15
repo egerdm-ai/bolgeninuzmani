@@ -175,12 +175,13 @@ function DetailRequestsInbox() {
     setSelectedId(id);
     // On mobile the detail panel sits below the list — scroll to it so the
     // user sees that the selection changed.
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      requestAnimationFrame(() => {
+    if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
+      window.setTimeout(() => {
         detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      }, 80);
     }
   };
+
 
   const updateStatus = (id: string, status: DetailRequestStatus, msg: string) => {
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
