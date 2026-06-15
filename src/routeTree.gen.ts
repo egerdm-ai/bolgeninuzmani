@@ -9,38 +9,184 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
+import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
+import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
+import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
+import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
+import { Route as DashboardPortfoliosIndexRouteImport } from './routes/dashboard.portfolios.index'
+import { Route as DashboardPortfoliosNewRouteImport } from './routes/dashboard.portfolios.new'
+import { Route as DashboardPortfoliosIdIndexRouteImport } from './routes/dashboard.portfolios.$id.index'
+import { Route as DashboardPortfoliosIdShareRouteImport } from './routes/dashboard.portfolios.$id.share'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardSearchRoute = DashboardSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardFavoritesRoute = DashboardFavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardDetailRequestsRoute = DashboardDetailRequestsRouteImport.update({
+  id: '/detail-requests',
+  path: '/detail-requests',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardConciergeRoute = DashboardConciergeRouteImport.update({
+  id: '/concierge',
+  path: '/concierge',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPortfoliosIndexRoute =
+  DashboardPortfoliosIndexRouteImport.update({
+    id: '/portfolios/',
+    path: '/portfolios/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardPortfoliosNewRoute = DashboardPortfoliosNewRouteImport.update({
+  id: '/portfolios/new',
+  path: '/portfolios/new',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPortfoliosIdIndexRoute =
+  DashboardPortfoliosIdIndexRouteImport.update({
+    id: '/portfolios/$id/',
+    path: '/portfolios/$id/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardPortfoliosIdShareRoute =
+  DashboardPortfoliosIdShareRouteImport.update({
+    id: '/portfolios/$id/share',
+    path: '/portfolios/$id/share',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/concierge': typeof DashboardConciergeRoute
+  '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
+  '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/search': typeof DashboardSearchRoute
+  '/p/$slug': typeof PSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
+  '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard/concierge': typeof DashboardConciergeRoute
+  '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
+  '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/search': typeof DashboardSearchRoute
+  '/p/$slug': typeof PSlugRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/portfolios': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
+  '/dashboard/portfolios/$id': typeof DashboardPortfoliosIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/dashboard/concierge': typeof DashboardConciergeRoute
+  '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
+  '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/search': typeof DashboardSearchRoute
+  '/p/$slug': typeof PSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
+  '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/dashboard/concierge'
+    | '/dashboard/detail-requests'
+    | '/dashboard/favorites'
+    | '/dashboard/search'
+    | '/p/$slug'
+    | '/dashboard/'
+    | '/dashboard/portfolios/new'
+    | '/dashboard/portfolios/'
+    | '/dashboard/portfolios/$id/share'
+    | '/dashboard/portfolios/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard/concierge'
+    | '/dashboard/detail-requests'
+    | '/dashboard/favorites'
+    | '/dashboard/search'
+    | '/p/$slug'
+    | '/dashboard'
+    | '/dashboard/portfolios/new'
+    | '/dashboard/portfolios'
+    | '/dashboard/portfolios/$id/share'
+    | '/dashboard/portfolios/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/dashboard/concierge'
+    | '/dashboard/detail-requests'
+    | '/dashboard/favorites'
+    | '/dashboard/search'
+    | '/p/$slug'
+    | '/dashboard/'
+    | '/dashboard/portfolios/new'
+    | '/dashboard/portfolios/'
+    | '/dashboard/portfolios/$id/share'
+    | '/dashboard/portfolios/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  PSlugRoute: typeof PSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +194,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/search': {
+      id: '/dashboard/search'
+      path: '/search'
+      fullPath: '/dashboard/search'
+      preLoaderRoute: typeof DashboardSearchRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/favorites': {
+      id: '/dashboard/favorites'
+      path: '/favorites'
+      fullPath: '/dashboard/favorites'
+      preLoaderRoute: typeof DashboardFavoritesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/detail-requests': {
+      id: '/dashboard/detail-requests'
+      path: '/detail-requests'
+      fullPath: '/dashboard/detail-requests'
+      preLoaderRoute: typeof DashboardDetailRequestsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/concierge': {
+      id: '/dashboard/concierge'
+      path: '/concierge'
+      fullPath: '/dashboard/concierge'
+      preLoaderRoute: typeof DashboardConciergeRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/portfolios/': {
+      id: '/dashboard/portfolios/'
+      path: '/portfolios'
+      fullPath: '/dashboard/portfolios/'
+      preLoaderRoute: typeof DashboardPortfoliosIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/portfolios/new': {
+      id: '/dashboard/portfolios/new'
+      path: '/portfolios/new'
+      fullPath: '/dashboard/portfolios/new'
+      preLoaderRoute: typeof DashboardPortfoliosNewRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/portfolios/$id/': {
+      id: '/dashboard/portfolios/$id/'
+      path: '/portfolios/$id'
+      fullPath: '/dashboard/portfolios/$id/'
+      preLoaderRoute: typeof DashboardPortfoliosIdIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/portfolios/$id/share': {
+      id: '/dashboard/portfolios/$id/share'
+      path: '/portfolios/$id/share'
+      fullPath: '/dashboard/portfolios/$id/share'
+      preLoaderRoute: typeof DashboardPortfoliosIdShareRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
+interface DashboardRouteChildren {
+  DashboardConciergeRoute: typeof DashboardConciergeRoute
+  DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
+  DashboardFavoritesRoute: typeof DashboardFavoritesRoute
+  DashboardSearchRoute: typeof DashboardSearchRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardPortfoliosNewRoute: typeof DashboardPortfoliosNewRoute
+  DashboardPortfoliosIndexRoute: typeof DashboardPortfoliosIndexRoute
+  DashboardPortfoliosIdShareRoute: typeof DashboardPortfoliosIdShareRoute
+  DashboardPortfoliosIdIndexRoute: typeof DashboardPortfoliosIdIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardConciergeRoute: DashboardConciergeRoute,
+  DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
+  DashboardFavoritesRoute: DashboardFavoritesRoute,
+  DashboardSearchRoute: DashboardSearchRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardPortfoliosNewRoute: DashboardPortfoliosNewRoute,
+  DashboardPortfoliosIndexRoute: DashboardPortfoliosIndexRoute,
+  DashboardPortfoliosIdShareRoute: DashboardPortfoliosIdShareRoute,
+  DashboardPortfoliosIdIndexRoute: DashboardPortfoliosIdIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
+  PSlugRoute: PSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
