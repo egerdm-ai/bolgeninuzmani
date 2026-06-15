@@ -10,6 +10,7 @@ import {
   FileText,
   Calculator,
   BookmarkPlus,
+  Bell,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
