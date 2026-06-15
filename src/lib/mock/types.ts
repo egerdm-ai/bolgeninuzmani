@@ -1,0 +1,140 @@
+export type MembershipTier = "standard" | "pro" | "elite";
+
+export type User = {
+  id: string;
+  fullName: string;
+  username: string;
+  avatarUrl: string;
+  title: string;
+  companyName?: string;
+  location: string;
+  membershipTier: MembershipTier;
+  isVerified: boolean;
+};
+
+export type Broker = {
+  id: string;
+  fullName: string;
+  username: string;
+  avatarUrl: string;
+  title: string;
+  companyName: string;
+  membershipTier: MembershipTier;
+  location: string;
+  expertiseRegions: string[];
+  expertiseTypes: string[];
+  portfolioCount: number;
+  responseTimeLabel?: string;
+  approvalRate?: number;
+};
+
+export type PortfolioType =
+  | "villa"
+  | "apartment"
+  | "land"
+  | "commercial"
+  | "hotel"
+  | "factory"
+  | "office"
+  | "restaurant";
+
+export type PortfolioCategory =
+  | "konut"
+  | "ticari"
+  | "arsa"
+  | "turizm"
+  | "isletme"
+  | "ozel_varlik";
+
+export type PortfolioStatus = "draft" | "active" | "passive" | "sold_or_rented";
+export type Purpose = "satilik" | "kiralik";
+export type Currency = "TRY" | "USD" | "EUR";
+export type LocationMode = "approximate" | "exact_locked" | "exact_visible";
+export type Visibility = "verified_members" | "invite_only";
+
+export type PortfolioDocument = {
+  id: string;
+  name: string;
+  type: "pdf" | "deed" | "permit" | "other";
+  isLocked: boolean;
+};
+
+export type Portfolio = {
+  id: string;
+  slug: string;
+  title: string;
+  shortDescription: string;
+  type: PortfolioType;
+  category: PortfolioCategory;
+  status: PortfolioStatus;
+  purpose: Purpose;
+  price: number;
+  currency: Currency;
+  city: string;
+  district: string;
+  neighborhood?: string;
+  regionLabel: string;
+  locationMode: LocationMode;
+  approxRadiusKm: number;
+  exactAddress?: string;
+  rooms?: string;
+  grossM2?: number;
+  netM2?: number;
+  landM2?: number;
+  bathrooms?: number;
+  parkingCapacity?: number;
+  features: string[];
+  tags: string[];
+  coverImage: string;
+  images: string[];
+  documents: PortfolioDocument[];
+  owner: Broker;
+  visibility: Visibility;
+  requestRequired: boolean;
+  viewCount: number;
+  requestCount: number;
+  createdAt: string;
+  mapX: number; // 0-100 percentage for mock map pin
+  mapY: number;
+};
+
+export type DetailRequestStatus =
+  | "new"
+  | "read"
+  | "answered"
+  | "approved"
+  | "rejected";
+
+export type DetailRequest = {
+  id: string;
+  portfolio: Portfolio;
+  requester: Broker;
+  status: DetailRequestStatus;
+  message: string;
+  purpose: string;
+  budgetLabel?: string;
+  createdAt: string;
+};
+
+export type SavedSearch = {
+  id: string;
+  label: string;
+  query: string;
+  filters: string[];
+  resultCount: number;
+  createdAt: string;
+};
+
+export type ActivityType =
+  | "view"
+  | "request"
+  | "save"
+  | "publish"
+  | "approve";
+
+export type Activity = {
+  id: string;
+  type: ActivityType;
+  text: string;
+  time: string;
+};
