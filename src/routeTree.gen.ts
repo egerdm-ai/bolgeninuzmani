@@ -17,6 +17,7 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardMatchesRouteImport } from './routes/dashboard.matches'
 import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
@@ -72,6 +73,11 @@ const DashboardSearchRoute = DashboardSearchRouteImport.update({
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMatchesRoute = DashboardMatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardFavoritesRoute = DashboardFavoritesRouteImport.update({
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/matches'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/matches'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/matches'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -381,6 +393,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/matches': {
+      id: '/dashboard/matches'
+      path: '/matches'
+      fullPath: '/dashboard/matches'
+      preLoaderRoute: typeof DashboardMatchesRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/favorites': {
@@ -504,6 +523,7 @@ interface DashboardRouteChildren {
   DashboardConciergeRoute: typeof DashboardConciergeRoute
   DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
   DashboardFavoritesRoute: typeof DashboardFavoritesRoute
+  DashboardMatchesRoute: typeof DashboardMatchesRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardSearchRoute: typeof DashboardSearchRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -527,6 +547,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardConciergeRoute: DashboardConciergeRoute,
   DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
   DashboardFavoritesRoute: DashboardFavoritesRoute,
+  DashboardMatchesRoute: DashboardMatchesRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardSearchRoute: DashboardSearchRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
