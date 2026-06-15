@@ -18,7 +18,6 @@ import {
   Send,
   Layers,
   Send as SendIcon,
-  Share2,
 } from "lucide-react";
 import type { Portfolio, Professional, ProfessionalActivity } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
