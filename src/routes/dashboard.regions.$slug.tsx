@@ -7,6 +7,8 @@ import {
   TrendingUp,
   Activity,
   Sparkles,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -23,6 +25,10 @@ import {
   buyerSearches,
 } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
+import { useRegionWatch } from "@/lib/region-watch-store";
+import { notificationFrequencyLabels } from "@/lib/mock/types";
+import { cn } from "@/lib/utils";
+import type { NotificationFrequency } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/regions/$slug")({
   component: RegionDetail,
@@ -33,7 +39,9 @@ const demandLabels = { high: "Yüksek", medium: "Orta", low: "Düşük" } as con
 function RegionDetail() {
   const { slug } = Route.useParams();
   const { isSaved, toggleSave } = useSaved();
+  const { isWatching, toggleWatch, frequencyFor, setFrequency } = useRegionWatch();
   const region = getRegionBySlug(slug);
+
 
   if (!region) {
     return (
@@ -56,6 +64,10 @@ function RegionDetail() {
   const searches = buyerSearches.filter(
     (b) => b.region.toLocaleLowerCase("tr-TR") === region.name.toLocaleLowerCase("tr-TR"),
   );
+  const watching = isWatching(region.slug);
+  const freq = frequencyFor(region.slug) ?? "instant";
+  const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
+
 
   return (
     <PageContainer className="space-y-7">
@@ -88,6 +100,18 @@ function RegionDetail() {
             <MapPin className="size-4 text-gold" /> {region.city}
           </p>
           <p className="mt-3 max-w-xl text-sm text-secondary-foreground">{region.blurb}</p>
+          <Button
+            onClick={() => toggleWatch(region.slug, region.name)}
+            className={cn(
+              "mt-5 gap-1.5",
+              watching
+                ? "border border-gold/40 bg-gold/10 text-gold hover:bg-gold/20"
+                : "bg-gradient-gold text-primary-foreground hover:opacity-90",
+            )}
+          >
+            {watching ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+            {watching ? "Takip Ediliyor" : "Bölgeyi Takip Et"}
+          </Button>
         </div>
       </div>
 
@@ -186,6 +210,48 @@ function RegionDetail() {
                 </li>
               ))}
             </ul>
+          </InfoPanel>
+
+          {/* Region watch settings */}
+          <InfoPanel title="Bölge Takibi">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm text-secondary-foreground">
+                {watching
+                  ? "Bu bölgede yeni portföy ve arayışlarda bildirim alıyorsunuz."
+                  : "Yeni portföy ve arayışlardan haberdar olmak için takip edin."}
+              </p>
+              <Button
+                size="sm"
+                variant={watching ? "outline" : "default"}
+                onClick={() => toggleWatch(region.slug, region.name)}
+                className={cn("shrink-0 gap-1.5", watching && "border-gold/40 text-gold")}
+              >
+                {watching ? "Takipte" : "Takip Et"}
+              </Button>
+            </div>
+            {watching && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Bildirim sıklığı
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {freqOptions.map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setFrequency(region.slug, f)}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                        freq === f
+                          ? "border-gold/40 bg-gold/10 text-gold"
+                          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {notificationFrequencyLabels[f]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </InfoPanel>
         </div>
       </div>

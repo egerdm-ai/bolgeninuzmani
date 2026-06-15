@@ -14,6 +14,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SavedProvider } from "../lib/saved-store";
 import { FollowProvider } from "../lib/follow-store";
 import { DetailRequestProvider } from "../lib/detail-request-store";
+import { NotificationProvider } from "../lib/notification-store";
+import { RegionWatchProvider } from "../lib/region-watch-store";
 import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
@@ -134,11 +136,15 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <SavedProvider>
         <FollowProvider>
-          <DetailRequestProvider>
-            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <Outlet />
-            <Toaster position="top-right" richColors />
-          </DetailRequestProvider>
+          <RegionWatchProvider>
+            <NotificationProvider>
+              <DetailRequestProvider>
+                {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                <Outlet />
+                <Toaster position="top-right" richColors />
+              </DetailRequestProvider>
+            </NotificationProvider>
+          </RegionWatchProvider>
         </FollowProvider>
       </SavedProvider>
     </QueryClientProvider>

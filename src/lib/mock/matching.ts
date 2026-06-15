@@ -204,6 +204,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 142,
     responses: 4,
     savedBy: 9,
+    notify: "instant",
+    clientLabel: "A. Yılmaz (VIP)",
+    lastMatchAt: "3 saat önce",
   },
   {
     id: "bs_002",
@@ -229,6 +232,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 88,
     responses: 1,
     savedBy: 3,
+    notify: "daily",
+    clientLabel: "Kurumsal Fon",
+    lastMatchAt: "1 gün önce",
   },
   {
     id: "bs_003",
@@ -254,6 +260,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 64,
     responses: 0,
     savedBy: 2,
+    notify: "weekly",
+    clientLabel: "M. Demir",
+    lastMatchAt: "4 gün önce",
   },
   {
     id: "bs_004",
@@ -279,6 +288,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 51,
     responses: 2,
     savedBy: 4,
+    notify: "instant",
+    clientLabel: "Aile (4 kişi)",
+    lastMatchAt: "2 gün önce",
   },
   {
     id: "bs_005",
@@ -304,6 +316,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 120,
     responses: 3,
     savedBy: 6,
+    notify: "off",
+    clientLabel: "HNW Müşteri",
+    lastMatchAt: "3 hafta önce",
   },
 ];
 

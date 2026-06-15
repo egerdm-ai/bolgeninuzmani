@@ -198,6 +198,12 @@ export type BuyerSearch = {
   views: number;
   responses: number;
   savedBy: number;
+  /** Notification setting for new matches on this saved search. */
+  notify?: NotificationFrequency;
+  /** Friendly customer label / nickname shown on the search card. */
+  clientLabel?: string;
+  /** Latest match relative time, e.g. "3 saat önce". */
+  lastMatchAt?: string;
 };
 
 /** A portfolio matched against a buyer search, with explanation. */
@@ -227,4 +233,47 @@ export type Region = {
   expertIds: string[];
   mapX: number;
   mapY: number;
+};
+
+// ---------------------------------------------------------------------------
+// Notifications, region watches, saved-search notification settings.
+// ---------------------------------------------------------------------------
+
+export type NotificationFrequency = "instant" | "daily" | "weekly" | "off";
+
+export const notificationFrequencyLabels: Record<NotificationFrequency, string> = {
+  instant: "Anında",
+  daily: "Günlük Özet",
+  weekly: "Haftalık Özet",
+  off: "Kapalı",
+};
+
+export type NotificationKind =
+  | "match"
+  | "region"
+  | "portfolio"
+  | "request"
+  | "search";
+
+/** `link` is constrained to the static section routes so typed routing stays happy. */
+export type NotificationLink =
+  | "/dashboard/searches"
+  | "/dashboard/matches"
+  | "/dashboard/regions"
+  | "/dashboard/detail-requests"
+  | "/dashboard/portfolios";
+
+export type AppNotification = {
+  id: string;
+  kind: NotificationKind;
+  title: string;
+  body: string;
+  time: string;
+  read: boolean;
+  link: NotificationLink;
+};
+
+export type RegionWatch = {
+  slug: string;
+  frequency: NotificationFrequency;
 };

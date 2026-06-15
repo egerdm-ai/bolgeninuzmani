@@ -14,22 +14,28 @@ import {
   Users2,
   Target,
   Map,
+  GitCompareArrows,
+  Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { currentUser, detailRequests } from "@/lib/mock/data";
+import { appNotifications } from "@/lib/mock/notifications";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MembershipBadge } from "@/components/vault/badges";
 
 const newRequests = detailRequests.filter((r) => r.status === "new").length;
+const unreadNotifications = appNotifications.filter((n) => !n.read).length;
 
 const mainNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
   { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
-  { label: "Arayışlar", to: "/dashboard/buyer-searches", icon: Target },
+  { label: "Arayışlar", to: "/dashboard/searches", icon: Target },
+  { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
   { label: "Bölgeler", to: "/dashboard/regions", icon: Map },
   { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
+  { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
   { label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark },
   { label: "VAULT Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
 ] as const;

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Sparkles, Search, Lock, Globe } from "lucide-react";
@@ -10,15 +10,21 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { InfoPanel, SurfaceCard } from "@/components/vault/cards";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
-import { ProfessionalCard } from "@/components/vault/professional-card";
+import { RegionExpertCard } from "@/components/vault/region-expert-card";
 import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
 import { cn } from "@/lib/utils";
-import type { MatchResult, PortfolioType, Professional } from "@/lib/mock/types";
+import { notificationFrequencyLabels } from "@/lib/mock/types";
+import type {
+  MatchResult,
+  NotificationFrequency,
+  PortfolioType,
+  Professional,
+} from "@/lib/mock/types";
 
-export const Route = createFileRoute("/dashboard/buyer-searches/new")({
-  component: NewBuyerSearch,
+export const Route = createFileRoute("/dashboard/searches/new")({
+  component: NewSearch,
 });
 
 const typeOptions: { value: PortfolioType; label: string }[] = [
@@ -30,7 +36,10 @@ const typeOptions: { value: PortfolioType; label: string }[] = [
   { value: "commercial", label: "Ticari" },
 ];
 
-function NewBuyerSearch() {
+const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
+
+function NewSearch() {
+  const navigate = useNavigate();
   const { isSaved, toggleSave } = useSaved();
   const { open: openRequest } = useDetailRequest();
   const [region, setRegion] = useState("Bodrum");
@@ -41,6 +50,7 @@ function NewBuyerSearch() {
   const [rooms, setRooms] = useState("5+1");
   const [mustHave, setMustHave] = useState("Deniz Manzarası, Havuz");
   const [visibility, setVisibility] = useState<"private" | "network">("network");
+  const [notify, setNotify] = useState<NotificationFrequency>("instant");
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
   const [experts, setExperts] = useState<Professional[]>([]);
 
@@ -57,8 +67,8 @@ function NewBuyerSearch() {
     const results = getMatchesForSearch(q);
     setMatches(results);
     setExperts(getExpertsForSearch(q));
-    toast.success("Eşleşmeler bulundu", {
-      description: `${results.length} uygun portföy ve ${getExpertsForSearch(q).length} bölge uzmanı.`,
+    toast.success("Arayış kaydedildi", {
+      description: `${results.length} uygun portföy bulundu. Bildirim: ${notificationFrequencyLabels[notify]}.`,
     });
   };
 
@@ -68,7 +78,7 @@ function NewBuyerSearch() {
         title="Yeni Arayış Oluştur"
         subtitle="Müşterinizin kriterlerini girin, VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
         breadcrumbs={[
-          { label: "Arayışlar", to: "/dashboard/buyer-searches" },
+          { label: "Arayışlar", to: "/dashboard/searches" },
           { label: "Yeni Arayış" },
         ]}
       />
@@ -78,11 +88,18 @@ function NewBuyerSearch() {
         <div className="space-y-5 lg:sticky lg:top-20 lg:self-start">
           <InfoPanel title="Arayış Bilgileri">
             <div className="space-y-4">
-              <Field label="Arayış başlığı">
+              <Field label="Arayış adı">
                 <Input defaultValue="Bodrum Deniz Manzaralı Villa" placeholder="örn. Bodrum Deniz Manzaralı Villa" />
               </Field>
-              <Field label="Müşteri tipi">
-                <Input defaultValue="Bireysel Alıcı" placeholder="Bireysel / Kurumsal / HNW" />
+              <Field label="Müşteri notu">
+                <Input defaultValue="A. Yılmaz (VIP)" placeholder="Müşteri etiketi / takma ad" />
+              </Field>
+              <Field label="Doğal dil arayış alanı">
+                <Textarea
+                  rows={3}
+                  defaultValue="Bodrum'da deniz manzaralı, 5+1, havuzlu, 100M TL altı villa arıyorum. Yalıkavak ve Türkbükü öncelikli."
+                  placeholder="Aradığınız portföyü kendi cümlelerinizle yazın..."
+                />
               </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Şehir">
@@ -119,7 +136,7 @@ function NewBuyerSearch() {
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Oda sayısı">
+                <Field label="Oda">
                   <Input value={rooms} onChange={(e) => setRooms(e.target.value)} placeholder="5+1" />
                 </Field>
                 <Field label="Min m²">
@@ -132,8 +149,23 @@ function NewBuyerSearch() {
               <Field label="Olursa iyi olur özellikler">
                 <Input defaultValue="Akıllı Ev, Denize Sıfır" />
               </Field>
-              <Field label="Notlar">
-                <Textarea rows={3} defaultValue="Bodrum'da deniz manzaralı, 5+1, havuzlu, 100M TL altı villa arıyorum." />
+              <Field label="Bildirim sıklığı">
+                <div className="grid grid-cols-2 gap-2">
+                  {freqOptions.map((f) => (
+                    <button
+                      key={f}
+                      onClick={() => setNotify(f)}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                        notify === f
+                          ? "border-gold/40 bg-gold/10 text-gold"
+                          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {notificationFrequencyLabels[f]}
+                    </button>
+                  ))}
+                </div>
               </Field>
               <Field label="Görünürlük">
                 <div className="grid grid-cols-2 gap-2">
@@ -142,7 +174,7 @@ function NewBuyerSearch() {
                 </div>
               </Field>
               <Button onClick={findMatches} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-                <Sparkles className="size-4" /> Eşleşmeleri Bul
+                <Sparkles className="size-4" /> Eşleşmeleri Bul ve Kaydet
               </Button>
             </div>
           </InfoPanel>
@@ -157,7 +189,7 @@ function NewBuyerSearch() {
               </span>
               <h3 className="mt-4 font-display text-lg font-semibold text-foreground">Eşleşmeler burada görünecek</h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Kriterleri doldurup “Eşleşmeleri Bul” butonuna basın. VAULT uygun portföyleri ve bölge uzmanlarını listeler.
+                Kriterleri doldurup “Eşleşmeleri Bul ve Kaydet” butonuna basın. VAULT uygun portföyleri ve bölge uzmanlarını listeler.
               </p>
             </div>
           ) : (
@@ -169,8 +201,8 @@ function NewBuyerSearch() {
                     <p className="text-sm font-semibold text-foreground">VAULT Asistan Özeti</p>
                     <p className="mt-1 text-sm text-secondary-foreground">
                       Bu arayış için <span className="font-semibold text-gold">{matches.length} uygun portföy</span> ve{" "}
-                      <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span> bulundu. En güçlü eşleşmeler{" "}
-                      {region} bölgesinde yoğunlaşıyor.
+                      <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span> bulundu. Yeni
+                      eşleşmelerde <span className="font-semibold text-gold">{notificationFrequencyLabels[notify].toLocaleLowerCase("tr-TR")}</span> bildirim alacaksınız.
                     </p>
                   </div>
                 </div>
@@ -193,17 +225,17 @@ function NewBuyerSearch() {
 
               {experts.length > 0 && (
                 <div>
-                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">İlgili Bölge Uzmanları</h2>
+                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Önerilen Bölge Uzmanları</h2>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {experts.map((e) => (
-                      <ProfessionalCard key={e.id} professional={e} compact />
+                      <RegionExpertCard key={e.id} professional={e} regionName={region} />
                     ))}
                   </div>
                 </div>
               )}
 
-              <Button onClick={() => toast.success("Arayış kaydedildi", { description: "Arayışlar listenize eklendi." })} variant="outline" className="w-full">
-                Arayışı Kaydet
+              <Button onClick={() => navigate({ to: "/dashboard/searches" })} variant="outline" className="w-full">
+                Arayışlara dön
               </Button>
             </>
           )}

@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut } from "lucide-react";
+import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut, CheckCheck } from "lucide-react";
 import { currentUser } from "@/lib/mock/data";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { AIButton } from "@/components/vault/ai-button";
+import { useNotifications } from "@/lib/notification-store";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +22,7 @@ export function Topbar({
   onOpenMobileNav?: () => void;
   searchPlaceholder?: string;
 }) {
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md lg:px-6">
       <button
@@ -48,10 +51,57 @@ export function Topbar({
           </Link>
         </Button>
 
-        <Button variant="outline" size="icon" className="relative" aria-label="Bildirimler">
-          <Bell className="size-4" />
-          <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-gold ring-2 ring-background" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon" className="relative" aria-label="Bildirimler">
+              <Bell className="size-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-bold text-primary-foreground ring-2 ring-background">
+                  {unreadCount}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 p-0">
+            <div className="flex items-center justify-between px-3 py-2.5">
+              <span className="text-sm font-semibold text-foreground">Bildirimler</span>
+              <button
+                onClick={markAllRead}
+                disabled={unreadCount === 0}
+                className="flex items-center gap-1 text-[11px] text-gold transition-colors hover:underline disabled:opacity-40"
+              >
+                <CheckCheck className="size-3" /> Tümünü oku
+              </button>
+            </div>
+            <DropdownMenuSeparator className="my-0" />
+            <div className="max-h-80 overflow-y-auto py-1">
+              {notifications.slice(0, 5).map((n) => (
+                <DropdownMenuItem key={n.id} asChild className="cursor-pointer">
+                  <Link
+                    to={n.link}
+                    onClick={() => markRead(n.id)}
+                    className="flex flex-col items-start gap-0.5 px-3 py-2"
+                  >
+                    <span className="flex w-full items-center gap-2">
+                      {!n.read && <span className="size-1.5 shrink-0 rounded-full bg-gold" />}
+                      <span className={cn("text-xs font-semibold", n.read ? "text-secondary-foreground" : "text-foreground")}>
+                        {n.title}
+                      </span>
+                    </span>
+                    <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
+                    <span className="text-[10px] text-muted-foreground">{n.time}</span>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </div>
+            <DropdownMenuSeparator className="my-0" />
+            <DropdownMenuItem asChild className="cursor-pointer justify-center">
+              <Link to="/dashboard/notifications" className="py-2 text-xs font-medium text-gold">
+                Tüm bildirimleri gör
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

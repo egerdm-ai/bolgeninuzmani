@@ -9,6 +9,8 @@ import {
   Eye,
   MessageSquare,
   Users,
+  Bell,
+  Pencil,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -27,14 +29,15 @@ import {
   getExpertsForSearch,
 } from "@/lib/mock/matching";
 import { formatPrice, portfolioTypeLabels } from "@/lib/format";
+import { notificationFrequencyLabels } from "@/lib/mock/types";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
 
-export const Route = createFileRoute("/dashboard/buyer-searches/$id")({
-  component: BuyerSearchDetail,
+export const Route = createFileRoute("/dashboard/searches/$id")({
+  component: SearchDetail,
 });
 
-function BuyerSearchDetail() {
+function SearchDetail() {
   const { id } = Route.useParams();
   const { isSaved, toggleSave } = useSaved();
   const { open: openRequest } = useDetailRequest();
@@ -49,7 +52,7 @@ function BuyerSearchDetail() {
           description="Bu arayış kaldırılmış veya taşınmış olabilir."
           action={
             <Button asChild variant="outline">
-              <Link to="/dashboard/buyer-searches">Arayışlara dön</Link>
+              <Link to="/dashboard/searches">Arayışlara dön</Link>
             </Button>
           }
         />
@@ -68,6 +71,16 @@ function BuyerSearchDetail() {
   };
   const matches = getMatchesForSearch(q);
   const experts = getExpertsForSearch(q);
+  const notify = search.notify ?? "instant";
+
+  const notificationHistory = [
+    {
+      text: `${search.region} bölgesinde yeni eşleşen portföy eklendi.`,
+      time: search.lastMatchAt ?? "3 saat önce",
+    },
+    { text: `${matches.length} portföy bu arayışla yeniden eşleşti.`, time: "1 gün önce" },
+    { text: "Arayış oluşturuldu ve bildirimler etkinleştirildi.", time: search.createdAt },
+  ];
 
   return (
     <PageContainer className="space-y-6">
@@ -75,14 +88,24 @@ function BuyerSearchDetail() {
         title={search.title}
         subtitle={search.notes}
         breadcrumbs={[
-          { label: "Arayışlar", to: "/dashboard/buyer-searches" },
+          { label: "Arayışlar", to: "/dashboard/searches" },
           { label: search.title },
         ]}
         actions={
-          <StatusBadge
-            label={buyerSearchStatusLabels[search.status]}
-            tone={buyerSearchStatusTones[search.status]}
-          />
+          <div className="flex items-center gap-2">
+            <StatusBadge
+              label={buyerSearchStatusLabels[search.status]}
+              tone={buyerSearchStatusTones[search.status]}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => toast.info("Arayış düzenleme (mock)", { description: search.title })}
+            >
+              <Pencil className="size-4" /> Düzenle
+            </Button>
+          </div>
         }
       />
 
@@ -136,7 +159,7 @@ function BuyerSearchDetail() {
           </div>
 
           <div>
-            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">İlgili Bölge Uzmanları</h2>
+            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Önerilen Bölge Uzmanları</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {experts.map((e) => (
                 <RegionExpertCard key={e.id} professional={e} regionName={search.region} />
@@ -157,6 +180,7 @@ function BuyerSearchDetail() {
                 value={`${formatPrice(search.budgetMin, search.currency)} – ${formatPrice(search.budgetMax, search.currency)}`}
               />
               {search.rooms && <Row icon={Home} label="Oda" value={search.rooms} />}
+              <Row icon={Bell} label="Bildirim" value={notificationFrequencyLabels[notify]} />
             </dl>
 
             <div className="mt-4">
@@ -183,12 +207,27 @@ function BuyerSearchDetail() {
             )}
           </InfoPanel>
 
+          {/* Notification history */}
+          <InfoPanel title="Bildirim Geçmişi">
+            <ul className="space-y-3 text-sm">
+              {notificationHistory.map((n, i) => (
+                <li key={i} className="flex gap-2">
+                  <Bell className="mt-0.5 size-3.5 shrink-0 text-gold" />
+                  <div>
+                    <p className="text-secondary-foreground">{n.text}</p>
+                    <p className="text-[11px] text-muted-foreground">{n.time}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </InfoPanel>
+
           <Button
             onClick={() => toast.success("Arayış kaydedildi", { description: search.title })}
             variant="outline"
             className="w-full gap-1.5"
           >
-            <Bookmark className="size-4" /> Aramayı Kaydet
+            <Bookmark className="size-4" /> Kaydedilen Arayış
           </Button>
         </div>
       </div>

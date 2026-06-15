@@ -30,7 +30,7 @@ export function PortfolioMatchPanel({
           {searches.slice(0, 3).map((s) => (
             <li key={s.id}>
               <Link
-                to="/dashboard/buyer-searches/$id"
+                to="/dashboard/searches/$id"
                 params={{ id: s.id }}
                 className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm transition-colors hover:border-gold/40"
               >
@@ -42,7 +42,7 @@ export function PortfolioMatchPanel({
           ))}
         </ul>
         <Button asChild variant="outline" className="mt-3 w-full gap-1.5 border-gold/30 text-gold hover:bg-gold/10">
-          <Link to="/dashboard/buyer-searches">
+          <Link to="/dashboard/searches">
             Eşleşmeleri Gör <ArrowRight className="size-4" />
           </Link>
         </Button>

@@ -13,8 +13,8 @@ import { buyerSearches } from "@/lib/mock/matching";
 import { cn } from "@/lib/utils";
 import type { BuyerSearchStatus } from "@/lib/mock/types";
 
-export const Route = createFileRoute("/dashboard/buyer-searches/")({
-  component: BuyerSearches,
+export const Route = createFileRoute("/dashboard/searches/")({
+  component: Searches,
 });
 
 const filters: { key: BuyerSearchStatus | "all"; label: string }[] = [
@@ -25,7 +25,7 @@ const filters: { key: BuyerSearchStatus | "all"; label: string }[] = [
   { key: "closed", label: buyerSearchStatusLabels.closed },
 ];
 
-function BuyerSearches() {
+function Searches() {
   const [filter, setFilter] = useState<BuyerSearchStatus | "all">("all");
   const list = buyerSearches.filter((b) => filter === "all" || b.status === filter);
   const matched = buyerSearches.filter((b) => b.status === "matched").length;
@@ -36,10 +36,10 @@ function BuyerSearches() {
     <PageContainer className="space-y-7">
       <PageHeader
         title="Arayışlar"
-        subtitle="Alıcılarınız için aradığınız portföyleri tanımlayın, VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
+        subtitle="Müşterileriniz için kaydettiğiniz arayışları takip edin; yeni portföyler eşleştiğinde haberdar olun."
         actions={
           <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-            <Link to="/dashboard/buyer-searches/new">
+            <Link to="/dashboard/searches/new">
               <Plus className="size-4" /> Yeni Arayış Oluştur
             </Link>
           </Button>
@@ -48,7 +48,7 @@ function BuyerSearches() {
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard label="Aktif Arayış" value={String(buyerSearches.filter((b) => b.status !== "closed").length)} icon={Search} />
-        <KpiCard label="Eşleşme Bulundu" value={String(matched)} icon={CheckCircle2} />
+        <KpiCard label="Yeni Eşleşme" value={String(matched)} icon={CheckCircle2} />
         <KpiCard label="Yanıt Bekleyen" value={String(awaiting)} icon={Clock} />
         <KpiCard label="Toplam Eşleşme" value={String(totalMatches)} icon={Sparkles} />
       </div>

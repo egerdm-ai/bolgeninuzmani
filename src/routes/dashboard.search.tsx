@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Search, SlidersHorizontal, Map, List, BookmarkPlus, Sparkles, X } from "lucide-react";
+import { toast } from "sonner";
+import { Search, SlidersHorizontal, Map, List, BookmarkPlus, Sparkles, X, Check } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Link } from "@tanstack/react-router";
 import { MapCanvasMock } from "@/components/vault/map-canvas-mock";
 import { PortfolioPreviewCard } from "@/components/vault/portfolio-preview-card";
@@ -11,7 +22,8 @@ import { DetailRequestModal } from "@/components/vault/detail-request-modal";
 import { portfolios } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
-import type { Portfolio } from "@/lib/mock/types";
+import { notificationFrequencyLabels } from "@/lib/mock/types";
+import type { NotificationFrequency, Portfolio } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/search")({
   component: SearchPage,
@@ -25,15 +37,29 @@ const filterGroups = [
 ];
 
 function SearchPage() {
-  const { isSaved, toggleSave, saveSearch } = useSaved();
+  const { isSaved, toggleSave } = useSaved();
   const searchable = portfolios.filter((p) => p.status === "active");
   const [selected, setSelected] = useState<Portfolio>(searchable[0]);
   const [view, setView] = useState<"map" | "list">("map");
   const [activeChips, setActiveChips] = useState<string[]>(["Bodrum", "Villa"]);
   const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [searchName, setSearchName] = useState("Bodrum Villa Arayışı");
+  const [notify, setNotify] = useState<NotificationFrequency>("instant");
 
   const toggleChip = (c: string) =>
     setActiveChips((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+
+  const confirmSave = () => {
+    setSaved(true);
+    setSaveOpen(false);
+    toast.success("Arayış olarak kaydedildi", {
+      description: `${searchName} · Bildirim: ${notificationFrequencyLabels[notify]}`,
+    });
+  };
+
+  const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
 
   return (
     <PageContainer className="space-y-4">
@@ -50,8 +76,13 @@ function SearchPage() {
           <Button asChild variant="outline" className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10">
             <Link to="/dashboard/assistant"><Sparkles className="size-4" /> VAULT Asistan</Link>
           </Button>
-          <Button variant="outline" className="gap-1.5" onClick={() => saveSearch("Bodrum Villa araması")}>
-            <BookmarkPlus className="size-4" /> Aramayı Kaydet
+          <Button
+            variant="outline"
+            className={cn("gap-1.5", saved && "border-gold/40 text-gold")}
+            onClick={() => (saved ? toast.info("Bu arayış zaten kaydedildi") : setSaveOpen(true))}
+          >
+            {saved ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
+            {saved ? "Arayış Kaydedildi" : "Arayış Olarak Kaydet"}
           </Button>
           <div className="flex rounded-lg border border-border bg-surface-2 p-0.5">
             <button
@@ -136,6 +167,48 @@ function SearchPage() {
       )}
 
       <DetailRequestModal portfolio={requestTarget} open={!!requestTarget} onOpenChange={(o) => !o && setRequestTarget(null)} />
+
+      <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Arayış Olarak Kaydet</DialogTitle>
+            <DialogDescription>
+              Bu aramayı kaydedin; yeni eşleşen portföyler eklendiğinde bildirim alın.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Arayış adı</Label>
+              <Input value={searchName} onChange={(e) => setSearchName(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Bildirim sıklığı</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {freqOptions.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setNotify(f)}
+                    className={cn(
+                      "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                      notify === f
+                        ? "border-gold/40 bg-gold/10 text-gold"
+                        : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {notificationFrequencyLabels[f]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveOpen(false)}>İptal</Button>
+            <Button onClick={confirmSave} className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <BookmarkPlus className="size-4" /> Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, FolderLock, Search, Users, TrendingUp, ArrowRight } from "lucide-react";
+import { MapPin, FolderLock, Search, Users, TrendingUp, ArrowRight, Bell, BellOff } from "lucide-react";
 import type { Region } from "@/lib/mock/types";
 import { FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
+import { useRegionWatch } from "@/lib/region-watch-store";
 
 const demandLabel: Record<Region["demandLevel"], { label: string; cls: string }> = {
   high: { label: "Yüksek talep", cls: "text-success" },
@@ -12,6 +13,8 @@ const demandLabel: Record<Region["demandLevel"], { label: string; cls: string }>
 
 export function RegionCard({ region }: { region: Region }) {
   const d = demandLabel[region.demandLevel];
+  const { isWatching, toggleWatch } = useRegionWatch();
+  const watching = isWatching(region.slug);
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-gradient-surface shadow-elegant transition-all hover:-translate-y-0.5 hover:border-border-strong hover:shadow-gold">
       {/* Mock map header */}
@@ -59,11 +62,22 @@ export function RegionCard({ region }: { region: Region }) {
           ))}
         </div>
 
-        <Button asChild className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-          <Link to="/dashboard/regions/$slug" params={{ slug: region.slug }}>
-            Bölgeyi Gör <ArrowRight className="size-4" />
-          </Link>
-        </Button>
+        <div className="mt-4 flex gap-2">
+          <Button asChild className="flex-1 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Link to="/dashboard/regions/$slug" params={{ slug: region.slug }}>
+              Bölgeyi Gör <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => toggleWatch(region.slug, region.name)}
+            aria-label={watching ? "Takibi bırak" : "Bölgeyi takip et"}
+            className={watching ? "border-gold/40 text-gold" : ""}
+          >
+            {watching ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+          </Button>
+        </div>
       </div>
     </div>
   );
