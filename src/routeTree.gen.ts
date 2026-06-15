@@ -20,6 +20,7 @@ import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile
 import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
+import { Route as DashboardAssistantRouteImport } from './routes/dashboard.assistant'
 import { Route as DashboardAiImportRouteImport } from './routes/dashboard.ai-import'
 import { Route as DashboardRegionsIndexRouteImport } from './routes/dashboard.regions.index'
 import { Route as DashboardProfessionalsIndexRouteImport } from './routes/dashboard.professionals.index'
@@ -86,6 +87,11 @@ const DashboardDetailRequestsRoute = DashboardDetailRequestsRouteImport.update({
 const DashboardConciergeRoute = DashboardConciergeRouteImport.update({
   id: '/concierge',
   path: '/concierge',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardAssistantRoute = DashboardAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardAiImportRoute = DashboardAiImportRouteImport.update({
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/ai-import': typeof DashboardAiImportRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/ai-import': typeof DashboardAiImportRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/ai-import': typeof DashboardAiImportRoute
+  '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
@@ -238,6 +247,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/ai-import'
+    | '/dashboard/assistant'
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
@@ -262,6 +272,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard/ai-import'
+    | '/dashboard/assistant'
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/ai-import'
+    | '/dashboard/assistant'
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
@@ -395,6 +407,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardConciergeRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/assistant': {
+      id: '/dashboard/assistant'
+      path: '/assistant'
+      fullPath: '/dashboard/assistant'
+      preLoaderRoute: typeof DashboardAssistantRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/ai-import': {
       id: '/dashboard/ai-import'
       path: '/ai-import'
@@ -484,6 +503,7 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardAiImportRoute: typeof DashboardAiImportRoute
+  DashboardAssistantRoute: typeof DashboardAssistantRoute
   DashboardConciergeRoute: typeof DashboardConciergeRoute
   DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
   DashboardFavoritesRoute: typeof DashboardFavoritesRoute
@@ -506,6 +526,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAiImportRoute: DashboardAiImportRoute,
+  DashboardAssistantRoute: DashboardAssistantRoute,
   DashboardConciergeRoute: DashboardConciergeRoute,
   DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
   DashboardFavoritesRoute: DashboardFavoritesRoute,
