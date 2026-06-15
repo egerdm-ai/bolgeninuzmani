@@ -167,6 +167,7 @@ function DetailRequestsInbox() {
   const [tab, setTab] = useState<DetailRequestStatus | "all">("all");
   const [selectedId, setSelectedId] = useState<string>(detailRequests[0].id);
   const detailRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filtered = tab === "all" ? requests : requests.filter((r) => r.status === tab);
   const selected = requests.find((r) => r.id === selectedId) ?? filtered[0];
