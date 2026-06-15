@@ -84,7 +84,7 @@ function DashboardHome() {
         <KpiCard label="Aktif Portföy" value={formatNumber(dashboardKpis.activePortfolios)} delta="+3 bu ay" icon={FolderLock} />
         <KpiCard label="Toplam Görüntülenme" value={formatNumber(dashboardKpis.totalViews)} delta="+12% bu ay" icon={Eye} />
         <KpiCard label="Detay Talepleri" value={formatNumber(dashboardKpis.detailRequests)} delta="+5 yeni" icon={Send} />
-        <KpiCard label="Ortalama Onay Oranı" value={`%${dashboardKpis.approvalRate}`} delta="+2% bu ay" icon={CheckCircle2} />
+        <KpiCard label="Kaydedilen Portföy" value={formatNumber(dashboardKpis.savedPortfolios)} delta="+4 bu ay" icon={Bookmark} />
       </div>
 
       <div className="grid gap-7 lg:grid-cols-3">
