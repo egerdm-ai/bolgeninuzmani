@@ -28,6 +28,33 @@ export type Broker = {
   approvalRate?: number;
 };
 
+export type RegionExpertise = {
+  region: string;
+  portfolioCount: number;
+  primaryTypes: string[];
+  /** mock map pin position 0-100 */
+  x: number;
+  y: number;
+};
+
+export type ProfessionalActivity = {
+  id: string;
+  type: "publish" | "update" | "photo" | "request";
+  text: string;
+  time: string;
+};
+
+/** Rich public profile data, extends Broker so it can be used as a portfolio owner. */
+export type Professional = Broker & {
+  bio: string;
+  coverImage: string;
+  followerCount: number;
+  views30d: number;
+  activePortfolios: number;
+  regionExpertise: RegionExpertise[];
+  activity: ProfessionalActivity[];
+};
+
 export type PortfolioType =
   | "villa"
   | "apartment"

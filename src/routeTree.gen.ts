@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as VUsernameRouteImport } from './routes/v.$username'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
@@ -20,7 +21,9 @@ import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favor
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
 import { Route as DashboardAiImportRouteImport } from './routes/dashboard.ai-import'
+import { Route as DashboardProfessionalsIndexRouteImport } from './routes/dashboard.professionals.index'
 import { Route as DashboardPortfoliosIndexRouteImport } from './routes/dashboard.portfolios.index'
+import { Route as DashboardProfessionalsIdRouteImport } from './routes/dashboard.professionals.$id'
 import { Route as DashboardPortfoliosNewRouteImport } from './routes/dashboard.portfolios.new'
 import { Route as DashboardPortfoliosIdIndexRouteImport } from './routes/dashboard.portfolios.$id.index'
 import { Route as DashboardPortfoliosIdShareRouteImport } from './routes/dashboard.portfolios.$id.share'
@@ -39,6 +42,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const VUsernameRoute = VUsernameRouteImport.update({
+  id: '/v/$username',
+  path: '/v/$username',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PSlugRoute = PSlugRouteImport.update({
   id: '/p/$slug',
@@ -80,10 +88,22 @@ const DashboardAiImportRoute = DashboardAiImportRouteImport.update({
   path: '/ai-import',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardProfessionalsIndexRoute =
+  DashboardProfessionalsIndexRouteImport.update({
+    id: '/professionals/',
+    path: '/professionals/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardPortfoliosIndexRoute =
   DashboardPortfoliosIndexRouteImport.update({
     id: '/portfolios/',
     path: '/portfolios/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
+const DashboardProfessionalsIdRoute =
+  DashboardProfessionalsIdRouteImport.update({
+    id: '/professionals/$id',
+    path: '/professionals/$id',
     getParentRoute: () => DashboardRoute,
   } as any)
 const DashboardPortfoliosNewRoute = DashboardPortfoliosNewRouteImport.update({
@@ -115,9 +135,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -131,9 +154,12 @@ export interface FileRoutesByTo {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/portfolios': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/professionals': typeof DashboardProfessionalsIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -149,9 +175,12 @@ export interface FileRoutesById {
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
+  '/v/$username': typeof VUsernameRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
+  '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
+  '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -168,9 +197,12 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
+    | '/dashboard/professionals/$id'
     | '/dashboard/portfolios/'
+    | '/dashboard/professionals/'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -184,9 +216,12 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard'
     | '/dashboard/portfolios/new'
+    | '/dashboard/professionals/$id'
     | '/dashboard/portfolios'
+    | '/dashboard/professionals'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id'
   id:
@@ -201,9 +236,12 @@ export interface FileRouteTypes {
     | '/dashboard/search'
     | '/dashboard/settings'
     | '/p/$slug'
+    | '/v/$username'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
+    | '/dashboard/professionals/$id'
     | '/dashboard/portfolios/'
+    | '/dashboard/professionals/'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id/'
   fileRoutesById: FileRoutesById
@@ -212,6 +250,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   PSlugRoute: typeof PSlugRoute
+  VUsernameRoute: typeof VUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -236,6 +275,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/v/$username': {
+      id: '/v/$username'
+      path: '/v/$username'
+      fullPath: '/v/$username'
+      preLoaderRoute: typeof VUsernameRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/p/$slug': {
       id: '/p/$slug'
@@ -293,11 +339,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiImportRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/professionals/': {
+      id: '/dashboard/professionals/'
+      path: '/professionals'
+      fullPath: '/dashboard/professionals/'
+      preLoaderRoute: typeof DashboardProfessionalsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/portfolios/': {
       id: '/dashboard/portfolios/'
       path: '/portfolios'
       fullPath: '/dashboard/portfolios/'
       preLoaderRoute: typeof DashboardPortfoliosIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/professionals/$id': {
+      id: '/dashboard/professionals/$id'
+      path: '/professionals/$id'
+      fullPath: '/dashboard/professionals/$id'
+      preLoaderRoute: typeof DashboardProfessionalsIdRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/portfolios/new': {
@@ -334,7 +394,9 @@ interface DashboardRouteChildren {
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardPortfoliosNewRoute: typeof DashboardPortfoliosNewRoute
+  DashboardProfessionalsIdRoute: typeof DashboardProfessionalsIdRoute
   DashboardPortfoliosIndexRoute: typeof DashboardPortfoliosIndexRoute
+  DashboardProfessionalsIndexRoute: typeof DashboardProfessionalsIndexRoute
   DashboardPortfoliosIdShareRoute: typeof DashboardPortfoliosIdShareRoute
   DashboardPortfoliosIdIndexRoute: typeof DashboardPortfoliosIdIndexRoute
 }
@@ -349,7 +411,9 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardPortfoliosNewRoute: DashboardPortfoliosNewRoute,
+  DashboardProfessionalsIdRoute: DashboardProfessionalsIdRoute,
   DashboardPortfoliosIndexRoute: DashboardPortfoliosIndexRoute,
+  DashboardProfessionalsIndexRoute: DashboardProfessionalsIndexRoute,
   DashboardPortfoliosIdShareRoute: DashboardPortfoliosIdShareRoute,
   DashboardPortfoliosIdIndexRoute: DashboardPortfoliosIdIndexRoute,
 }
@@ -362,6 +426,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   PSlugRoute: PSlugRoute,
+  VUsernameRoute: VUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -15,6 +15,7 @@ import { InfoPanel, SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
+import { getPortfoliosByProfessional } from "@/lib/mock/data";
 
 export function PortfolioDetailView({
   portfolio,
@@ -29,6 +30,9 @@ export function PortfolioDetailView({
   const [requestOpen, setRequestOpen] = useState(false);
   const unlocked = mode === "owner";
   const images = mode === "public" ? portfolio.images.slice(0, 2) : portfolio.images;
+  const ownerOthers = getPortfoliosByProfessional(portfolio.owner.id, { activeOnly: true })
+    .filter((x) => x.id !== portfolio.id)
+    .slice(0, 3);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -75,6 +79,19 @@ export function PortfolioDetailView({
             <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Benzer Portföyler</h2>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {similar.map((p) => (
+                <PortfolioCard key={p.id} portfolio={p} saved={isSaved(p.id)} onToggleSave={toggleSave} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {mode !== "public" && ownerOthers.length > 0 && (
+          <div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+              Bu Profesyonelin Benzer Portföyleri
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {ownerOthers.map((p) => (
                 <PortfolioCard key={p.id} portfolio={p} saved={isSaved(p.id)} onToggleSave={toggleSave} />
               ))}
             </div>
