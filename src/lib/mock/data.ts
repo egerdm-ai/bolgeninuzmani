@@ -841,7 +841,7 @@ export const detailRequests: DetailRequest[] = [
     id: "r_004",
     portfolio: portfolios[1],
     requester: p[2],
-    status: "answered",
+    status: "read",
     purpose: "Kendim için",
     message: "Bu portföyün ödeme planı ve takas imkanı var mı?",
     createdAt: "2 gün önce",

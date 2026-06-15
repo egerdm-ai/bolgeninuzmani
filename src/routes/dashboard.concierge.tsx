@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles, Send, ArrowUp, ShieldCheck, MapPin } from "lucide-react";
+import { toast } from "sonner";
+import { Sparkles, Send, ArrowUp, MapPin, TrendingUp, BookmarkPlus, Building2, Activity } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { PortfolioPreviewCard } from "@/components/vault/portfolio-preview-card";
+import { ProfessionalCard } from "@/components/vault/professional-card";
 import { DetailRequestModal } from "@/components/vault/detail-request-modal";
 import { SurfaceCard } from "@/components/vault/cards";
 import { conciergeSuggestions, portfolios, professionals } from "@/lib/mock/data";
@@ -120,6 +122,29 @@ function Concierge() {
             </div>
           ) : (
             <div className="space-y-6">
+              {/* Region insight card */}
+              <SurfaceCard className="border-gold/30 bg-gold/[0.05] p-0">
+                <div className="flex items-center gap-1.5 border-b border-gold/20 px-4 py-3">
+                  <TrendingUp className="size-4 text-gold" />
+                  <h2 className="text-sm font-semibold text-foreground">Bölge İçgörüsü · Bodrum</h2>
+                  <span className="ml-auto rounded-full bg-surface-2 px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">Tahmini</span>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-gold/15">
+                  <div className="px-4 py-3">
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground"><Building2 className="size-3 text-gold" /> Aktif portföy</div>
+                    <div className="mt-1 font-display text-xl font-semibold text-foreground">{results.length * 9}</div>
+                  </div>
+                  <div className="px-4 py-3">
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground"><MapPin className="size-3 text-gold" /> Ort. aralık</div>
+                    <div className="mt-1 font-display text-xl font-semibold text-foreground">55–95M</div>
+                  </div>
+                  <div className="px-4 py-3">
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground"><Activity className="size-3 text-gold" /> Talep</div>
+                    <div className="mt-1 font-display text-xl font-semibold text-success">Yüksek</div>
+                  </div>
+                </div>
+              </SurfaceCard>
+
               <div>
                 <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Eşleşen Portföyler</h2>
                 <div className="space-y-4">
@@ -128,22 +153,29 @@ function Concierge() {
                   ))}
                 </div>
               </div>
+
               <div>
-                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">İlgili Uzmanlar</h2>
-                <div className="space-y-3">
-                  {professionals.slice(1, 3).map((b) => (
-                    <SurfaceCard key={b.id} className="flex items-center gap-3 p-3">
-                      <BrokerAvatar name={b.fullName} size="lg" />
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-1 font-semibold text-foreground">{b.fullName} <ShieldCheck className="size-3.5 text-gold" /></p>
-                        <p className="truncate text-xs text-muted-foreground">{b.title} · {b.companyName}</p>
-                        <p className="flex items-center gap-1 text-xs text-gold"><MapPin className="size-3" /> {b.expertiseRegions.join(", ")}</p>
-                      </div>
-                      <Button variant="outline" size="sm">Profil</Button>
-                    </SurfaceCard>
+                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Eşleşen Uzmanlar</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {professionals.slice(0, 2).map((b) => (
+                    <ProfessionalCard key={b.id} professional={b} compact />
                   ))}
                 </div>
               </div>
+
+              {/* Saved search CTA */}
+              <SurfaceCard className="flex items-center gap-3 border-gold/30 bg-gold/[0.05]">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
+                  <BookmarkPlus className="size-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">Bu aramayı kaydet</p>
+                  <p className="text-xs text-muted-foreground">Yeni eşleşen portföylerde bildirim alın.</p>
+                </div>
+                <Button onClick={() => toast.success("Arama kaydedildi", { description: "Kaydedilen Aramalar'a eklendi." })} className="shrink-0 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+                  <BookmarkPlus className="size-4" /> Kaydet
+                </Button>
+              </SurfaceCard>
             </div>
           )}
         </div>

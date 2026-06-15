@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Lock, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tone = "success" | "warning" | "muted" | "info" | "danger" | "gold";
@@ -71,6 +71,20 @@ export function VisibilityBadge({ visibility }: { visibility: "verified_members"
       tone={visibility === "invite_only" ? "gold" : "info"}
       label={visibility === "invite_only" ? "Sadece Davetle" : "Üyelere Açık"}
     />
+  );
+}
+
+export function RegionExpertBadge({ region, className }: { region?: string; className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[11px] font-semibold text-gold ring-1 ring-inset ring-gold/30",
+        className,
+      )}
+    >
+      <Award className="size-3" />
+      {region ? `${region} Uzmanı` : "Bölge Uzmanı"}
+    </span>
   );
 }
 

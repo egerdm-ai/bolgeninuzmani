@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Bookmark, Share2, Heart } from "lucide-react";
+import { MapPin, Bookmark, Share2, Heart, Clock, TrendingUp, ImagePlus, Inbox, Plus } from "lucide-react";
 import type { Portfolio } from "@/lib/mock/types";
 import { formatPrice, categoryLabels, portfolioTypeLabels } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,20 @@ import { PortfolioCard } from "./portfolio-card";
 import { CategoryChip, FeatureChip, VisibilityBadge } from "./badges";
 import { InfoPanel, SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
+import { MarketContextCard } from "./market-context-card";
+import { DataScoreCard } from "./data-score";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
 import { getPortfoliosByProfessional } from "@/lib/mock/data";
+import { getPortfolioTimeline } from "@/lib/mock/insights";
+
+const eventIcons = {
+  created: Plus,
+  updated: TrendingUp,
+  price: TrendingUp,
+  photo: ImagePlus,
+  request: Inbox,
+} as const;
 
 export function PortfolioDetailView({
   portfolio,
@@ -33,6 +44,7 @@ export function PortfolioDetailView({
   const ownerOthers = getPortfoliosByProfessional(portfolio.owner.id, { activeOnly: true })
     .filter((x) => x.id !== portfolio.id)
     .slice(0, 3);
+  const timeline = getPortfolioTimeline(portfolio);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -67,6 +79,33 @@ export function PortfolioDetailView({
         <InfoPanel title="Yaklaşık Konum">
           <ApproxLocationMap label={portfolio.regionLabel} radiusKm={portfolio.approxRadiusKm} x={50} y={48} />
         </InfoPanel>
+
+        {mode !== "public" && (
+          <InfoPanel title="Portföy Geçmişi">
+            <ol className="relative space-y-4 pl-5">
+              <span className="absolute left-[5px] top-1 bottom-1 w-px bg-border" />
+              {timeline.map((e) => {
+                const Icon = eventIcons[e.type];
+                return (
+                  <li key={e.id} className="relative">
+                    <span className="absolute -left-[18px] top-0.5 flex size-3 items-center justify-center rounded-full bg-gold/20 ring-2 ring-surface">
+                      <span className="size-1.5 rounded-full bg-gold" />
+                    </span>
+                    <div className="flex items-start gap-2">
+                      <Icon className="mt-0.5 size-3.5 shrink-0 text-gold" />
+                      <div>
+                        <p className="text-sm text-secondary-foreground">{e.text}</p>
+                        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <Clock className="size-3" /> {e.time}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </InfoPanel>
+        )}
 
         {mode !== "public" && (
           <InfoPanel title="Belgeler">
@@ -125,7 +164,12 @@ export function PortfolioDetailView({
           <LockedInfoPanel onRequest={() => setRequestOpen(true)} />
         )}
 
+        <MarketContextCard portfolio={portfolio} />
+
+        {mode === "owner" && <DataScoreCard portfolio={portfolio} />}
+
         <OwnerCard owner={portfolio.owner} />
+
 
         {mode === "public" && (
           <SurfaceCard className="border-gold/30 bg-gold/[0.05] text-center">

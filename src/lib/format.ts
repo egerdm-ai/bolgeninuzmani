@@ -52,9 +52,9 @@ export const statusTones: Record<PortfolioStatus, "success" | "warning" | "muted
 
 export const requestStatusLabels: Record<DetailRequestStatus, string> = {
   new: "Yeni",
-  read: "Okundu",
+  read: "İncelendi",
   answered: "Yanıtlandı",
-  approved: "Onaylandı",
+  approved: "Bilgi Paylaşıldı",
   rejected: "Reddedildi",
 };
 

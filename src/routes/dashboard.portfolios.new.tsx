@@ -31,6 +31,7 @@ import {
 import { SurfaceCard } from "@/components/vault/cards";
 import { ApproxLocationMap } from "@/components/vault/approx-location-map";
 import { FeatureChip } from "@/components/vault/badges";
+import { DataScoreRing } from "@/components/vault/data-score";
 import { formatPrice } from "@/lib/format";
 import { propertyImages } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,21 @@ function NewPortfolioWizard() {
 
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
+
+  const scoreChecks = [
+    title.length > 8,
+    price > 0,
+    !!type,
+    !!region,
+    features.length >= 2,
+    features.length >= 4,
+    step >= 2,
+    step >= 3,
+    step >= 4,
+    locationMode === "exact",
+  ];
+  const dataScore = Math.round((scoreChecks.filter(Boolean).length / scoreChecks.length) * 100);
+  const dataLevel: "low" | "medium" | "high" = dataScore >= 80 ? "high" : dataScore >= 55 ? "medium" : "low";
 
   const publish = () => {
     toast.success("Portföy yayınlandı", { description: "Share Studio'ya yönlendiriliyorsunuz." });
@@ -381,6 +397,15 @@ function NewPortfolioWizard() {
                 <div className="h-full rounded-full bg-gradient-gold transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
               </div>
               <p className="mt-1.5 text-xs text-gold">{Math.round(((step + 1) / steps.length) * 100)}% · Adım {step + 1}/{steps.length}</p>
+            </div>
+            <div className="flex items-center gap-3 border-t border-border px-4 py-3">
+              <DataScoreRing score={dataScore} level={dataLevel} size={48} />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Portföy Veri Skoru</p>
+                <p className="mt-0.5 text-xs text-secondary-foreground">
+                  {dataLevel === "high" ? "Güçlü veri — yayına hazır" : dataLevel === "medium" ? "İyi, daha fazla detay ekleyin" : "Daha fazla bilgi ekleyin"}
+                </p>
+              </div>
             </div>
           </SurfaceCard>
         </div>
