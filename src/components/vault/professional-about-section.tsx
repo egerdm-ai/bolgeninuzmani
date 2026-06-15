@@ -1,6 +1,4 @@
 import {
-  Phone,
-  Mail,
   MessageCircle,
   MapPin,
   Languages as LanguagesIcon,
