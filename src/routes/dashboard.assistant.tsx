@@ -216,19 +216,33 @@ function Assistant() {
                 </div>
               )}
 
-              <SurfaceCard className="flex items-center gap-3 border-gold/30 bg-gold/[0.05]">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
-                  <BookmarkPlus className="size-5" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-foreground">Bu aramayı kaydet</p>
-                  <p className="text-xs text-muted-foreground">Yeni eşleşen portföylerde bildirim alın.</p>
+              <SurfaceCard className="space-y-3 border-gold/30 bg-gold/[0.05]">
+                <div className="flex items-center gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
+                    <BookmarkPlus className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">Bu aramayı arayış olarak kaydet</p>
+                    <p className="text-xs text-muted-foreground">Yeni eşleşen portföylerde bildirim alın.</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-3 py-2">
+                  <span className="flex items-center gap-2 text-sm text-secondary-foreground">
+                    <Bell className="size-4 text-gold" /> Yeni eşleşmelerde bildir
+                  </span>
+                  <Switch checked={notifyOnMatch} onCheckedChange={setNotifyOnMatch} />
                 </div>
                 <Button
-                  onClick={() => toast.success("Arama kaydedildi", { description: "Kaydedilenlere eklendi." })}
-                  className="shrink-0 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+                  onClick={() =>
+                    toast.success("Arayış olarak kaydedildi", {
+                      description: notifyOnMatch
+                        ? "Yeni eşleşmelerde bildirim alacaksınız."
+                        : "Bildirimler kapalı olarak kaydedildi.",
+                    })
+                  }
+                  className="w-full shrink-0 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
                 >
-                  <BookmarkPlus className="size-4" /> Kaydet
+                  <BookmarkPlus className="size-4" /> Arayış Olarak Kaydet
                 </Button>
               </SurfaceCard>
             </div>
