@@ -22,8 +22,9 @@ export const propertyImages = {
   hotel1,
 };
 
+// TODO[backend]: replace with Supabase auth session + profile query (currentUser must match a row in `profiles`).
 export const currentUser: User = {
-  id: "u_001",
+  id: "b_001", // aligned with brokers[0] so `myPortfolios` resolves correctly
   fullName: "Taylan Hersek",
   username: "taylan-hersek",
   avatarUrl: "",
