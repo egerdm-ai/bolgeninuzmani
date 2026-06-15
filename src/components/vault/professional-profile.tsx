@@ -184,7 +184,9 @@ export function ProfessionalProfile({ professional }: { professional: Profession
               <div className="mb-4">
                 <h2 className="font-display text-xl font-semibold text-foreground">Arayışları</h2>
                 <p className="text-sm text-muted-foreground">
-                  Bu profesyonelin aktif olarak takip ettiği alıcı arayışları.
+                  {professional.fullName.split(" ")[0]} bu mülkleri arıyor. Müşterileri için
+                  oluşturduğu aktif arayışlar — uygun bir portföyünüz varsa eşleştirebilir veya
+                  iletişime geçebilirsiniz.
                 </p>
               </div>
               {searches.length === 0 ? (
@@ -215,19 +217,13 @@ export function ProfessionalProfile({ professional }: { professional: Profession
             />
           )}
 
-          {activeTab === "links" && <ProfessionalLinksSection professional={professional} />}
-
           {activeTab === "similar" && <SimilarProfessionals professionals={similar} />}
         </div>
 
         {/* Right sidebar */}
         <aside className="space-y-5 lg:sticky lg:top-32 lg:self-start">
-          <LockedContactCard />
-          <ProfessionalQuickActions
-            professional={professional}
-            onShowPortfolios={showPortfolios}
-            onRequestDetail={openRequest}
-          />
+          <ContactCard professional={professional} />
+
 
           {/* Region summary */}
           <SurfaceCard>
