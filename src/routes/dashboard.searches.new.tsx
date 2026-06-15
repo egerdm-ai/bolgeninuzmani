@@ -129,13 +129,13 @@ function NewSearch() {
             <div className="space-y-3">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="size-4 text-gold" />
-                <p className="text-sm font-semibold text-foreground">Doğal Dil Arayışı</p>
+                <p className="text-sm font-semibold text-foreground">Müşteriniz ne arıyor?</p>
               </div>
               <Textarea
                 rows={3}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Aradığınız portföyü kendi cümlelerinizle yazın..."
+                placeholder="örn. Bebek'te havuzlu, müstakil, 5+1 villa arıyorum. 8M USD üstüne çıkamam."
               />
               <Button onClick={runAi} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
                 <Wand2 className="size-4" /> AI ile Filtrelere Çevir
