@@ -169,6 +169,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
     { label: "Takipçi", value: formatNumber(followers), icon: Users },
     { label: "Uzmanlık Bölgesi", value: String(professional.expertiseRegions.length), icon: Compass },
     { label: "Son 30 Gün Görüntülenme", value: formatNumber(professional.views30d), icon: Eye },
+    { label: "Eşleşme Sayısı", value: formatNumber(professional.matchCount), icon: Sparkles },
   ];
 
   return (
