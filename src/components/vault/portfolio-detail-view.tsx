@@ -15,6 +15,7 @@ import { InfoPanel, SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
+import { getPortfoliosByProfessional } from "@/lib/mock/data";
 
 export function PortfolioDetailView({
   portfolio,
