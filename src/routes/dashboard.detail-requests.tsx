@@ -345,16 +345,18 @@ function DetailRequestsInbox() {
                 </div>
               </div>
 
-              {/* Sticky action footer — always visible */}
-              <div className="space-y-3 border-t border-border bg-surface/95 p-4 backdrop-blur-sm">
-                <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
-                <Button
-                  onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
-                  className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-                >
-                  <Send className="size-4" /> Bilgi Paylaş
-                  <ChevronRight className="size-4" />
-                </Button>
+              {/* Action footer */}
+              <div className="space-y-3 border-t border-border p-4">
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+                  <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
+                  <Button
+                    onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
+                    className="h-auto gap-1.5 self-stretch bg-gradient-gold py-2.5 text-primary-foreground hover:opacity-90 sm:w-44"
+                  >
+                    <Send className="size-4" /> Bilgi Paylaş
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Button onClick={() => updateStatus(selected.id, "read", "Yanıt gönderildi")} variant="outline" className="gap-1.5">
                     <Reply className="size-4" /> Yanıtla
