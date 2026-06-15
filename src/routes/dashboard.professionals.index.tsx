@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Users, FolderLock, Clock, Heart, X } from "lucide-react";
+import { Search, Users, FolderLock, Award, Sparkles, X } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { ProfessionalCard } from "@/components/vault/professional-card";
@@ -12,51 +12,93 @@ export const Route = createFileRoute("/dashboard/professionals/")({
   component: ProfessionalsPage,
 });
 
-const regionFilters = ["İstanbul", "Bodrum", "Çeşme", "Riva", "Bebek", "Yalıkavak", "Türkbükü"];
-const expertiseFilters = ["Villa", "Yalı", "Arsa", "Ticari", "Otel", "Ofis", "Restoran"];
+type ChipKind = "scope" | "tier" | "region" | "type";
+type Chip = { id: string; label: string; kind: ChipKind; value?: string };
 
-type SortMode = "default" | "portfolios" | "recent";
+const chips: Chip[] = [
+  { id: "all", label: "Tümü", kind: "scope" },
+  { id: "following", label: "Takip Ettiklerim", kind: "scope" },
+  { id: "experts", label: "Bölge Uzmanları", kind: "scope" },
+  { id: "elite", label: "Elite", kind: "tier", value: "Elite" },
+  { id: "r-bodrum", label: "Bodrum", kind: "region", value: "Bodrum" },
+  { id: "r-istanbul", label: "İstanbul", kind: "region", value: "İstanbul" },
+  { id: "r-cesme", label: "Çeşme", kind: "region", value: "Çeşme" },
+  { id: "t-ticari", label: "Ticari", kind: "type", value: "Ticari" },
+  { id: "t-villa", label: "Villa", kind: "type", value: "Villa" },
+  { id: "t-arsa", label: "Arsa", kind: "type", value: "Arsa" },
+];
+
+const stats = [
+  { label: "Profesyonel", value: "48", icon: Users },
+  { label: "Aktif Portföy", value: "126", icon: FolderLock },
+  { label: "Bölge Uzmanı", value: "18", icon: Award },
+  { label: "Yeni Eşleşme", value: "312", icon: Sparkles },
+];
 
 function ProfessionalsPage() {
   const { isFollowing } = useFollow();
   const [search, setSearch] = useState("");
-  const [regions, setRegions] = useState<string[]>([]);
-  const [expertise, setExpertise] = useState<string[]>([]);
-  const [sort, setSort] = useState<SortMode>("default");
-  const [followingOnly, setFollowingOnly] = useState(false);
+  const [active, setActive] = useState<string[]>(["all"]);
 
-  const toggle = (list: string[], set: (v: string[]) => void, v: string) =>
-    set(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const toggleChip = (chip: Chip) => {
+    if (chip.id === "all") {
+      setActive(["all"]);
+      return;
+    }
+    setActive((prev) => {
+      const without = prev.filter((x) => x !== "all");
+      const next = without.includes(chip.id)
+        ? without.filter((x) => x !== chip.id)
+        : [...without, chip.id];
+      return next.length === 0 ? ["all"] : next;
+    });
+  };
 
   const results = useMemo(() => {
-    let list = professionals.filter((pro) => {
+    const activeChips = chips.filter((c) => active.includes(c.id));
+    const scopes = activeChips.filter((c) => c.kind === "scope").map((c) => c.id);
+    const tiers = activeChips.filter((c) => c.kind === "tier").map((c) => c.value!);
+    const regions = activeChips.filter((c) => c.kind === "region").map((c) => c.value!);
+    const types = activeChips.filter((c) => c.kind === "type").map((c) => c.value!);
+
+    return professionals.filter((pro) => {
       if (search) {
         const q = search.toLocaleLowerCase("tr");
         const hay = `${pro.fullName} ${pro.title} ${pro.companyName} ${pro.location} ${pro.expertiseRegions.join(" ")} ${pro.expertiseTypes.join(" ")}`.toLocaleLowerCase("tr");
         if (!hay.includes(q)) return false;
       }
+      if (scopes.includes("following") && !isFollowing(pro.id)) return false;
+      if (scopes.includes("experts") && pro.expertBadge === "Network Uzmanı") return false;
+      if (tiers.length > 0 && !tiers.includes(pro.membershipBadge)) return false;
       if (regions.length > 0) {
         const hay = `${pro.expertiseRegions.join(" ")} ${pro.location}`;
         if (!regions.some((r) => hay.includes(r))) return false;
       }
-      if (expertise.length > 0 && !expertise.some((t) => pro.expertiseTypes.includes(t))) return false;
-      if (followingOnly && !isFollowing(pro.id)) return false;
+      if (types.length > 0 && !types.some((t) => pro.expertiseTypes.includes(t))) return false;
       return true;
     });
+  }, [search, active, isFollowing]);
 
-    if (sort === "portfolios") list = [...list].sort((a, b) => b.activePortfolios - a.activePortfolios);
-    if (sort === "recent") list = [...list].sort((a, b) => b.views30d - a.views30d);
-    return list;
-  }, [search, regions, expertise, sort, followingOnly, isFollowing]);
-
-  const hasFilters = regions.length > 0 || expertise.length > 0 || followingOnly || sort !== "default" || search !== "";
+  const hasFilters = search !== "" || !(active.length === 1 && active[0] === "all");
 
   return (
     <PageContainer className="space-y-5">
       <PageHeader
         title="Profesyoneller"
-        subtitle="Luxury portföy ağı içindeki doğrulanmış emlak profesyonellerini keşfedin."
+        subtitle="VAULT ağı içindeki doğrulanmış emlak profesyonellerini, bölge uzmanlarını ve portföy vitrinlerini keşfedin."
       />
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-xl border border-border bg-surface-2 px-4 py-3">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <s.icon className="size-3.5 text-gold" /> {s.label}
+            </span>
+            <span className="mt-1 block font-display text-2xl font-semibold text-foreground">{s.value}</span>
+          </div>
+        ))}
+      </div>
 
       {/* Search */}
       <div className="relative">
@@ -64,28 +106,30 @@ function ProfessionalsPage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="İsim, bölge veya uzmanlık ara..."
+          placeholder="İsim, bölge, şirket veya uzmanlık ara..."
           className="h-11 w-full rounded-xl border border-border bg-surface-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-gold/40"
         />
       </div>
 
       {/* Quick filter chips */}
       <div className="flex flex-wrap items-center gap-2">
-        <QuickChip active={sort === "portfolios"} onClick={() => setSort(sort === "portfolios" ? "default" : "portfolios")} icon={FolderLock}>
-          Portföy sayısı
-        </QuickChip>
-        <QuickChip active={sort === "recent"} onClick={() => setSort(sort === "recent" ? "default" : "recent")} icon={Clock}>
-          Yeni portföy ekleyenler
-        </QuickChip>
-        <QuickChip active={followingOnly} onClick={() => setFollowingOnly((v) => !v)} icon={Heart}>
-          Takip ettiklerim
-        </QuickChip>
-      </div>
-
-      {/* Region + expertise filters */}
-      <div className="space-y-3 rounded-xl border border-border bg-surface-2 p-4">
-        <FilterRow label="Bölge" options={regionFilters} selected={regions} onToggle={(v) => toggle(regions, setRegions, v)} />
-        <FilterRow label="Uzmanlık" options={expertiseFilters} selected={expertise} onToggle={(v) => toggle(expertise, setExpertise, v)} />
+        {chips.map((chip) => {
+          const isActive = active.includes(chip.id);
+          return (
+            <button
+              key={chip.id}
+              onClick={() => toggleChip(chip)}
+              className={cn(
+                "rounded-full px-3.5 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors",
+                isActive
+                  ? "bg-gold/15 text-gold ring-gold/30"
+                  : "bg-surface-2 text-secondary-foreground ring-border hover:ring-border-strong",
+              )}
+            >
+              {chip.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex items-center justify-between">
@@ -96,10 +140,7 @@ function ProfessionalsPage() {
           <button
             onClick={() => {
               setSearch("");
-              setRegions([]);
-              setExpertise([]);
-              setSort("default");
-              setFollowingOnly(false);
+              setActive(["all"]);
             }}
             className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
@@ -121,61 +162,5 @@ function ProfessionalsPage() {
         </div>
       )}
     </PageContainer>
-  );
-}
-
-function QuickChip({
-  active,
-  onClick,
-  icon: Icon,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: typeof Users;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors",
-        active ? "bg-gold/15 text-gold ring-gold/30" : "bg-surface-2 text-secondary-foreground ring-border hover:ring-border-strong",
-      )}
-    >
-      <Icon className="size-3.5" /> {children}
-    </button>
-  );
-}
-
-function FilterRow({
-  label,
-  options,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  options: string[];
-  selected: string[];
-  onToggle: (v: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="flex w-20 shrink-0 items-center gap-1 text-xs font-semibold text-muted-foreground">
-        <SlidersHorizontal className="size-3.5" /> {label}
-      </span>
-      {options.map((o) => (
-        <button
-          key={o}
-          onClick={() => onToggle(o)}
-          className={cn(
-            "rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset transition-colors",
-            selected.includes(o) ? "bg-gold/15 text-gold ring-gold/30" : "bg-surface text-secondary-foreground ring-border hover:ring-border-strong",
-          )}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
   );
 }
