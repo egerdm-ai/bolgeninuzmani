@@ -1,21 +1,26 @@
-import { MapPin, ArrowRight, FolderLock, Sparkles } from "lucide-react";
+import { MapPin, ArrowRight, FolderLock, Sparkles, Search, Award } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import type { RegionExpertise } from "@/lib/mock/types";
 import { SurfaceCard } from "./cards";
 import { FeatureChip, CategoryChip } from "./badges";
+import { regionSlugForName } from "@/lib/mock/matching";
 
 /**
  * Region expertise card shown on the professional profile. Displays active
- * portfolio count, match count, primary property types and a mini location
- * indicator. Clicking the CTA filters the portfolio showcase to this region.
+ * portfolio count, active buyer-search count, match count, primary property
+ * types and a "Bölge Uzmanı" badge. "Bu Bölgedeki Portföyleri Gör" filters the
+ * catalog; "Bölgeyi Gör" navigates to the region page when it exists.
  */
 export function ExpertiseRegionCard({
   region,
   onFocus,
 }: {
-  region: RegionExpertise & { matchCount?: number };
+  region: RegionExpertise & { matchCount?: number; searchCount?: number };
   onFocus: (region: string) => void;
 }) {
   const matchCount = region.matchCount ?? Math.round(region.portfolioCount * 3.5 + 4);
+  const searchCount = region.searchCount ?? Math.max(1, Math.round(region.portfolioCount * 0.6));
+  const slug = regionSlugForName(region.region);
 
   return (
     <SurfaceCard className="p-4" hover>
@@ -24,7 +29,10 @@ export function ExpertiseRegionCard({
           <h3 className="flex items-center gap-1.5 font-semibold text-foreground">
             <MapPin className="size-4 text-gold" /> {region.region}
           </h3>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[11px] font-semibold text-gold ring-1 ring-inset ring-gold/30">
+            <Award className="size-3" /> Bölge Uzmanı
+          </span>
+          <div className="mt-2 flex flex-wrap gap-1.5">
             {region.primaryTypes.map((t) => (
               <FeatureChip key={t} label={t} />
             ))}
@@ -46,30 +54,48 @@ export function ExpertiseRegionCard({
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-1.5">
-          <FolderLock className="size-3.5 text-gold" />
-          <div>
-            <div className="text-sm font-semibold text-foreground">{region.portfolioCount}</div>
-            <div className="text-[10px] text-muted-foreground">Aktif Portföy</div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg bg-surface-2 px-2.5 py-1.5">
-          <Sparkles className="size-3.5 text-gold" />
-          <div>
-            <div className="text-sm font-semibold text-foreground">{matchCount}</div>
-            <div className="text-[10px] text-muted-foreground">Eşleşme</div>
-          </div>
-        </div>
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        <Mini icon={FolderLock} value={region.portfolioCount} label="Portföy" />
+        <Mini icon={Search} value={searchCount} label="Arayış" />
+        <Mini icon={Sparkles} value={matchCount} label="Eşleşme" />
       </div>
 
-      <button
-        onClick={() => onFocus(region.region)}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-gold transition-colors hover:text-gold/80"
-      >
-        Bu bölgedeki portföyleri gör <ArrowRight className="size-3" />
-      </button>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+        <button
+          onClick={() => onFocus(region.region)}
+          className="inline-flex items-center gap-1 text-xs font-medium text-gold transition-colors hover:text-gold/80"
+        >
+          Bu Bölgedeki Portföyleri Gör <ArrowRight className="size-3" />
+        </button>
+        {slug && (
+          <Link
+            to="/dashboard/regions/$slug"
+            params={{ slug }}
+            className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Bölgeyi Gör <ArrowRight className="size-3" />
+          </Link>
+        )}
+      </div>
     </SurfaceCard>
+  );
+}
+
+function Mini({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof FolderLock;
+  value: number;
+  label: string;
+}) {
+  return (
+    <div className="rounded-lg bg-surface-2 px-2 py-1.5 text-center">
+      <Icon className="mx-auto size-3.5 text-gold" />
+      <div className="mt-0.5 text-sm font-semibold text-foreground">{value}</div>
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+    </div>
   );
 }
 
