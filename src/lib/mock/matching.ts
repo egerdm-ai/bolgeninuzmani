@@ -316,6 +316,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 120,
     responses: 3,
     savedBy: 6,
+    notify: "off",
+    clientLabel: "HNW Müşteri",
+    lastMatchAt: "3 hafta önce",
   },
 ];
 
