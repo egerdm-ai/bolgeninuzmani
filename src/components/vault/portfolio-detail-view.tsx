@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { MapPin, Bookmark, Share2, Heart, Clock, TrendingUp, ImagePlus, Inbox, Plus } from "lucide-react";
 import type { Portfolio } from "@/lib/mock/types";
 import { formatPrice, categoryLabels, portfolioTypeLabels } from "@/lib/format";
