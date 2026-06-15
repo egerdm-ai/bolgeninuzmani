@@ -81,6 +81,33 @@ export function PortfolioDetailView({
         </InfoPanel>
 
         {mode !== "public" && (
+          <InfoPanel title="Portföy Geçmişi">
+            <ol className="relative space-y-4 pl-5">
+              <span className="absolute left-[5px] top-1 bottom-1 w-px bg-border" />
+              {timeline.map((e) => {
+                const Icon = eventIcons[e.type];
+                return (
+                  <li key={e.id} className="relative">
+                    <span className="absolute -left-[18px] top-0.5 flex size-3 items-center justify-center rounded-full bg-gold/20 ring-2 ring-surface">
+                      <span className="size-1.5 rounded-full bg-gold" />
+                    </span>
+                    <div className="flex items-start gap-2">
+                      <Icon className="mt-0.5 size-3.5 shrink-0 text-gold" />
+                      <div>
+                        <p className="text-sm text-secondary-foreground">{e.text}</p>
+                        <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <Clock className="size-3" /> {e.time}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          </InfoPanel>
+        )}
+
+        {mode !== "public" && (
           <InfoPanel title="Belgeler">
             <DocumentLockList documents={portfolio.documents} unlocked={unlocked} />
           </InfoPanel>
