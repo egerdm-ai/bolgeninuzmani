@@ -13,7 +13,9 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
@@ -43,9 +45,19 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSearchRoute = DashboardSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardFavoritesRoute = DashboardFavoritesRouteImport.update({
@@ -99,7 +111,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
@@ -113,7 +127,9 @@ export interface FileRoutesByTo {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
@@ -129,7 +145,9 @@ export interface FileRoutesById {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
   '/p/$slug': typeof PSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/portfolios/new': typeof DashboardPortfoliosNewRoute
@@ -146,7 +164,9 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/profile'
     | '/dashboard/search'
+    | '/dashboard/settings'
     | '/p/$slug'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
@@ -160,7 +180,9 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/profile'
     | '/dashboard/search'
+    | '/dashboard/settings'
     | '/p/$slug'
     | '/dashboard'
     | '/dashboard/portfolios/new'
@@ -175,7 +197,9 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
+    | '/dashboard/profile'
     | '/dashboard/search'
+    | '/dashboard/settings'
     | '/p/$slug'
     | '/dashboard/'
     | '/dashboard/portfolios/new'
@@ -220,11 +244,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/search': {
       id: '/dashboard/search'
       path: '/search'
       fullPath: '/dashboard/search'
       preLoaderRoute: typeof DashboardSearchRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/favorites': {
@@ -291,7 +329,9 @@ interface DashboardRouteChildren {
   DashboardConciergeRoute: typeof DashboardConciergeRoute
   DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
   DashboardFavoritesRoute: typeof DashboardFavoritesRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardSearchRoute: typeof DashboardSearchRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardPortfoliosNewRoute: typeof DashboardPortfoliosNewRoute
   DashboardPortfoliosIndexRoute: typeof DashboardPortfoliosIndexRoute
@@ -304,7 +344,9 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardConciergeRoute: DashboardConciergeRoute,
   DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
   DashboardFavoritesRoute: DashboardFavoritesRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
   DashboardSearchRoute: DashboardSearchRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardPortfoliosNewRoute: DashboardPortfoliosNewRoute,
   DashboardPortfoliosIndexRoute: DashboardPortfoliosIndexRoute,
