@@ -27,7 +27,9 @@ const tabs: { key: PortfolioStatus | "all"; label: string }[] = [
 
 function MyPortfolios() {
   const [tab, setTab] = useState<PortfolioStatus | "all">("all");
-  const filtered = tab === "all" ? myPortfolios : myPortfolios.filter((p) => p.status === tab);
+  const [sortByViews, setSortByViews] = useState(false);
+  const base = tab === "all" ? myPortfolios : myPortfolios.filter((p) => p.status === tab);
+  const filtered = sortByViews ? [...base].sort((a, b) => b.viewCount - a.viewCount) : base;
 
   const totalViews = myPortfolios.reduce((s, p) => s + p.viewCount, 0);
   const totalRequests = myPortfolios.reduce((s, p) => s + p.requestCount, 0);
@@ -70,7 +72,17 @@ function MyPortfolios() {
             </button>
           ))}
         </div>
-        <Button variant="outline" size="sm" className="gap-1.5"><Filter className="size-4" /> Filtrele</Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn("gap-1.5", sortByViews && "border-gold/40 text-gold")}
+          onClick={() => {
+            setSortByViews((v) => !v);
+            toast.info(sortByViews ? "Varsayılan sıralama" : "Görüntülenmeye göre sıralandı");
+          }}
+        >
+          <ArrowDownWideNarrow className="size-4" /> {sortByViews ? "En çok görüntülenen" : "Sırala"}
+        </Button>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-elegant">
