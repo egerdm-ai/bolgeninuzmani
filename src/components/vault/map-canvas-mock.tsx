@@ -1,7 +1,11 @@
 import { MapPin } from "lucide-react";
 import type { Portfolio } from "@/lib/mock/types";
-import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+function priceLabel(price: number) {
+  if (price >= 1_000_000) return `${(price / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M ₺`;
+  return `${(price / 1000).toFixed(0)}K ₺`;
+}
 
 export function MapCanvasMock({
   portfolios,
