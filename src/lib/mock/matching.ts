@@ -389,7 +389,7 @@ function scorePortfolio(p: Portfolio, q: MatchInput): MatchResult | null {
   }
   matchedFeatures.forEach((f) => matched.push(f));
   q.mustHave
-    .filter((f) => !matchedFeatures.includes(f))
+    .filter((f) => !matchedFeatures.includes(f) && f !== q.rooms && !matched.includes(f))
     .forEach((f) => missing.push(`${f} (belirtilmemiş)`));
 
   // Locked-info reminders
