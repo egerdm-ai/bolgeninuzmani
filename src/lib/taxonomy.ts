@@ -688,6 +688,7 @@ export function parsePromptToFilters(prompt: string): ParsedPrompt {
   }
 
   const typeMap: { kw: string[]; sub: string; cat: CategoryKey; label: string }[] = [
+    { kw: ["müstakil", "mustakil"], sub: "mustakil", cat: "konut", label: "Müstakil" },
     { kw: ["villa"], sub: "villa", cat: "konut", label: "Villa" },
     { kw: ["daire", "rezidans"], sub: "daire", cat: "konut", label: "Daire" },
     { kw: ["yalı", "yali"], sub: "yali", cat: "konut", label: "Yalı" },
@@ -695,27 +696,42 @@ export function parsePromptToFilters(prompt: string): ParsedPrompt {
     { kw: ["otel", "butik otel"], sub: "otel", cat: "turizm", label: "Otel" },
     { kw: ["ofis", "dükkan", "mağaza", "ticari"], sub: "ofis", cat: "ticari", label: "Ticari" },
   ];
-  for (const t of typeMap) {
-    if (t.kw.some((k) => lower.includes(k))) {
-      filters.category = t.cat;
-      filters.subcategory = t.sub;
-      summary.push(`Tip: ${t.label}`);
-      break;
+  // villa wins over müstakil when both present
+  if (lower.includes("villa")) {
+    filters.category = "konut";
+    filters.subcategory = "villa";
+    summary.push("Tip: Villa");
+    if (lower.includes("müstakil") || lower.includes("mustakil")) summary.push("Olmazsa olmaz: Müstakil");
+  } else {
+    for (const t of typeMap) {
+      if (t.kw.some((k) => lower.includes(k))) {
+        filters.category = t.cat;
+        filters.subcategory = t.sub;
+        summary.push(`Tip: ${t.label}`);
+        break;
+      }
     }
   }
 
-  // budget like "100m", "50 milyon", "100M TL"
-  const budgetMatch = lower.match(/(\d+)\s*(m|milyon|milyon tl|m tl)/);
+  // currency detection
+  let currency: "TRY" | "USD" | "EUR" = "TRY";
+  if (/(usd|\$|dolar)/.test(lower)) currency = "USD";
+  else if (/(eur|€|euro)/.test(lower)) currency = "EUR";
+  filters.currency = currency;
+
+  // budget like "8m usd", "100m", "50 milyon", "100M TL"
+  const budgetMatch = lower.match(/(\d+(?:[.,]\d+)?)\s*(m|milyon)/);
   if (budgetMatch) {
-    const max = Number(budgetMatch[1]) * 1_000_000;
+    const max = Math.round(Number(budgetMatch[1].replace(",", ".")) * 1_000_000);
     filters.priceMax = max;
-    summary.push(`Bütçe ≤ ${budgetMatch[1]}M`);
+    summary.push(`Bütçe ≤ ${budgetMatch[1]}M ${currency}`);
   }
 
-  // rooms like 5+1
+  // rooms like 5+1 → store room string + min bedroom counter
   const roomMatch = lower.match(/(\d\+\d|\d\+)/);
   if (roomMatch) {
-    filters.rooms = roomMatch[1].includes("+") && !/\d$/.test(roomMatch[1]) ? `${roomMatch[1]}` : roomMatch[1];
+    filters.rooms = roomMatch[1];
+    filters.cntRoom = Number(roomMatch[1].split("+")[0]) || undefined;
     summary.push(`Oda: ${filters.rooms}`);
   }
 
