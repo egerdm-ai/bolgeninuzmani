@@ -84,6 +84,19 @@ export function PortfolioDetailView({
             </div>
           </div>
         )}
+
+        {mode !== "public" && ownerOthers.length > 0 && (
+          <div>
+            <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+              Bu Profesyonelin Benzer Portföyleri
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {ownerOthers.map((p) => (
+                <PortfolioCard key={p.id} portfolio={p} saved={isSaved(p.id)} onToggleSave={toggleSave} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right rail */}
