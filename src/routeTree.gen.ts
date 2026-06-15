@@ -22,6 +22,7 @@ import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
 import { Route as DashboardAssistantRouteImport } from './routes/dashboard.assistant'
 import { Route as DashboardAiImportRouteImport } from './routes/dashboard.ai-import'
+import { Route as DashboardSearchesIndexRouteImport } from './routes/dashboard.searches.index'
 import { Route as DashboardRegionsIndexRouteImport } from './routes/dashboard.regions.index'
 import { Route as DashboardProfessionalsIndexRouteImport } from './routes/dashboard.professionals.index'
 import { Route as DashboardPortfoliosIndexRouteImport } from './routes/dashboard.portfolios.index'
@@ -97,6 +98,11 @@ const DashboardAssistantRoute = DashboardAssistantRouteImport.update({
 const DashboardAiImportRoute = DashboardAiImportRouteImport.update({
   id: '/ai-import',
   path: '/ai-import',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSearchesIndexRoute = DashboardSearchesIndexRouteImport.update({
+  id: '/searches/',
+  path: '/searches/',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardRegionsIndexRoute = DashboardRegionsIndexRouteImport.update({
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
   '/dashboard/regions/': typeof DashboardRegionsIndexRoute
+  '/dashboard/searches/': typeof DashboardSearchesIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/dashboard/portfolios': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals': typeof DashboardProfessionalsIndexRoute
   '/dashboard/regions': typeof DashboardRegionsIndexRoute
+  '/dashboard/searches': typeof DashboardSearchesIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
   '/dashboard/regions/': typeof DashboardRegionsIndexRoute
+  '/dashboard/searches/': typeof DashboardSearchesIndexRoute
   '/dashboard/portfolios/$id/share': typeof DashboardPortfoliosIdShareRoute
   '/dashboard/portfolios/$id/': typeof DashboardPortfoliosIdIndexRoute
 }
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/dashboard/portfolios/'
     | '/dashboard/professionals/'
     | '/dashboard/regions/'
+    | '/dashboard/searches/'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/dashboard/portfolios'
     | '/dashboard/professionals'
     | '/dashboard/regions'
+    | '/dashboard/searches'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id'
   id:
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/dashboard/portfolios/'
     | '/dashboard/professionals/'
     | '/dashboard/regions/'
+    | '/dashboard/searches/'
     | '/dashboard/portfolios/$id/share'
     | '/dashboard/portfolios/$id/'
   fileRoutesById: FileRoutesById
@@ -421,6 +433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiImportRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/searches/': {
+      id: '/dashboard/searches/'
+      path: '/searches'
+      fullPath: '/dashboard/searches/'
+      preLoaderRoute: typeof DashboardSearchesIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/regions/': {
       id: '/dashboard/regions/'
       path: '/regions'
@@ -520,6 +539,7 @@ interface DashboardRouteChildren {
   DashboardPortfoliosIndexRoute: typeof DashboardPortfoliosIndexRoute
   DashboardProfessionalsIndexRoute: typeof DashboardProfessionalsIndexRoute
   DashboardRegionsIndexRoute: typeof DashboardRegionsIndexRoute
+  DashboardSearchesIndexRoute: typeof DashboardSearchesIndexRoute
   DashboardPortfoliosIdShareRoute: typeof DashboardPortfoliosIdShareRoute
   DashboardPortfoliosIdIndexRoute: typeof DashboardPortfoliosIdIndexRoute
 }
@@ -543,6 +563,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardPortfoliosIndexRoute: DashboardPortfoliosIndexRoute,
   DashboardProfessionalsIndexRoute: DashboardProfessionalsIndexRoute,
   DashboardRegionsIndexRoute: DashboardRegionsIndexRoute,
+  DashboardSearchesIndexRoute: DashboardSearchesIndexRoute,
   DashboardPortfoliosIdShareRoute: DashboardPortfoliosIdShareRoute,
   DashboardPortfoliosIdIndexRoute: DashboardPortfoliosIdIndexRoute,
 }
