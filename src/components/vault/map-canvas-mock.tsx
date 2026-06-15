@@ -59,7 +59,7 @@ export function MapCanvasMock({
               )}
             >
               <MapPin className="size-3" />
-              {formatPrice(p.price, p.currency).replace(" TL", "M").replace(/\.000\.000/, "")}
+              {priceLabel(p.price)}
             </span>
           </button>
         );
