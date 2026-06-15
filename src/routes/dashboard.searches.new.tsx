@@ -159,7 +159,12 @@ function NewSearch() {
                 <Input defaultValue="A. Yılmaz (VIP)" placeholder="Müşteri etiketi / takma ad" />
               </Field>
 
-              <p className="pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detaylı Filtreler</p>
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detaylı Filtreler</p>
+                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => setFilterOpen(true)}>
+                  <Sparkles className="size-3.5 text-gold" /> Tüm Filtreler
+                </Button>
+              </div>
 
               <FilterSection label="Lokasyon" defaultOpen>
                 <div className="grid grid-cols-2 gap-2.5">
