@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, FolderLock, Search, Users, TrendingUp, ArrowRight } from "lucide-react";
+import { MapPin, FolderLock, Search, Users, TrendingUp, ArrowRight, Bell, BellOff } from "lucide-react";
 import type { Region } from "@/lib/mock/types";
 import { FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
+import { useRegionWatch } from "@/lib/region-watch-store";
 
 const demandLabel: Record<Region["demandLevel"], { label: string; cls: string }> = {
   high: { label: "Yüksek talep", cls: "text-success" },
