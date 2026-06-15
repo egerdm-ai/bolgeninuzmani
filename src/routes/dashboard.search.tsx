@@ -37,15 +37,29 @@ const filterGroups = [
 ];
 
 function SearchPage() {
-  const { isSaved, toggleSave, saveSearch } = useSaved();
+  const { isSaved, toggleSave } = useSaved();
   const searchable = portfolios.filter((p) => p.status === "active");
   const [selected, setSelected] = useState<Portfolio>(searchable[0]);
   const [view, setView] = useState<"map" | "list">("map");
   const [activeChips, setActiveChips] = useState<string[]>(["Bodrum", "Villa"]);
   const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
+  const [saveOpen, setSaveOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [searchName, setSearchName] = useState("Bodrum Villa Arayışı");
+  const [notify, setNotify] = useState<NotificationFrequency>("instant");
 
   const toggleChip = (c: string) =>
     setActiveChips((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
+
+  const confirmSave = () => {
+    setSaved(true);
+    setSaveOpen(false);
+    toast.success("Arayış olarak kaydedildi", {
+      description: `${searchName} · Bildirim: ${notificationFrequencyLabels[notify]}`,
+    });
+  };
+
+  const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
 
   return (
     <PageContainer className="space-y-4">
