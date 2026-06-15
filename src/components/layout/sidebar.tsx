@@ -1,0 +1,162 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import {
+  LayoutDashboard,
+  Search,
+  FolderLock,
+  Inbox,
+  Bookmark,
+  Sparkles,
+  UserRound,
+  Settings,
+  ShieldCheck,
+  Crown,
+  ChevronLeft,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { currentUser, detailRequests } from "@/lib/mock/data";
+import { BrokerAvatar } from "@/components/vault/broker-avatar";
+import { MembershipBadge } from "@/components/vault/badges";
+
+const newRequests = detailRequests.filter((r) => r.status === "new").length;
+
+const mainNav = [
+  { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
+  { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
+  { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
+  { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
+  { label: "Kaydettiklerim", to: "/dashboard/favorites", icon: Bookmark },
+  { label: "AI Concierge", to: "/dashboard/concierge", icon: Sparkles, accent: true },
+] as const;
+
+const accountNav = [
+  { label: "Profilim", to: "/dashboard/profile", icon: UserRound },
+  { label: "Ayarlar", to: "/dashboard/settings", icon: Settings },
+] as const;
+
+export function Sidebar({
+  collapsed,
+  onToggle,
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const isActive = (to: string, exact?: boolean) =>
+    exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+
+  return (
+    <aside
+      className={cn(
+        "flex h-full flex-col border-r border-border bg-sidebar transition-[width] duration-200",
+        collapsed ? "w-[76px]" : "w-64",
+      )}
+    >
+      {/* Logo */}
+      <div className="flex h-16 items-center gap-2 border-b border-border px-5">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground">
+          <ShieldCheck className="size-5" />
+        </span>
+        {!collapsed && (
+          <Link to="/dashboard" className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-foreground">
+            Vault
+          </Link>
+        )}
+        <button
+          onClick={onToggle}
+          className="ml-auto hidden size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground lg:flex"
+          aria-label="Menüyü daralt"
+        >
+          <ChevronLeft className={cn("size-4 transition-transform", collapsed && "rotate-180")} />
+        </button>
+      </div>
+
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+        <div className="space-y-1">
+          {!collapsed && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Menü</p>}
+          {mainNav.map((item) => (
+            <NavLink key={item.to} item={item} active={isActive(item.to, "exact" in item && item.exact)} collapsed={collapsed} />
+          ))}
+        </div>
+        <div className="space-y-1">
+          {!collapsed && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Hesap</p>}
+          {accountNav.map((item) => (
+            <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
+          ))}
+        </div>
+      </nav>
+
+      {/* Membership + user */}
+      <div className="space-y-3 border-t border-border p-3">
+        {!collapsed && (
+          <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
+            <div className="flex items-center gap-2">
+              <Crown className="size-4 text-gold" />
+              <span className="text-sm font-semibold text-foreground">VAULT PRO</span>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Sınırsız portföy, öncelikli görünürlük ve gelişmiş AI araçları.
+            </p>
+            <button className="mt-2.5 w-full rounded-lg bg-gradient-gold py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+              Yükselt
+            </button>
+          </div>
+        )}
+        <Link
+          to="/dashboard/profile"
+          className={cn(
+            "flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 p-2 transition-colors hover:border-border-strong",
+            collapsed && "justify-center",
+          )}
+        >
+          <BrokerAvatar name={currentUser.fullName} size="sm" />
+          {!collapsed && (
+            <div className="min-w-0">
+              <div className="flex items-center gap-1">
+                <span className="truncate text-xs font-semibold text-foreground">{currentUser.fullName}</span>
+                <MembershipBadge tier={currentUser.membershipTier} />
+              </div>
+              <span className="truncate text-[11px] text-muted-foreground">{currentUser.companyName}</span>
+            </div>
+          )}
+        </Link>
+      </div>
+    </aside>
+  );
+}
+
+function NavLink({
+  item,
+  active,
+  collapsed,
+}: {
+  item: { label: string; to: string; icon: typeof Search; count?: number; accent?: boolean };
+  active: boolean;
+  collapsed: boolean;
+}) {
+  return (
+    <Link
+      to={item.to}
+      title={collapsed ? item.label : undefined}
+      className={cn(
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        active
+          ? "bg-gold/10 text-gold"
+          : "text-sidebar-foreground hover:bg-surface-3 hover:text-foreground",
+        collapsed && "justify-center px-0",
+      )}
+    >
+      {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold" />}
+      <item.icon className={cn("size-[18px] shrink-0", item.accent && !active && "text-gold")} />
+      {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+      {!collapsed && item.count ? (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-[11px] font-bold text-primary-foreground">
+          {item.count}
+        </span>
+      ) : null}
+      {collapsed && item.count ? (
+        <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-gold" />
+      ) : null}
+    </Link>
+  );
+}
