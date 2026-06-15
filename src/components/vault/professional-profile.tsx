@@ -76,7 +76,8 @@ export function ProfessionalProfile({ professional }: { professional: Profession
     scrollToContent();
   };
 
-  const openRequest = () => setRequestTarget(allPortfolios[0] ?? null);
+
+
 
   const stats = [
     { label: "Aktif Portföy", value: formatNumber(professional.activePortfolios), icon: FolderLock },
