@@ -245,7 +245,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
 
       {/* B. About + contact / region-list / quick actions sidebar */}
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <InfoPanel title="Hakkında">
+        <InfoPanel title="Hakkında" className="self-start">
           <p className="text-sm leading-relaxed text-secondary-foreground">{professional.bio}</p>
           <p className="mt-3 rounded-lg border border-gold/20 bg-gold/[0.05] px-4 py-3 text-sm text-secondary-foreground">
             Bu profesyonel özellikle{" "}
