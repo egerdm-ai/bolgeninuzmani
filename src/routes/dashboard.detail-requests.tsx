@@ -174,15 +174,19 @@ function DetailRequestsInbox() {
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
-    // On mobile the detail panel sits below the list — scroll to it so the
-    // user sees that the selection changed.
     window.setTimeout(() => {
-      const el = detailRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY - 72;
+      const panel = detailRef.current;
+      const list = listRef.current;
+      if (!panel || !list) return;
+      // Only auto-scroll when columns are stacked (mobile/tablet): the panel
+      // sits well below the list. Side-by-side layouts share a row top.
+      const stacked = panel.offsetTop > list.offsetTop + 40;
+      if (!stacked) return;
+      const top = panel.getBoundingClientRect().top + window.scrollY - 72;
       window.scrollTo({ top, behavior: "smooth" });
     }, 100);
   };
+
 
 
 
