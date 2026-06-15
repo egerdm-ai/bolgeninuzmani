@@ -628,7 +628,7 @@ function MembershipSection() {
             <ul className="mt-6 flex-1 space-y-3">
               {t.features.map((f) => (
                 <li key={f} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                  <span className="mt-0.5 flex size-4.5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
+                  <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
                     <Check className="size-3" />
                   </span>
                   {f}
