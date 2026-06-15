@@ -31,6 +31,7 @@ import {
 import { SurfaceCard } from "@/components/vault/cards";
 import { ApproxLocationMap } from "@/components/vault/approx-location-map";
 import { FeatureChip } from "@/components/vault/badges";
+import { DataScoreRing } from "@/components/vault/data-score";
 import { formatPrice } from "@/lib/format";
 import { propertyImages } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
