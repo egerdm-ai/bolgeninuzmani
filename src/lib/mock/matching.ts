@@ -204,6 +204,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 142,
     responses: 4,
     savedBy: 9,
+    notify: "instant",
+    clientLabel: "A. Yılmaz (VIP)",
+    lastMatchAt: "3 saat önce",
   },
   {
     id: "bs_002",
