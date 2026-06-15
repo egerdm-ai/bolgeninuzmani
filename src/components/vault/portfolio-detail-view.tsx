@@ -164,7 +164,12 @@ export function PortfolioDetailView({
           <LockedInfoPanel onRequest={() => setRequestOpen(true)} />
         )}
 
+        <MarketContextCard portfolio={portfolio} />
+
+        {mode === "owner" && <DataScoreCard portfolio={portfolio} />}
+
         <OwnerCard owner={portfolio.owner} />
+
 
         {mode === "public" && (
           <SurfaceCard className="border-gold/30 bg-gold/[0.05] text-center">
