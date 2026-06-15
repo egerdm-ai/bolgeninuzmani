@@ -231,7 +231,11 @@ export const landFields: FieldDef[] = [
   { key: "sewerage", label: "Kanalizasyon", type: "boolean" },
   { key: "singleDeed", label: "Tek Tapu", type: "boolean" },
   { key: "suitableConstruction", label: "İnşaata Uygun", type: "boolean" },
-  { key: "suitableRevenueShare", label: "Kat Karşılığına Uygun", type: "boolean" },
+  { key: "suitableRevenueShare", label: "Kat Karşılığı Uygun", type: "boolean" },
+  { key: "villaZoning", label: "Villa İmarlı", type: "boolean" },
+  { key: "tourismZoning", label: "Turizm İmarlı", type: "boolean" },
+  { key: "commercialZoning", label: "Ticari İmarlı", type: "boolean" },
+  { key: "nearSea", label: "Denize Yakın", type: "boolean" },
 ];
 
 export const commercialFields: FieldDef[] = [
