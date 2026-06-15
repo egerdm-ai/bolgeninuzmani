@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Bookmark, Share2, Heart } from "lucide-react";
+import { MapPin, Bookmark, Share2, Heart, Clock, TrendingUp, ImagePlus, Inbox, Plus } from "lucide-react";
 import type { Portfolio } from "@/lib/mock/types";
 import { formatPrice, categoryLabels, portfolioTypeLabels } from "@/lib/format";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,20 @@ import { PortfolioCard } from "./portfolio-card";
 import { CategoryChip, FeatureChip, VisibilityBadge } from "./badges";
 import { InfoPanel, SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
+import { MarketContextCard } from "./market-context-card";
+import { DataScoreCard } from "./data-score";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
 import { getPortfoliosByProfessional } from "@/lib/mock/data";
+import { getPortfolioTimeline } from "@/lib/mock/insights";
+
+const eventIcons = {
+  created: Plus,
+  updated: TrendingUp,
+  price: TrendingUp,
+  photo: ImagePlus,
+  request: Inbox,
+} as const;
 
 export function PortfolioDetailView({
   portfolio,
