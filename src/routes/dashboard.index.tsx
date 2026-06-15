@@ -12,7 +12,9 @@ import {
   ArrowRight,
   Activity as ActivityIcon,
   Bookmark,
-  UploadCloud,
+  Target,
+  Download,
+  MapPin,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { KpiCard, QuickActionCard, InfoPanel, SurfaceCard } from "@/components/vault/cards";
@@ -30,6 +32,7 @@ import {
   myPortfolios,
   propertyImages,
 } from "@/lib/mock/data";
+import { networkAnalytics } from "@/lib/mock/matching";
 import { formatNumber, requestStatusLabels, requestStatusTones } from "@/lib/format";
 import { useSaved } from "@/lib/saved-store";
 import type { Portfolio } from "@/lib/mock/types";
