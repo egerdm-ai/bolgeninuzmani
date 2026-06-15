@@ -107,7 +107,7 @@ export function ProfessionalLinksSection({ professional }: { professional: Profe
           const content = (
             <>
               <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-gold">
-                <l.icon className="size-4.5" />
+                <l.icon className="size-4" />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-sm font-medium text-foreground group-hover:text-gold">
