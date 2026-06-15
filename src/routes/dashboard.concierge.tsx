@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Sparkles, Send, ArrowUp, ShieldCheck, MapPin } from "lucide-react";
+import { toast } from "sonner";
+import { Sparkles, Send, ArrowUp, MapPin, TrendingUp, BookmarkPlus, Building2, Activity } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { PortfolioPreviewCard } from "@/components/vault/portfolio-preview-card";
+import { ProfessionalCard } from "@/components/vault/professional-card";
 import { DetailRequestModal } from "@/components/vault/detail-request-modal";
 import { SurfaceCard } from "@/components/vault/cards";
 import { conciergeSuggestions, portfolios, professionals } from "@/lib/mock/data";
