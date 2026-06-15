@@ -7,6 +7,8 @@ import {
   TrendingUp,
   Activity,
   Sparkles,
+  Bell,
+  BellOff,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -23,6 +25,10 @@ import {
   buyerSearches,
 } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
+import { useRegionWatch } from "@/lib/region-watch-store";
+import { notificationFrequencyLabels } from "@/lib/mock/types";
+import { cn } from "@/lib/utils";
+import type { NotificationFrequency } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/regions/$slug")({
   component: RegionDetail,
