@@ -39,7 +39,9 @@ const demandLabels = { high: "Yüksek", medium: "Orta", low: "Düşük" } as con
 function RegionDetail() {
   const { slug } = Route.useParams();
   const { isSaved, toggleSave } = useSaved();
+  const { isWatching, toggleWatch, frequencyFor, setFrequency } = useRegionWatch();
   const region = getRegionBySlug(slug);
+
 
   if (!region) {
     return (
