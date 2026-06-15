@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
 import { ProfessionalCard } from "@/components/vault/professional-card";
