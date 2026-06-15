@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  Inbox,
   FolderLock,
   Eye,
   Send,
