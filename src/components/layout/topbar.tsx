@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut } from "lucide-react";
+import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut, CheckCheck } from "lucide-react";
 import { currentUser } from "@/lib/mock/data";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { AIButton } from "@/components/vault/ai-button";
+import { useNotifications } from "@/lib/notification-store";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,

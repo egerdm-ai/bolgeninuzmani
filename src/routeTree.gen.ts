@@ -17,6 +17,7 @@ import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard.settings'
 import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
+import { Route as DashboardNotificationsRouteImport } from './routes/dashboard.notifications'
 import { Route as DashboardMatchesRouteImport } from './routes/dashboard.matches'
 import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
@@ -73,6 +74,11 @@ const DashboardSearchRoute = DashboardSearchRouteImport.update({
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardMatchesRoute = DashboardMatchesRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
   '/dashboard/search': typeof DashboardSearchRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
     | '/dashboard/matches'
+    | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -284,6 +294,7 @@ export interface FileRouteTypes {
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
     | '/dashboard/matches'
+    | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
     | '/dashboard/matches'
+    | '/dashboard/notifications'
     | '/dashboard/profile'
     | '/dashboard/search'
     | '/dashboard/settings'
@@ -393,6 +405,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/notifications': {
+      id: '/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/matches': {
@@ -524,6 +543,7 @@ interface DashboardRouteChildren {
   DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
   DashboardFavoritesRoute: typeof DashboardFavoritesRoute
   DashboardMatchesRoute: typeof DashboardMatchesRoute
+  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
   DashboardSearchRoute: typeof DashboardSearchRoute
   DashboardSettingsRoute: typeof DashboardSettingsRoute
@@ -548,6 +568,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
   DashboardFavoritesRoute: DashboardFavoritesRoute,
   DashboardMatchesRoute: DashboardMatchesRoute,
+  DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardProfileRoute: DashboardProfileRoute,
   DashboardSearchRoute: DashboardSearchRoute,
   DashboardSettingsRoute: DashboardSettingsRoute,
