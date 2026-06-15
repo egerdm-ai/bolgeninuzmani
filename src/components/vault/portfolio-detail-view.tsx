@@ -156,7 +156,31 @@ export function PortfolioDetailView({
             >
               <Bookmark className={cn("size-4", isSaved(portfolio.id) && "fill-current")} /> Kaydet
             </Button>
-            <Button variant="outline" className="flex-1 gap-1.5"><Share2 className="size-4" /> Paylaş</Button>
+            {mode === "public" ? (
+              <Button
+                variant="outline"
+                className="flex-1 gap-1.5"
+                onClick={() => {
+                  const path = `/p/${portfolio.slug}`;
+                  try {
+                    navigator.clipboard?.writeText(
+                      typeof window !== "undefined" ? `${window.location.origin}${path}` : path,
+                    );
+                  } catch {
+                    /* mock-only */
+                  }
+                  toast.success("Portföy bağlantısı kopyalandı", { description: path });
+                }}
+              >
+                <Share2 className="size-4" /> Paylaş
+              </Button>
+            ) : (
+              <Button asChild variant="outline" className="flex-1 gap-1.5">
+                <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }}>
+                  <Share2 className="size-4" /> Paylaş
+                </Link>
+              </Button>
+            )}
           </div>
         </SurfaceCard>
 
