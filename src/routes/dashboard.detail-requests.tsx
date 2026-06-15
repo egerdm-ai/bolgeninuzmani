@@ -177,10 +177,14 @@ function DetailRequestsInbox() {
     // user sees that the selection changed.
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1023px)").matches) {
       window.setTimeout(() => {
-        detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        const el = detailRef.current;
+        if (!el) return;
+        const top = el.getBoundingClientRect().top + window.scrollY - 72;
+        window.scrollTo({ top, behavior: "smooth" });
       }, 80);
     }
   };
+
 
 
   const updateStatus = (id: string, status: DetailRequestStatus, msg: string) => {
