@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Search,
@@ -11,11 +12,13 @@ import {
   ShieldCheck,
   Crown,
   ChevronLeft,
+  ChevronDown,
   Users2,
   Target,
   Map,
   GitCompareArrows,
   Bell,
+  Compass,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { currentUser, detailRequests } from "@/lib/mock/data";
@@ -26,18 +29,25 @@ import { MembershipBadge } from "@/components/vault/badges";
 const newRequests = detailRequests.filter((r) => r.status === "new").length;
 const unreadNotifications = appNotifications.filter((n) => !n.read).length;
 
-const mainNav = [
+const primaryNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
-  { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
-  { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
-  { label: "Arayışlar", to: "/dashboard/searches", icon: Target },
-  { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
+] as const;
+
+// Keşfet parent area — keeps discovery routes grouped and the sidebar compact.
+const discoverChildren = [
+  { label: "Portföyler", to: "/dashboard/search", icon: Search },
   { label: "Bölgeler", to: "/dashboard/regions", icon: Map },
   { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
-  { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
-  { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
   { label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark },
+] as const;
+
+const workNav = [
+  { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
+  { label: "Arayışlar", to: "/dashboard/searches", icon: Target },
+  { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
+  { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
   { label: "VAULT Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
+  { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
 ] as const;
 
 const accountNav = [
@@ -56,6 +66,9 @@ export function Sidebar({
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
+
+  const discoverActive = discoverChildren.some((c) => isActive(c.to));
+  const [discoverOpen, setDiscoverOpen] = useState(discoverActive);
 
   return (
     <aside
@@ -86,8 +99,40 @@ export function Sidebar({
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
         <div className="space-y-1">
           {!collapsed && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Menü</p>}
-          {mainNav.map((item) => (
+          {primaryNav.map((item) => (
             <NavLink key={item.to} item={item} active={isActive(item.to, "exact" in item && item.exact)} collapsed={collapsed} />
+          ))}
+
+          {/* Keşfet group */}
+          {collapsed ? (
+            discoverChildren.map((item) => (
+              <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
+            ))
+          ) : (
+            <div>
+              <button
+                onClick={() => setDiscoverOpen((o) => !o)}
+                className={cn(
+                  "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  discoverActive ? "text-gold" : "text-sidebar-foreground hover:bg-surface-3 hover:text-foreground",
+                )}
+              >
+                <Compass className="size-[18px] shrink-0" />
+                <span className="flex-1 truncate text-left">Keşfet</span>
+                <ChevronDown className={cn("size-4 transition-transform", discoverOpen && "rotate-180")} />
+              </button>
+              {discoverOpen && (
+                <div className="ml-3 mt-1 space-y-1 border-l border-border pl-2">
+                  {discoverChildren.map((item) => (
+                    <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} sub />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {workNav.map((item) => (
+            <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
           ))}
         </div>
         <div className="space-y-1">
@@ -141,25 +186,28 @@ function NavLink({
   item,
   active,
   collapsed,
+  sub,
 }: {
   item: { label: string; to: string; icon: typeof Search; count?: number; accent?: boolean };
   active: boolean;
   collapsed: boolean;
+  sub?: boolean;
 }) {
   return (
     <Link
       to={item.to}
       title={collapsed ? item.label : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+        "group relative flex items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+        sub ? "py-2" : "py-2.5",
         active
           ? "bg-gold/10 text-gold"
           : "text-sidebar-foreground hover:bg-surface-3 hover:text-foreground",
         collapsed && "justify-center px-0",
       )}
     >
-      {active && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold" />}
-      <item.icon className={cn("size-[18px] shrink-0", item.accent && !active && "text-gold")} />
+      {active && !sub && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold" />}
+      <item.icon className={cn("size-[18px] shrink-0", sub && "size-4", item.accent && !active && "text-gold")} />
       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
       {!collapsed && item.count ? (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-[11px] font-bold text-primary-foreground">
