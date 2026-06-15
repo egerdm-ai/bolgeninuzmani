@@ -527,6 +527,3 @@ function FilterSelect({
     </Select>
   );
 }
-
-// re-export for route convenience
-export { getProfessionalById };
