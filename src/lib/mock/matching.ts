@@ -288,6 +288,9 @@ export const buyerSearches: BuyerSearch[] = [
     views: 51,
     responses: 2,
     savedBy: 4,
+    notify: "instant",
+    clientLabel: "Aile (4 kişi)",
+    lastMatchAt: "2 gün önce",
   },
   {
     id: "bs_005",
