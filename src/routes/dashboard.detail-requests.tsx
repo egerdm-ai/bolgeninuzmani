@@ -180,8 +180,8 @@ function DetailRequestsInbox() {
         const el = detailRef.current;
         if (!el) return;
         const top = el.getBoundingClientRect().top + window.scrollY - 72;
-        window.scrollTo({ top, behavior: "smooth" });
-      }, 80);
+        window.scrollTo({ top });
+      }, 100);
     }
   };
 
