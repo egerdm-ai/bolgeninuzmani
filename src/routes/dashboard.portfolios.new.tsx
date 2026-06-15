@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Check,
@@ -12,6 +12,8 @@ import {
   ShieldCheck,
   Eye,
   Rocket,
+  AlertCircle,
+  Layers,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -30,11 +32,21 @@ import {
 } from "@/components/ui/select";
 import { SurfaceCard } from "@/components/vault/cards";
 import { ApproxLocationMap } from "@/components/vault/approx-location-map";
-import { FeatureChip } from "@/components/vault/badges";
 import { DataScoreRing } from "@/components/vault/data-score";
+import { FilterFieldGrid } from "@/components/vault/filter-section";
 import { formatPrice } from "@/lib/format";
 import { propertyImages } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
+import {
+  categories,
+  categoryByKey,
+  transactionTypes,
+  currencies,
+  getDetailGroupsForCategory,
+  computeCompleteness,
+  type CategoryKey,
+  type FilterValue,
+} from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/dashboard/portfolios/new")({
   component: NewPortfolioWizard,
@@ -43,45 +55,46 @@ export const Route = createFileRoute("/dashboard/portfolios/new")({
 const steps = [
   { label: "Temel Bilgiler", icon: ShieldCheck },
   { label: "Konum & Fiyat", icon: MapPin },
-  { label: "Detaylar", icon: Check },
+  { label: "Detaylar", icon: Layers },
   { label: "Medya", icon: ImagePlus },
   { label: "Gizlilik & Paylaşım", icon: ShieldCheck },
   { label: "Önizleme", icon: Eye },
 ];
 
-const featureOptions = ["Deniz Manzarası", "Havuz", "Akıllı Ev", "Özel Bahçe", "Güvenlik", "Asansör", "Otopark", "Denize Sıfır"];
 const galleryImages = [propertyImages.villa1, propertyImages.interior1, propertyImages.villa2, propertyImages.apartment1];
+
+type Values = Record<string, FilterValue>;
 
 function NewPortfolioWizard() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const [title, setTitle] = useState("Yalıkavak'ta Deniz Manzaralı Özel Tasarım Villa");
-  const [price, setPrice] = useState(64500000);
-  const [type, setType] = useState("villa");
-  const [region, setRegion] = useState("Yalıkavak / Bodrum");
-  const [features, setFeatures] = useState<string[]>(["Deniz Manzarası", "Havuz"]);
-  const [locationMode, setLocationMode] = useState<"approximate" | "exact">("approximate");
+  const [values, setValues] = useState<Values>({
+    title: "Yalıkavak'ta Deniz Manzaralı Özel Tasarım Villa",
+    shortDescription: "Sonsuzluk havuzu ve panoramik Ege manzarası ile özel tasarım lüks villa.",
+    category: "konut",
+    subcategory: "villa",
+    transaction: "satilik",
+    city: "Muğla",
+    district: "Bodrum",
+    neighborhood: "Yalıkavak",
+    price: 64500000,
+    currency: "TRY",
+    priceVisibility: "visible",
+    locationMode: "approximate",
+    luxuryFeatures: ["deniz_manzara", "havuz"],
+  });
 
-  const toggleFeature = (f: string) =>
-    setFeatures((prev) => (prev.includes(f) ? prev.filter((x) => x !== f) : [...prev, f]));
+  const category = (values.category as CategoryKey) ?? "konut";
+  const detailGroups = useMemo(() => getDetailGroupsForCategory(category), [category]);
+  const completeness = useMemo(() => computeCompleteness(values, category), [values, category]);
+  const dataLevel = completeness.level;
+
+  const set = (key: string, value: FilterValue) => setValues((p) => ({ ...p, [key]: value }));
 
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
-  const scoreChecks = [
-    title.length > 8,
-    price > 0,
-    !!type,
-    !!region,
-    features.length >= 2,
-    features.length >= 4,
-    step >= 2,
-    step >= 3,
-    step >= 4,
-    locationMode === "exact",
-  ];
-  const dataScore = Math.round((scoreChecks.filter(Boolean).length / scoreChecks.length) * 100);
-  const dataLevel: "low" | "medium" | "high" = dataScore >= 80 ? "high" : dataScore >= 55 ? "medium" : "low";
+  const region = `${values.neighborhood ?? values.district} / ${values.district}`;
 
   const publish = () => {
     toast.success("Portföy yayınlandı", { description: "Share Studio'ya yönlendiriliyorsunuz." });
@@ -132,66 +145,67 @@ function NewPortfolioWizard() {
         <SurfaceCard className="p-6">
           <h2 className="font-display text-xl font-semibold text-foreground">{steps[step].label}</h2>
 
+          {/* Step 1 — Temel Bilgiler */}
           {step === 0 && (
             <div className="mt-5 space-y-4">
-              <Field label="Portföy Tipi">
-                <Select value={type} onValueChange={setType}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="villa">Villa</SelectItem>
-                    <SelectItem value="apartment">Daire</SelectItem>
-                    <SelectItem value="land">Arsa</SelectItem>
-                    <SelectItem value="hotel">Otel</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Field>
-              <Field label="Portföy Başlığı">
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-              </Field>
-              <Field label="Kısa Açıklama">
-                <Textarea rows={3} defaultValue="Sonsuzluk havuzu ve panoramik Ege manzarası ile özel tasarım lüks villa." />
-              </Field>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Kategori">
-                  <Select defaultValue="konut">
+                  <Select value={category} onValueChange={(v) => { set("category", v); set("subcategory", undefined); }}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="konut">Konut</SelectItem>
-                      <SelectItem value="ticari">Ticari</SelectItem>
-                      <SelectItem value="arsa">Arsa</SelectItem>
-                      <SelectItem value="turizm">Turizm</SelectItem>
-                      <SelectItem value="isletme">İşletme</SelectItem>
-                      <SelectItem value="ozel_varlik">Özel Varlık</SelectItem>
+                      {categories.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="Kullanım Amacı">
-                  <Select defaultValue="satilik">
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                <Field label="Alt Kategori">
+                  <Select value={(values.subcategory as string) ?? ""} onValueChange={(v) => set("subcategory", v)}>
+                    <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="satilik">Satılık</SelectItem>
-                      <SelectItem value="kiralik">Kiralık</SelectItem>
+                      {categoryByKey[category]?.subcategories.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
               </div>
+              <Field label="İşlem Tipi">
+                <div className="flex flex-wrap gap-1.5">
+                  {transactionTypes.map((t) => (
+                    <button
+                      key={t.value}
+                      onClick={() => set("transaction", t.value)}
+                      className={cn(
+                        "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                        values.transaction === t.value ? "border-gold/50 bg-gold/10 text-gold" : "border-border bg-surface-2 text-secondary-foreground",
+                      )}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </Field>
+              <Field label="Portföy Başlığı">
+                <Input value={(values.title as string) ?? ""} onChange={(e) => set("title", e.target.value)} />
+              </Field>
+              <Field label="Kısa Açıklama">
+                <Textarea rows={3} value={(values.shortDescription as string) ?? ""} onChange={(e) => set("shortDescription", e.target.value)} />
+              </Field>
             </div>
           )}
 
+          {/* Step 2 — Konum & Fiyat */}
           {step === 1 && (
             <div className="mt-5 space-y-4">
               <Field label="Konum Tipi">
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { key: "approximate" as const, label: "Yaklaşık Bölge", desc: "Sadece bölge gösterilir" },
-                    { key: "exact" as const, label: "Tam Konum", desc: "Erişim onayıyla açılır" },
+                    { key: "approximate", label: "Yaklaşık Bölge", desc: "Sadece bölge gösterilir" },
+                    { key: "exact", label: "Tam Konum", desc: "Erişim onayıyla açılır" },
                   ].map((o) => (
                     <button
                       key={o.key}
-                      onClick={() => setLocationMode(o.key)}
+                      onClick={() => set("locationMode", o.key)}
                       className={cn(
                         "rounded-xl border p-3 text-left transition-colors",
-                        locationMode === o.key ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2",
+                        values.locationMode === o.key ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2",
                       )}
                     >
                       <p className="text-sm font-semibold text-foreground">{o.label}</p>
@@ -202,30 +216,27 @@ function NewPortfolioWizard() {
               </Field>
               <ApproxLocationMap label={region} x={58} y={42} />
               <div className="grid grid-cols-3 gap-4">
-                <Field label="Şehir"><Input defaultValue="Muğla" /></Field>
-                <Field label="İlçe"><Input defaultValue="Bodrum" /></Field>
-                <Field label="Mahalle"><Input defaultValue="Yalıkavak" /></Field>
+                <Field label="Şehir"><Input value={(values.city as string) ?? ""} onChange={(e) => set("city", e.target.value)} /></Field>
+                <Field label="İlçe"><Input value={(values.district as string) ?? ""} onChange={(e) => set("district", e.target.value)} /></Field>
+                <Field label="Mahalle"><Input value={(values.neighborhood as string) ?? ""} onChange={(e) => set("neighborhood", e.target.value)} /></Field>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <Field label="Fiyat">
-                  <Input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
+                  <Input type="number" value={(values.price as number) ?? ""} onChange={(e) => set("price", e.target.value === "" ? undefined : Number(e.target.value))} />
                 </Field>
                 <Field label="Para Birimi">
-                  <Select defaultValue="TRY">
+                  <Select value={(values.currency as string) ?? "TRY"} onValueChange={(v) => set("currency", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="TRY">TRY (₺)</SelectItem>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                      <SelectItem value="EUR">EUR (€)</SelectItem>
-                    </SelectContent>
+                    <SelectContent>{currencies.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
                   </Select>
                 </Field>
-                <Field label="Fiyat Tipi">
-                  <Select defaultValue="fixed">
+                <Field label="Fiyat Görünürlüğü">
+                  <Select value={(values.priceVisibility as string) ?? "visible"} onValueChange={(v) => set("priceVisibility", v)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="fixed">Sabit</SelectItem>
-                      <SelectItem value="negotiable">Pazarlıklı</SelectItem>
+                      <SelectItem value="visible">Herkese Açık</SelectItem>
+                      <SelectItem value="on_request">Talep Üzerine</SelectItem>
+                      <SelectItem value="hidden">Gizli</SelectItem>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -233,64 +244,32 @@ function NewPortfolioWizard() {
             </div>
           )}
 
+          {/* Step 3 — Dynamic details by category */}
           {step === 2 && (
-            <div className="mt-5 space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <Field label="Brüt Alan (m²)"><Input type="number" defaultValue={480} /></Field>
-                <Field label="Net Alan (m²)"><Input type="number" defaultValue={410} /></Field>
-                <Field label="Arsa Alanı (m²)"><Input type="number" defaultValue={900} /></Field>
-                <Field label="Oda Sayısı"><Input defaultValue="5+1" /></Field>
-                <Field label="Banyo Sayısı"><Input type="number" defaultValue={4} /></Field>
-                <Field label="Otopark"><Input type="number" defaultValue={3} /></Field>
-                <Field label="Yapım Yılı"><Input type="number" defaultValue={2022} /></Field>
-                <Field label="Isıtma">
-                  <Select defaultValue="floor">
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="floor">Yerden Isıtma</SelectItem>
-                      <SelectItem value="central">Merkezi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
-                <Field label="Eşyalı">
-                  <Select defaultValue="yes">
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="yes">Evet</SelectItem>
-                      <SelectItem value="no">Hayır</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Field>
+            <div className="mt-5 space-y-5">
+              <div className="rounded-xl border border-gold/25 bg-gold/[0.05] px-3.5 py-2.5 text-xs text-secondary-foreground">
+                <span className="font-semibold text-gold">{categoryByKey[category]?.label}</span> kategorisi için detay alanları gösteriliyor.
               </div>
-              <Field label="Öne Çıkan Özellikler">
-                <div className="flex flex-wrap gap-2">
-                  {featureOptions.map((f) => (
-                    <button
-                      key={f}
-                      onClick={() => toggleFeature(f)}
-                      className={cn(
-                        "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                        features.includes(f) ? "border-gold/50 bg-gold/10 text-gold" : "border-border bg-surface-2 text-secondary-foreground",
-                      )}
-                    >
-                      {f}
-                    </button>
-                  ))}
+              {detailGroups.map((g) => (
+                <div key={g.id} className="space-y-3">
+                  <p className="text-sm font-semibold text-foreground">{g.label}</p>
+                  <FilterFieldGrid fields={g.fields} state={values} onChange={set} />
                 </div>
-              </Field>
+              ))}
               <Field label="Açıklama">
-                <Textarea rows={4} defaultValue="Yalıkavak'ın en prestijli bölgesinde, korunaklı sitede yer alan villa..." />
+                <Textarea rows={4} value={(values.description as string) ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Portföy hakkında detaylı açıklama..." />
               </Field>
             </div>
           )}
 
+          {/* Step 4 — Media */}
           {step === 3 && (
             <div className="mt-5 space-y-4">
-              <Field label="Fotoğraflar">
+              <Field label="Fotoğraflar & Kapak Görseli">
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center">
                   <UploadCloud className="size-7 text-gold" />
                   <p className="mt-2 text-sm font-medium text-foreground">Fotoğrafları sürükleyin veya seçin</p>
-                  <p className="text-xs text-muted-foreground">JPG, PNG · maks. 20 görsel</p>
+                  <p className="text-xs text-muted-foreground">JPG, PNG · maks. 20 görsel · ilk görsel kapak olur</p>
                 </div>
               </Field>
               <div className="grid grid-cols-4 gap-3">
@@ -301,33 +280,40 @@ function NewPortfolioWizard() {
                   </div>
                 ))}
               </div>
-              <Field label="Belgeler">
-                <div className="rounded-xl border border-dashed border-border-strong bg-surface-2 px-4 py-5 text-center text-sm text-muted-foreground">
-                  PDF portföy, tapu ve ruhsat belgelerini yükleyin (erişim onayına kadar kilitli kalır)
+              <Field label="Belgeler (erişim onayına kadar kilitli)">
+                <div className="grid grid-cols-2 gap-2">
+                  {["PDF Portföy", "Tapu Belgesi", "İmar / Ruhsat", "Kat Planı", "Video Turu"].map((d) => (
+                    <div key={d} className="flex items-center gap-2 rounded-lg border border-dashed border-border-strong bg-surface-2 px-3 py-2.5 text-xs text-muted-foreground">
+                      <UploadCloud className="size-4 text-gold" /> {d}
+                    </div>
+                  ))}
                 </div>
               </Field>
             </div>
           )}
 
+          {/* Step 5 — Privacy */}
           {step === 4 && (
             <div className="mt-5 space-y-4">
               <Field label="Görünürlük Seviyesi">
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Platform Üyelerine Açık", desc: "Tüm doğrulanmış üyeler görebilir" },
-                    { label: "Sadece Davetle", desc: "Yalnızca paylaştığınız kişiler" },
-                  ].map((o, i) => (
-                    <button key={o.label} className={cn("rounded-xl border p-3 text-left", i === 0 ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2")}>
+                    { key: "verified", label: "Platform Üyelerine Açık", desc: "Tüm doğrulanmış üyeler görebilir" },
+                    { key: "invite", label: "Sadece Davetle", desc: "Yalnızca paylaştığınız kişiler" },
+                  ].map((o) => (
+                    <button key={o.key} onClick={() => set("visibility", o.key)} className={cn("rounded-xl border p-3 text-left", (values.visibility ?? "verified") === o.key ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2")}>
                       <p className="text-sm font-semibold text-foreground">{o.label}</p>
                       <p className="text-xs text-muted-foreground">{o.desc}</p>
                     </button>
                   ))}
                 </div>
               </Field>
-              <ToggleRow label="Erişim için talep gerekli" desc="Kilitli bilgiler için onay isteyin" defaultChecked />
-              <ToggleRow label="İletişim bilgilerini gizle" desc="Telefon ve e-posta erişim sonrası açılır" defaultChecked />
+              <ToggleRow label="Detay talebi gerekli" desc="Kilitli bilgiler için onay isteyin" checked={(values.requestRequired as boolean) ?? true} onChange={(c) => set("requestRequired", c)} />
+              <ToggleRow label="Tam adresi gizle" desc="Adres erişim sonrası açılır" checked={(values.hideAddress as boolean) ?? true} onChange={(c) => set("hideAddress", c)} />
+              <ToggleRow label="Telefon numarasını gizle" desc="İletişim erişim sonrası açılır" checked={(values.hidePhone as boolean) ?? true} onChange={(c) => set("hidePhone", c)} />
+              <ToggleRow label="PDF portföyü kilitle" desc="PDF yalnızca onaylı taleplere açılır" checked={(values.lockPdf as boolean) ?? true} onChange={(c) => set("lockPdf", c)} />
               <Field label="Erişim Geçerlilik Süresi">
-                <Select defaultValue="30">
+                <Select value={(values.accessValidity as string) ?? "30"} onValueChange={(v) => set("accessValidity", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="7">7 gün</SelectItem>
@@ -336,22 +322,33 @@ function NewPortfolioWizard() {
                   </SelectContent>
                 </Select>
               </Field>
-              <Field label="Paylaşım Notu (opsiyonel)">
-                <Textarea rows={2} placeholder="Paylaşırken eklenecek özel not..." />
-              </Field>
             </div>
           )}
 
+          {/* Step 6 — Preview & completeness */}
           {step === 5 && (
             <div className="mt-5 space-y-4">
-              <div className="rounded-xl border border-success/25 bg-success/5 px-4 py-3 text-sm text-success">
-                <Check className="mr-1 inline size-4" /> Tüm zorunlu alanlar tamamlandı. Yayınlamaya hazır.
+              <div className={cn(
+                "flex items-start gap-2 rounded-xl border px-4 py-3 text-sm",
+                completeness.missingImportant.length === 0
+                  ? "border-success/25 bg-success/5 text-success"
+                  : "border-warning/25 bg-warning/5 text-warning",
+              )}>
+                {completeness.missingImportant.length === 0 ? <Check className="mt-0.5 size-4" /> : <AlertCircle className="mt-0.5 size-4" />}
+                <div>
+                  {completeness.missingImportant.length === 0
+                    ? "Tüm zorunlu alanlar tamamlandı. Yayınlamaya hazır."
+                    : `${completeness.missingImportant.length} önemli alan eksik: ${completeness.missingImportant.join(", ")}`}
+                </div>
               </div>
-              <SummaryRow label="Başlık" value={title} onEdit={() => setStep(0)} />
-              <SummaryRow label="Tip & Bölge" value={`Villa · ${region}`} onEdit={() => setStep(1)} />
-              <SummaryRow label="Fiyat" value={formatPrice(price)} onEdit={() => setStep(1)} />
-              <SummaryRow label="Özellikler" value={features.join(", ")} onEdit={() => setStep(2)} />
-              <SummaryRow label="Gizlilik" value="Platform üyelerine açık · Talep gerekli" onEdit={() => setStep(4)} />
+              <div className="grid grid-cols-2 gap-3">
+                <StatBox label="Zorunlu alanlar" value={`${completeness.requiredDone}/${completeness.requiredTotal}`} />
+                <StatBox label="Opsiyonel alanlar" value={`${completeness.optionalDone}/${completeness.optionalTotal}`} />
+              </div>
+              <SummaryRow label="Başlık" value={(values.title as string) ?? "—"} onEdit={() => setStep(0)} />
+              <SummaryRow label="Kategori & Bölge" value={`${categoryByKey[category]?.label} · ${region}`} onEdit={() => setStep(1)} />
+              <SummaryRow label="Fiyat" value={formatPrice(Number(values.price) || 0)} onEdit={() => setStep(1)} />
+              <SummaryRow label="Gizlilik" value={`${(values.visibility ?? "verified") === "invite" ? "Sadece davetle" : "Platform üyelerine açık"} · ${values.requestRequired === false ? "Talep gerekmiyor" : "Detay talebi gerekli"}`} onEdit={() => setStep(4)} />
               <ApproxLocationMap label={region} x={58} y={42} />
             </div>
           )}
@@ -384,29 +381,38 @@ function NewPortfolioWizard() {
                 <img src={propertyImages.villa1} alt="" className="size-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
               </div>
-              <h3 className="mt-3 line-clamp-2 font-semibold text-foreground">{title}</h3>
+              <h3 className="mt-3 line-clamp-2 font-semibold text-foreground">{(values.title as string) || "Portföy başlığı"}</h3>
               <p className="text-xs text-muted-foreground">~{region}</p>
-              <p className="mt-1.5 font-display text-xl font-semibold text-gold">{formatPrice(price)}</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {features.slice(0, 4).map((f) => <FeatureChip key={f} label={f} />)}
-              </div>
+              <p className="mt-1.5 font-display text-xl font-semibold text-gold">{formatPrice(Number(values.price) || 0)}</p>
             </div>
             <div className="border-t border-border px-4 py-3">
-              <p className="mb-2 text-xs text-muted-foreground">Tamamlanma</p>
+              <p className="mb-2 text-xs text-muted-foreground">Adım İlerlemesi</p>
               <div className="h-2 overflow-hidden rounded-full bg-surface-3">
                 <div className="h-full rounded-full bg-gradient-gold transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
               </div>
               <p className="mt-1.5 text-xs text-gold">{Math.round(((step + 1) / steps.length) * 100)}% · Adım {step + 1}/{steps.length}</p>
             </div>
             <div className="flex items-center gap-3 border-t border-border px-4 py-3">
-              <DataScoreRing score={dataScore} level={dataLevel} size={48} />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Portföy Veri Skoru</p>
+              <DataScoreRing score={completeness.score} level={dataLevel} size={48} />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Veri Tamlık Skoru</p>
                 <p className="mt-0.5 text-xs text-secondary-foreground">
                   {dataLevel === "high" ? "Güçlü veri — yayına hazır" : dataLevel === "medium" ? "İyi, daha fazla detay ekleyin" : "Daha fazla bilgi ekleyin"}
                 </p>
               </div>
             </div>
+            {completeness.missingImportant.length > 0 && (
+              <div className="border-t border-border px-4 py-3">
+                <p className="mb-1.5 flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <AlertCircle className="size-3 text-warning" /> Eksik önemli alanlar
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {completeness.missingImportant.slice(0, 6).map((m) => (
+                    <span key={m} className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-secondary-foreground">{m}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </SurfaceCard>
         </div>
       </div>
@@ -423,14 +429,23 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function ToggleRow({ label, desc, defaultChecked }: { label: string; desc: string; defaultChecked?: boolean }) {
+function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (c: boolean) => void }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3">
       <div>
         <p className="text-sm font-medium text-foreground">{label}</p>
         <p className="text-xs text-muted-foreground">{desc}</p>
       </div>
-      <Switch defaultChecked={defaultChecked} />
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
+
+function StatBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-2 px-4 py-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-0.5 font-display text-lg font-semibold text-gold">{value}</p>
     </div>
   );
 }
