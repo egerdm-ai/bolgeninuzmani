@@ -51,13 +51,11 @@ const regionChips = ["Bodrum", "Yalıkavak", "Bebek"];
  * Search, quick chips, region pill, list/grid toggle and sort all run locally.
  */
 export function ProfessionalPortfolioCatalog({
-  professional,
   portfolios,
   regionFilter,
   onRegionChange,
   onRequestDetail,
 }: {
-  professional: Professional;
   portfolios: Portfolio[];
   regionFilter: string | null;
   onRegionChange: (region: string | null) => void;
