@@ -100,6 +100,18 @@ function RegionDetail() {
             <MapPin className="size-4 text-gold" /> {region.city}
           </p>
           <p className="mt-3 max-w-xl text-sm text-secondary-foreground">{region.blurb}</p>
+          <Button
+            onClick={() => toggleWatch(region.slug, region.name)}
+            className={cn(
+              "mt-5 gap-1.5",
+              watching
+                ? "border border-gold/40 bg-gold/10 text-gold hover:bg-gold/20"
+                : "bg-gradient-gold text-primary-foreground hover:opacity-90",
+            )}
+          >
+            {watching ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+            {watching ? "Takip Ediliyor" : "Bölgeyi Takip Et"}
+          </Button>
         </div>
       </div>
 
