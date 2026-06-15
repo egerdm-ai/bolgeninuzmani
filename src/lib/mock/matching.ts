@@ -168,6 +168,8 @@ export function regionSlugForName(name: string): string | null {
   const s = slugify(name);
   return regions.some((r) => r.slug === s) ? s : null;
 }
+
+export function getExpertsForRegion(region: Region): Professional[] {
   const byId = professionals.filter((pro) => region.expertIds.includes(pro.id));
   const byExpertise = professionals.filter((pro) =>
     pro.expertiseRegions.some((r) => slugify(r) === region.slug),
