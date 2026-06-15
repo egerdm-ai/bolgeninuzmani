@@ -62,11 +62,22 @@ export function RegionCard({ region }: { region: Region }) {
           ))}
         </div>
 
-        <Button asChild className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-          <Link to="/dashboard/regions/$slug" params={{ slug: region.slug }}>
-            Bölgeyi Gör <ArrowRight className="size-4" />
-          </Link>
-        </Button>
+        <div className="mt-4 flex gap-2">
+          <Button asChild className="flex-1 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Link to="/dashboard/regions/$slug" params={{ slug: region.slug }}>
+              Bölgeyi Gör <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => toggleWatch(region.slug, region.name)}
+            aria-label={watching ? "Takibi bırak" : "Bölgeyi takip et"}
+            className={watching ? "border-gold/40 text-gold" : ""}
+          >
+            {watching ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+          </Button>
+        </div>
       </div>
     </div>
   );
