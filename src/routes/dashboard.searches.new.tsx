@@ -73,6 +73,7 @@ function NewSearch() {
   const [visibility, setVisibility] = useState<"private" | "network">("network");
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
   const [experts, setExperts] = useState<Professional[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const category = (filters.category as CategoryKey) ?? "konut";
   const setFilter = (key: string, value: FilterValue) => setFilters((p) => ({ ...p, [key]: value }));
