@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Plus, Filter, FolderLock, Eye, Send, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { Plus, ArrowDownWideNarrow, FolderLock, Eye, Send, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/vault/cards";
