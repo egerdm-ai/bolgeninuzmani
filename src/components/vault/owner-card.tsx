@@ -29,18 +29,24 @@ export function OwnerCard({ owner }: { owner: Broker }) {
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-semibold text-foreground">{owner.fullName}</h3>
             <ShieldCheck className="size-4 shrink-0 text-gold" />
-            <MembershipBadge tier={owner.membershipTier} />
+            <MembershipBadge tier={owner.membershipTier} label={pro?.membershipBadge} />
           </div>
           <p className="truncate text-xs text-muted-foreground">{owner.title}</p>
           <p className="truncate text-xs text-gold">{owner.companyName}</p>
         </div>
       </Link>
 
+      {pro?.expertBadge && (
+        <div className="mt-3">
+          <RegionExpertBadge region={pro.expertBadge ?? topExpertRegion(pro)} />
+        </div>
+      )}
+
       {/* Expertise regions */}
       {owner.expertiseRegions.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
           {owner.expertiseRegions.slice(0, 4).map((r) => (
-            <FeatureChip key={r} label={r} />
+            <RegionLinkChip key={r} region={r} />
           ))}
         </div>
       )}
