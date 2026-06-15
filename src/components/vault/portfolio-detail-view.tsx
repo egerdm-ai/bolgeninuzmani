@@ -44,6 +44,7 @@ export function PortfolioDetailView({
   const ownerOthers = getPortfoliosByProfessional(portfolio.owner.id, { activeOnly: true })
     .filter((x) => x.id !== portfolio.id)
     .slice(0, 3);
+  const timeline = getPortfolioTimeline(portfolio);
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
