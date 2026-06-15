@@ -68,6 +68,21 @@ function NewPortfolioWizard() {
   const next = () => setStep((s) => Math.min(s + 1, steps.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
+  const scoreChecks = [
+    title.length > 8,
+    price > 0,
+    !!type,
+    !!region,
+    features.length >= 2,
+    features.length >= 4,
+    step >= 2,
+    step >= 3,
+    step >= 4,
+    locationMode === "exact",
+  ];
+  const dataScore = Math.round((scoreChecks.filter(Boolean).length / scoreChecks.length) * 100);
+  const dataLevel: "low" | "medium" | "high" = dataScore >= 80 ? "high" : dataScore >= 55 ? "medium" : "low";
+
   const publish = () => {
     toast.success("Portföy yayınlandı", { description: "Share Studio'ya yönlendiriliyorsunuz." });
     navigate({ to: "/dashboard/portfolios/$id/share", params: { id: "p_001" } });
