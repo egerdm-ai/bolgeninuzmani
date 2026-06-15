@@ -23,7 +23,6 @@ import { cn } from "@/lib/utils";
 import { formatNumber, portfolioTypeLabels } from "@/lib/format";
 import {
   getPortfoliosByProfessional,
-  getProfessionalById,
   professionals,
 } from "@/lib/mock/data";
 import { BrokerAvatar } from "./broker-avatar";
