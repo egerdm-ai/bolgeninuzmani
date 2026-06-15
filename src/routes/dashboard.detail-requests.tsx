@@ -233,7 +233,7 @@ function DetailRequestsInbox() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] xl:grid-cols-[minmax(0,1fr)_540px]">
         {/* List */}
         <div className="space-y-3">
           {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride talep yok.</p>}
@@ -242,15 +242,15 @@ function DetailRequestsInbox() {
               key={r.id}
               request={r}
               active={selected?.id === r.id}
-              onSelect={() => setSelectedId(r.id)}
+              onSelect={() => handleSelect(r.id)}
             />
           ))}
         </div>
 
-        {/* Opportunity panel — header + scroll body + sticky action footer */}
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        {/* Opportunity panel — header + body + action footer (no inner scroll) */}
+        <div ref={detailRef} className="scroll-mt-20 lg:sticky lg:top-20 lg:self-start">
           {selected && (
-            <SurfaceCard className="flex flex-col p-0 lg:max-h-[calc(100vh-7rem)]">
+            <SurfaceCard className="p-0">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -259,8 +259,8 @@ function DetailRequestsInbox() {
                 <StatusBadge label={requestStatusLabels[selected.status]} tone={requestStatusTones[selected.status]} />
               </div>
 
-              {/* Scrollable body */}
-              <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+              {/* Body */}
+              <div className="space-y-4 px-5 py-4">
                 {/* Property hero */}
                 <div className="relative overflow-hidden rounded-xl border border-border">
                   <img
