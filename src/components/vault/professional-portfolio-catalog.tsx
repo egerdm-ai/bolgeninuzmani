@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Search, LayoutGrid, List, X, RotateCcw } from "lucide-react";
-import type { Portfolio, Professional } from "@/lib/mock/types";
+import type { Portfolio } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
 import { SurfaceCard } from "./cards";
 import { PortfolioCard } from "./portfolio-card";
