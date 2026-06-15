@@ -48,7 +48,7 @@ function SearchPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10">
-            <Link to="/dashboard/concierge"><Sparkles className="size-4" /> AI Concierge</Link>
+            <Link to="/dashboard/assistant"><Sparkles className="size-4" /> VAULT Asistan</Link>
           </Button>
           <Button variant="outline" className="gap-1.5" onClick={() => saveSearch("Bodrum Villa araması")}>
             <BookmarkPlus className="size-4" /> Aramayı Kaydet

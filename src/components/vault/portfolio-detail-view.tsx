@@ -15,6 +15,9 @@ import { InfoPanel, SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
 import { MarketContextCard } from "./market-context-card";
 import { DataScoreCard } from "./data-score";
+import { PortfolioMatchPanel } from "./portfolio-match-panel";
+import { PdfCtaCard } from "./pdf-cta-card";
+import { PortfolioAnalyticsCard } from "./portfolio-analytics-card";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
 import { getPortfoliosByProfessional } from "@/lib/mock/data";
@@ -166,7 +169,13 @@ export function PortfolioDetailView({
 
         <MarketContextCard portfolio={portfolio} />
 
+        <PortfolioMatchPanel portfolio={portfolio} mode={mode} />
+
+        <PdfCtaCard portfolio={portfolio} mode={mode} onRequest={() => setRequestOpen(true)} />
+
         {mode === "owner" && <DataScoreCard portfolio={portfolio} />}
+
+        {mode === "owner" && <PortfolioAnalyticsCard portfolio={portfolio} />}
 
         <OwnerCard owner={portfolio.owner} />
 

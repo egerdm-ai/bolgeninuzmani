@@ -165,3 +165,66 @@ export type Activity = {
   text: string;
   time: string;
 };
+
+// ---------------------------------------------------------------------------
+// Buyer Search ("Arayış") — what a professional is looking for on behalf of a buyer.
+// ---------------------------------------------------------------------------
+
+export type BuyerSearchStatus = "active" | "matched" | "awaiting" | "closed";
+export type Urgency = "low" | "medium" | "high";
+export type SearchVisibility = "private" | "network";
+
+export type BuyerSearch = {
+  id: string;
+  title: string;
+  clientType: string;
+  city: string;
+  region: string;
+  type: PortfolioType;
+  budgetMin: number;
+  budgetMax: number;
+  currency: Currency;
+  rooms?: string;
+  minM2?: number;
+  mustHave: string[];
+  niceToHave: string[];
+  urgency: Urgency;
+  notes?: string;
+  visibility: SearchVisibility;
+  status: BuyerSearchStatus;
+  matchCount: number;
+  createdAt: string;
+  owner: Broker;
+  views: number;
+  responses: number;
+  savedBy: number;
+};
+
+/** A portfolio matched against a buyer search, with explanation. */
+export type MatchResult = {
+  portfolio: Portfolio;
+  score: number;
+  matched: string[];
+  missing: string[];
+  explanation: string;
+};
+
+// ---------------------------------------------------------------------------
+// Region ("Bölge") — area-level expertise + market context.
+// ---------------------------------------------------------------------------
+
+export type Region = {
+  slug: string;
+  name: string;
+  city: string;
+  blurb: string;
+  activePortfolios: number;
+  buyerSearchCount: number;
+  expertCount: number;
+  priceRange: string;
+  demandLevel: "low" | "medium" | "high";
+  topFeatures: string[];
+  expertIds: string[];
+  mapX: number;
+  mapY: number;
+};

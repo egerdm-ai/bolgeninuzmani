@@ -12,6 +12,8 @@ import {
   Crown,
   ChevronLeft,
   Users2,
+  Target,
+  Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { currentUser, detailRequests } from "@/lib/mock/data";
@@ -24,10 +26,12 @@ const mainNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
   { label: "Portföy Ara", to: "/dashboard/search", icon: Search },
+  { label: "Arayışlar", to: "/dashboard/buyer-searches", icon: Target },
+  { label: "Bölgeler", to: "/dashboard/regions", icon: Map },
   { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
   { label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark },
-  { label: "AI Concierge", to: "/dashboard/concierge", icon: Sparkles, accent: true },
+  { label: "VAULT Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
 ] as const;
 
 const accountNav = [

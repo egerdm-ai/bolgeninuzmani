@@ -3,7 +3,6 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  Inbox,
   FolderLock,
   Eye,
   Send,
@@ -12,7 +11,9 @@ import {
   ArrowRight,
   Activity as ActivityIcon,
   Bookmark,
-  UploadCloud,
+  Target,
+  Download,
+  MapPin,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { KpiCard, QuickActionCard, InfoPanel, SurfaceCard } from "@/components/vault/cards";
@@ -30,6 +31,7 @@ import {
   myPortfolios,
   propertyImages,
 } from "@/lib/mock/data";
+import { networkAnalytics } from "@/lib/mock/matching";
 import { formatNumber, requestStatusLabels, requestStatusTones } from "@/lib/format";
 import { useSaved } from "@/lib/saved-store";
 import type { Portfolio } from "@/lib/mock/types";
@@ -73,18 +75,22 @@ function DashboardHome() {
 
       {/* Quick actions */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <QuickActionCard label="Portföy Oluştur" description="Yeni lüks portföy ekle" icon={Plus} accent />
-        <Link to="/dashboard/ai-import"><QuickActionCard label="AI ile Oluştur" description="WhatsApp / PDF'ten içe aktar" icon={UploadCloud} /></Link>
+        <Link to="/dashboard/portfolios/new"><QuickActionCard label="Portföy Oluştur" description="Yeni lüks portföy ekle" icon={Plus} accent /></Link>
+        <Link to="/dashboard/buyer-searches/new"><QuickActionCard label="Yeni Arayış" description="Alıcı için portföy eşleştir" icon={Target} /></Link>
         <Link to="/dashboard/search"><QuickActionCard label="Portföy Ara" description="Harita üzerinde keşfet" icon={Search} /></Link>
-        <Link to="/dashboard/detail-requests"><QuickActionCard label="Detay Talepleri" description="Gelen talepleri yönet" icon={Inbox} /></Link>
+        <Link to="/dashboard/assistant"><QuickActionCard label="VAULT Asistan" description="Akıllı eşleştirme & değerleme" icon={Sparkles} /></Link>
       </div>
 
       {/* KPIs */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Aktif Portföy" value={formatNumber(dashboardKpis.activePortfolios)} delta="+3 bu ay" icon={FolderLock} />
-        <KpiCard label="Toplam Görüntülenme" value={formatNumber(dashboardKpis.totalViews)} delta="+12% bu ay" icon={Eye} />
-        <KpiCard label="Detay Talepleri" value={formatNumber(dashboardKpis.detailRequests)} delta="+5 yeni" icon={Send} />
+        <KpiCard label="Aktif Portföy" value={formatNumber(networkAnalytics.activePortfolios)} delta="+3 bu ay" icon={FolderLock} />
+        <KpiCard label="Aktif Arayış" value={formatNumber(networkAnalytics.activeSearches)} delta="+2 bu hafta" icon={Target} />
+        <KpiCard label="Eşleşen Arayışlar" value={formatNumber(networkAnalytics.matchedSearches)} delta="Yeni eşleşmeler" icon={Sparkles} />
+        <KpiCard label="Gelen Detay Talepleri" value={formatNumber(networkAnalytics.detailRequests)} delta="+5 yeni" icon={Send} />
+        <KpiCard label="PDF İndirme" value={formatNumber(networkAnalytics.pdfDownloads)} delta="+18 bu ay" icon={Download} />
+        <KpiCard label="Profil Görüntülenme" value={formatNumber(networkAnalytics.profileViews)} delta="+12% bu ay" icon={Eye} />
         <KpiCard label="Kaydedilen Portföy" value={formatNumber(dashboardKpis.savedPortfolios)} delta="+4 bu ay" icon={Bookmark} />
+        <KpiCard label="En Aktif Bölge" value={networkAnalytics.topRegion} delta="Yüksek talep" deltaTone="muted" icon={MapPin} />
       </div>
 
       <div className="grid gap-7 lg:grid-cols-3">
@@ -133,17 +139,17 @@ function DashboardHome() {
 
         {/* Right rail */}
         <div className="space-y-7">
-          {/* AI Concierge CTA */}
+          {/* VAULT Asistan CTA */}
           <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
             <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
               <Sparkles className="size-5" />
             </span>
-            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">AI Concierge</h3>
+            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">VAULT Asistan</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Doğal dille portföy ve uzman arayın. "Bodrum'da 100M altı deniz manzaralı villa ara".
+              Arayıştan portföy bulun, portföyü arayışlarla eşleştirin ve bölge uzmanı önerileri alın.
             </p>
             <Button asChild className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-              <Link to="/dashboard/concierge"><Sparkles className="size-4" /> Concierge ile Ara</Link>
+              <Link to="/dashboard/assistant"><Sparkles className="size-4" /> Asistan ile Eşleştir</Link>
             </Button>
           </SurfaceCard>
 
