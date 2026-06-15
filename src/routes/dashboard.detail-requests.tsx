@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Reply,
@@ -166,9 +166,33 @@ function DetailRequestsInbox() {
   const [requests, setRequests] = useState<DetailRequest[]>(detailRequests);
   const [tab, setTab] = useState<DetailRequestStatus | "all">("all");
   const [selectedId, setSelectedId] = useState<string>(detailRequests[0].id);
+  const detailRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filtered = tab === "all" ? requests : requests.filter((r) => r.status === tab);
   const selected = requests.find((r) => r.id === selectedId) ?? filtered[0];
+
+  const handleSelect = (id: string) => {
+    setSelectedId(id);
+    window.setTimeout(() => {
+      const panel = detailRef.current;
+      const list = listRef.current;
+      if (!panel || !list) return;
+      // Only auto-scroll when the columns are stacked (mobile/tablet): the
+      // detail panel renders well below the list. On side-by-side (desktop)
+      // layouts both columns share the same row top, so we leave scroll alone.
+      const listTop = list.getBoundingClientRect().top;
+      const panelTop = panel.getBoundingClientRect().top;
+      const stacked = panelTop > listTop + 80;
+      if (!stacked) return;
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  };
+
+
+
+
+
 
   const updateStatus = (id: string, status: DetailRequestStatus, msg: string) => {
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
@@ -221,24 +245,25 @@ function DetailRequestsInbox() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] xl:grid-cols-[minmax(0,1fr)_540px]">
         {/* List */}
-        <div className="space-y-3">
+        <div ref={listRef} className="space-y-3">
+
           {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride talep yok.</p>}
           {filtered.map((r) => (
             <RequestListItem
               key={r.id}
               request={r}
               active={selected?.id === r.id}
-              onSelect={() => setSelectedId(r.id)}
+              onSelect={() => handleSelect(r.id)}
             />
           ))}
         </div>
 
-        {/* Opportunity panel — header + scroll body + sticky action footer */}
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        {/* Opportunity panel — header + body + action footer (no inner scroll) */}
+        <div ref={detailRef} className="scroll-mt-20 lg:sticky lg:top-20 lg:self-start">
           {selected && (
-            <SurfaceCard className="flex flex-col p-0 lg:max-h-[calc(100vh-7rem)]">
+            <SurfaceCard className="p-0">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -247,8 +272,8 @@ function DetailRequestsInbox() {
                 <StatusBadge label={requestStatusLabels[selected.status]} tone={requestStatusTones[selected.status]} />
               </div>
 
-              {/* Scrollable body */}
-              <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+              {/* Body */}
+              <div className="space-y-4 px-5 py-4">
                 {/* Property hero */}
                 <div className="relative overflow-hidden rounded-xl border border-border">
                   <img
@@ -333,16 +358,18 @@ function DetailRequestsInbox() {
                 </div>
               </div>
 
-              {/* Sticky action footer — always visible */}
-              <div className="space-y-3 border-t border-border bg-surface/95 p-4 backdrop-blur-sm">
-                <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
-                <Button
-                  onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
-                  className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-                >
-                  <Send className="size-4" /> Bilgi Paylaş
-                  <ChevronRight className="size-4" />
-                </Button>
+              {/* Action footer */}
+              <div className="space-y-3 border-t border-border p-4">
+                <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+                  <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
+                  <Button
+                    onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
+                    className="h-auto gap-1.5 self-stretch bg-gradient-gold py-2.5 text-primary-foreground hover:opacity-90 sm:w-44"
+                  >
+                    <Send className="size-4" /> Bilgi Paylaş
+                    <ChevronRight className="size-4" />
+                  </Button>
+                </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Button onClick={() => updateStatus(selected.id, "read", "Yanıt gönderildi")} variant="outline" className="gap-1.5">
                     <Reply className="size-4" /> Yanıtla
