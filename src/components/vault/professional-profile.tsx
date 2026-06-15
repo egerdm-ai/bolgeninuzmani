@@ -8,7 +8,6 @@ import {
   Eye,
   Compass,
   Search,
-  Lock,
   LayoutGrid,
   List,
   RotateCcw,
@@ -17,6 +16,9 @@ import {
   Image as ImageIcon,
   PencilLine,
   Send,
+  Layers,
+  Send as SendIcon,
+  Share2,
 } from "lucide-react";
 import type { Portfolio, Professional, ProfessionalActivity } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
@@ -26,13 +28,16 @@ import {
   professionals,
 } from "@/lib/mock/data";
 import { BrokerAvatar } from "./broker-avatar";
-import { MembershipBadge, CategoryChip, FeatureChip } from "./badges";
+import { MembershipBadge, FeatureChip, RegionExpertBadge } from "./badges";
 import { FollowButton } from "./follow-button";
 import { ShareProfileButton } from "./share-profile-button";
 import { ExpertiseMap } from "./expertise-map";
 import { PortfolioCard } from "./portfolio-card";
 import { PortfolioListRow } from "./portfolio-list-row";
-import { ProfessionalCard } from "./professional-card";
+import { ProfessionalMiniCard } from "./professional-mini-card";
+import { ExpertiseRegionCard } from "./expertise-region-card";
+import { LockedContactCard } from "./locked-contact-card";
+import { RegionLinkChip } from "./region-link-chip";
 import { SurfaceCard, InfoPanel } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
 import { Button } from "@/components/ui/button";
