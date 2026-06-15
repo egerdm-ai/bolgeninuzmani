@@ -12,6 +12,7 @@ import { InfoPanel, SurfaceCard } from "@/components/vault/cards";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
 import { RegionExpertCard } from "@/components/vault/region-expert-card";
 import { FilterSection, FilterFieldGrid } from "@/components/vault/filter-section";
+import { FilterModal } from "@/components/vault/filter-modal";
 import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
@@ -72,6 +73,7 @@ function NewSearch() {
   const [visibility, setVisibility] = useState<"private" | "network">("network");
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
   const [experts, setExperts] = useState<Professional[]>([]);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const category = (filters.category as CategoryKey) ?? "konut";
   const setFilter = (key: string, value: FilterValue) => setFilters((p) => ({ ...p, [key]: value }));
@@ -127,13 +129,13 @@ function NewSearch() {
             <div className="space-y-3">
               <div className="flex items-center gap-1.5">
                 <Sparkles className="size-4 text-gold" />
-                <p className="text-sm font-semibold text-foreground">Doğal Dil Arayışı</p>
+                <p className="text-sm font-semibold text-foreground">Müşteriniz ne arıyor?</p>
               </div>
               <Textarea
                 rows={3}
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Aradığınız portföyü kendi cümlelerinizle yazın..."
+                placeholder="örn. Bebek'te havuzlu, müstakil, 5+1 villa arıyorum. 8M USD üstüne çıkamam."
               />
               <Button onClick={runAi} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
                 <Wand2 className="size-4" /> AI ile Filtrelere Çevir
@@ -157,7 +159,12 @@ function NewSearch() {
                 <Input defaultValue="A. Yılmaz (VIP)" placeholder="Müşteri etiketi / takma ad" />
               </Field>
 
-              <p className="pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detaylı Filtreler</p>
+              <div className="flex items-center justify-between pt-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detaylı Filtreler</p>
+                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => setFilterOpen(true)}>
+                  <Sparkles className="size-3.5 text-gold" /> Tüm Filtreler
+                </Button>
+              </div>
 
               <FilterSection label="Lokasyon" defaultOpen>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -339,6 +346,15 @@ function NewSearch() {
           )}
         </div>
       </div>
+
+      <FilterModal
+        open={filterOpen}
+        onOpenChange={setFilterOpen}
+        filters={filters}
+        setFilter={setFilter}
+        resultCount={matches?.length ?? 0}
+        onClear={() => setFilters({ category: "konut", subcategory: "villa", currency: "TRY" })}
+      />
     </PageContainer>
   );
 }

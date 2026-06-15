@@ -83,3 +83,44 @@ completeness score and as primary match criteria.
 - Replace `parsePromptToFilters` with a real LLM call (Lovable AI Gateway).
 - Implement server-side filtering + match scoring (currently client-side mock).
 - Wire privacy/access flags to RLS + Detay Talebi approval gating.
+
+---
+
+## Update — search/saved-search shared filter model
+
+`/dashboard/search` and `/dashboard/searches/new` now share a single
+`FilterState` (flat `Record<string, FilterValue>`) and the same `FilterModal`
+component, so a saved Arayış captures the same keys the search page filters on.
+
+### Key groups → portfolio fields (mock filtering in dashboard.search.tsx)
+
+| Filter key(s) | Portfolio field | Rule |
+|---------------|-----------------|------|
+| modalCategory | category | mapped via `modalCategories[].category` |
+| transaction | purpose | display/segmented (mock) |
+| priceMin/priceMax/currency | price/currency | numeric range |
+| grossM2/netM2/landM2/indoorM2/outdoorM2 | matching m² | minimum |
+| cntRoom/cntBedroom | rooms ("5+1"→5) | min bedrooms |
+| cntBath | bathrooms | minimum |
+| cntParking | parkingCapacity | minimum |
+| luxuryFeatures[] | features[] | all selected must be present |
+| recDeniz/qcDeniz | features ~ "Deniz" | substring |
+| recHavuz/qcHavuz | features ~ "Havuz" | substring |
+| recPdf/qcPdf | documents (type pdf) | has pdf |
+| recUzman/qcUzman/regionExpertsOnly | owner.expertiseRegions ∩ location | region expert |
+| recYeni/qcYeni | createdAt | last 14 days |
+| recTalep/qcTalep/requestRequired | requestRequired | true |
+| recOtopark/qcOtopark | parkingCapacity / features | has parking |
+| qc5Oda | rooms | ≥ 5 |
+
+### AI prompt → filters
+
+`parsePromptToFilters(prompt)` returns `{ filters, summary }`. Detects region
+(cityKeywords), type (incl. müstakil/villa), currency (TRY/USD/EUR), budget
+(`Nm`/`milyon`), rooms (`5+1`) and luxury feature labels.
+
+### Backend TODO
+
+- Persist FilterState per saved search with RLS; recompute counts server-side.
+- Server-side match scoring shared between portfolio↔arayış directions.
+- Replace mock keyword parser with an AI-gateway LLM parser.

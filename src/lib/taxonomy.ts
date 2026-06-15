@@ -231,7 +231,11 @@ export const landFields: FieldDef[] = [
   { key: "sewerage", label: "Kanalizasyon", type: "boolean" },
   { key: "singleDeed", label: "Tek Tapu", type: "boolean" },
   { key: "suitableConstruction", label: "İnşaata Uygun", type: "boolean" },
-  { key: "suitableRevenueShare", label: "Kat Karşılığına Uygun", type: "boolean" },
+  { key: "suitableRevenueShare", label: "Kat Karşılığı Uygun", type: "boolean" },
+  { key: "villaZoning", label: "Villa İmarlı", type: "boolean" },
+  { key: "tourismZoning", label: "Turizm İmarlı", type: "boolean" },
+  { key: "commercialZoning", label: "Ticari İmarlı", type: "boolean" },
+  { key: "nearSea", label: "Denize Yakın", type: "boolean" },
 ];
 
 export const commercialFields: FieldDef[] = [
@@ -260,8 +264,11 @@ export const commercialFields: FieldDef[] = [
     { value: "empty", label: "Boş" },
     { value: "tenant", label: "Kiracılı" },
   ] },
-  { key: "transferFee", label: "Devir Bedeli", type: "number", unit: "₺" },
-  { key: "monthlyRent", label: "Aylık Kira Geliri", type: "number", unit: "₺" },
+  { key: "transferFee", label: "Devren Bedeli", type: "number", unit: "₺" },
+  { key: "monthlyRent", label: "Kira Getirisi", type: "number", unit: "₺" },
+  { key: "turnover", label: "Ciro Bilgisi", type: "number", unit: "₺/ay" },
+  { key: "truckAccess", label: "Tır Girişi", type: "boolean" },
+  { key: "inOsb", label: "OSB İçinde", type: "boolean" },
 ];
 
 export const tourismFields: FieldDef[] = [
@@ -305,21 +312,20 @@ export const industrialFields: FieldDef[] = [
 export const luxuryFeatures: Option[] = [
   { value: "deniz_manzara", label: "Deniz Manzarası" },
   { value: "bogaz_manzara", label: "Boğaz Manzarası" },
+  { value: "orman_manzara", label: "Orman Manzarası" },
   { value: "havuz", label: "Havuz" },
   { value: "kapali_havuz", label: "Kapalı Havuz" },
-  { value: "bahce", label: "Özel Bahçe" },
-  { value: "teras", label: "Teras" },
-  { value: "akilli_ev", label: "Akıllı Ev" },
-  { value: "ozel_iskele", label: "Özel İskele" },
-  { value: "denize_sifir", label: "Denize Sıfır" },
-  { value: "guvenlik", label: "7/24 Güvenlik" },
-  { value: "jenerator", label: "Jeneratör" },
+  { value: "sonsuzluk_havuz", label: "Sonsuzluk Havuzu" },
+  { value: "spa", label: "Spa" },
+  { value: "sauna", label: "Sauna" },
+  { value: "hamam", label: "Hamam" },
+  { value: "sinema_odasi", label: "Sinema Odası" },
+  { value: "sarap_mahzeni", label: "Şarap Mahzeni" },
   { value: "personel_odasi", label: "Personel Odası" },
   { value: "misafir_evi", label: "Misafir Evi" },
-  { value: "sarap_mahzeni", label: "Şarap Mahzeni" },
-  { value: "sinema_odasi", label: "Sinema Odası" },
-  { value: "spa", label: "SPA / Hamam" },
-  { value: "helikopter", label: "Helikopter Pisti" },
+  { value: "ozel_iskele", label: "Özel İskele" },
+  { value: "denize_sifir", label: "Denize Sıfır" },
+  { value: "helipad", label: "Helipad" },
 ];
 
 // ---------------------------------------------------------------------------
@@ -344,37 +350,197 @@ export function getDetailGroupsForCategory(category: CategoryKey): FieldGroup[] 
 }
 
 // ---------------------------------------------------------------------------
-// Quick filter chips (search "Hızlı Filtreler")
+// Quick filter chips — Airbnb-style horizontal row under the search bar.
+// `kind: "modal"` chips open the filter modal; `kind: "toggle"` chips flip a
+// boolean filter key and live-update the result count.
 // ---------------------------------------------------------------------------
 
-export const quickFilterChips: string[] = [
-  "Deniz Manzarası",
-  "Havuz",
-  "Denize Sıfır",
-  "5+1",
-  "Akıllı Ev",
-  "Site İçinde",
-  "Krediye Uygun",
-  "Sıfır Bina",
+export interface QuickChip {
+  id: string;
+  label: string;
+  kind: "modal" | "toggle";
+  /** filter state key for toggle chips */
+  key?: string;
+  /** which modal section to scroll/open to for modal chips */
+  section?: string;
+}
+
+export const searchQuickChips: QuickChip[] = [
+  { id: "fiyat", label: "Fiyat", kind: "modal", section: "price" },
+  { id: "tip", label: "Portföy Tipi", kind: "modal", section: "type" },
+  { id: "deniz_manzara", label: "Deniz Manzaralı", kind: "toggle", key: "qcDeniz" },
+  { id: "havuz", label: "Havuzlu", kind: "toggle", key: "qcHavuz" },
+  { id: "5oda", label: "5+ Oda", kind: "toggle", key: "qc5Oda" },
+  { id: "otopark", label: "Otoparklı", kind: "toggle", key: "qcOtopark" },
+  { id: "pdf", label: "PDF Hazır", kind: "toggle", key: "qcPdf" },
+  { id: "uzman", label: "Bölge Uzmanından", kind: "toggle", key: "qcUzman" },
+  { id: "talep", label: "Detay Talebi Açık", kind: "toggle", key: "qcTalep" },
+  { id: "yeni", label: "Yeni Eklenen", kind: "toggle", key: "qcYeni" },
+];
+
+// Legacy flat chip list (kept for backward compatibility)
+export const quickFilterChips: string[] = searchQuickChips
+  .filter((c) => c.kind === "toggle")
+  .map((c) => c.label);
+
+// ---------------------------------------------------------------------------
+// "Önerilenler" — large selectable recommended filter cards (Airbnb style)
+// ---------------------------------------------------------------------------
+
+export interface RecommendedFilter {
+  key: string;
+  label: string;
+  /** lucide icon name resolved in the UI layer */
+  icon: string;
+  hint?: string;
+}
+
+export const recommendedFilters: RecommendedFilter[] = [
+  { key: "recDeniz", label: "Deniz Manzaralı", icon: "Waves", hint: "Manzara garantili" },
+  { key: "recHavuz", label: "Havuzlu", icon: "Droplets", hint: "Özel / ortak" },
+  { key: "recPdf", label: "PDF Hazır", icon: "FileText", hint: "Sunum dosyası var" },
+  { key: "recUzman", label: "Bölge Uzmanından", icon: "BadgeCheck", hint: "Doğrulanmış uzman" },
+  { key: "recEslesen", label: "Arayışlarımla Eşleşen", icon: "Sparkles", hint: "AI önerisi" },
+  { key: "recYeni", label: "Yeni Eklenen", icon: "Clock", hint: "Son 7 gün" },
+  { key: "recTalep", label: "Detay Talebi Açık", icon: "Send", hint: "Hızlı erişim" },
+  { key: "recOtopark", label: "Otoparklı", icon: "Car", hint: "Kapalı / açık" },
 ];
 
 // ---------------------------------------------------------------------------
-// Privacy / access + professional filter field defs (search only)
+// Portföy Tipi (modal segmented buttons) — display list mapped to CategoryKey
+// ---------------------------------------------------------------------------
+
+export interface ModalCategory {
+  value: string;
+  label: string;
+  /** mapped taxonomy category for conditional sections */
+  category?: CategoryKey;
+}
+
+export const modalCategories: ModalCategory[] = [
+  { value: "all", label: "Tümü" },
+  { value: "konut", label: "Konut", category: "konut" },
+  { value: "villa", label: "Villa / Yalı", category: "konut" },
+  { value: "arsa", label: "Arsa", category: "arsa" },
+  { value: "ticari", label: "Ticari", category: "ticari" },
+  { value: "turizm", label: "Otel / Turizm", category: "turizm" },
+  { value: "endustriyel", label: "Endüstriyel", category: "endustriyel" },
+  { value: "ozel_varlik", label: "Özel Varlık", category: "konut" },
+];
+
+export const modalTransactionTypes: Option[] = [
+  { value: "satilik", label: "Satılık" },
+  { value: "kiralik", label: "Kiralık" },
+  { value: "sezonluk", label: "Sezonluk" },
+  { value: "devren_satilik", label: "Devren Satılık" },
+  { value: "devren_kiralik", label: "Devren Kiralık" },
+];
+
+// ---------------------------------------------------------------------------
+// Oda ve Yaşam Alanları — plus/minus counters
+// ---------------------------------------------------------------------------
+
+export interface CounterDef {
+  key: string;
+  label: string;
+  max?: number;
+}
+
+export const livingSpaceCounters: CounterDef[] = [
+  { key: "cntRoom", label: "Oda", max: 10 },
+  { key: "cntSalon", label: "Salon", max: 5 },
+  { key: "cntBedroom", label: "Yatak odası", max: 10 },
+  { key: "cntBath", label: "Banyo", max: 8 },
+  { key: "cntWc", label: "WC", max: 8 },
+  { key: "cntParking", label: "Otopark kapasitesi", max: 10 },
+];
+
+// ---------------------------------------------------------------------------
+// Alan / m² range fields
+// ---------------------------------------------------------------------------
+
+export const areaRangeFields: { key: string; label: string }[] = [
+  { key: "grossM2", label: "Brüt m²" },
+  { key: "netM2", label: "Net m²" },
+  { key: "landM2", label: "Arsa m²" },
+  { key: "indoorM2", label: "Kapalı alan m²" },
+  { key: "outdoorM2", label: "Açık alan m²" },
+];
+
+// ---------------------------------------------------------------------------
+// Konut / Villa detayları (modal checkboxes/selects)
+// ---------------------------------------------------------------------------
+
+export const konutDetailFields: FieldDef[] = [
+  { key: "buildingAge", label: "Bina yaşı", type: "select", options: [
+    { value: "0", label: "0 (Sıfır)" },
+    { value: "1-5", label: "1-5" },
+    { value: "6-10", label: "6-10" },
+    { value: "11-20", label: "11-20" },
+    { value: "21+", label: "21+" },
+  ] },
+  { key: "floor", label: "Kat", type: "text" },
+  { key: "totalFloors", label: "Kat sayısı", type: "number" },
+  { key: "heating", label: "Isıtma tipi", type: "select", options: [
+    { value: "floor", label: "Yerden Isıtma" },
+    { value: "central", label: "Merkezi" },
+    { value: "combi", label: "Kombi" },
+    { value: "ac", label: "Klima" },
+  ] },
+  { key: "furnished", label: "Eşyalı", type: "boolean" },
+  { key: "inSite", label: "Site içinde", type: "boolean" },
+  { key: "balcony", label: "Balkon", type: "boolean" },
+  { key: "terrace", label: "Teras", type: "boolean" },
+  { key: "garden", label: "Bahçe", type: "boolean" },
+  { key: "elevator", label: "Asansör", type: "boolean" },
+  { key: "security", label: "Güvenlik", type: "boolean" },
+  { key: "smartHome", label: "Akıllı ev", type: "boolean" },
+  { key: "generator", label: "Jeneratör", type: "boolean" },
+];
+
+// ---------------------------------------------------------------------------
+// Privacy / access + professional + match filter field defs (search only)
 // ---------------------------------------------------------------------------
 
 export const privacyAccessFields: FieldDef[] = [
-  { key: "hasPhotos", label: "Fotoğraflı", type: "boolean" },
-  { key: "hasPdf", label: "PDF Portföy", type: "boolean" },
-  { key: "hasMap", label: "Haritalı", type: "boolean" },
   { key: "requestRequired", label: "Detay Talebi Gerekli", type: "boolean" },
-  { key: "savedOnly", label: "Sadece Kaydedilenler", type: "boolean" },
+  { key: "pdfLocked", label: "PDF Kilitli", type: "boolean" },
+  { key: "addressHidden", label: "Tam Adres Gizli", type: "boolean" },
+  { key: "phoneHidden", label: "Telefon Gizli", type: "boolean" },
+  { key: "approvedAccessOnly", label: "Onaylı Erişimim Olanlar", type: "boolean" },
+  { key: "previouslyRequested", label: "Daha Önce Talep Ettiklerim", type: "boolean" },
 ];
 
 export const professionalFields: FieldDef[] = [
-  { key: "followedOnly", label: "Takip Ettiğim Profesyoneller", type: "boolean" },
-  { key: "regionExpertsOnly", label: "Sadece Bölge Uzmanları", type: "boolean" },
-  { key: "verifiedOnly", label: "Doğrulanmış Profiller", type: "boolean" },
+  { key: "verifiedOnly", label: "Sadece doğrulanmış profesyoneller", type: "boolean" },
+  { key: "regionExpertsOnly", label: "Bölge uzmanlarından portföyler", type: "boolean" },
+  { key: "followedOnly", label: "Takip ettiğim profesyoneller", type: "boolean" },
+  { key: "highActivity", label: "Aktif portföy sayısı yüksek olanlar", type: "boolean" },
+  { key: "highResponse", label: "Yanıt oranı yüksek olanlar", type: "boolean" },
 ];
+
+export const matchSearchFields: FieldDef[] = [
+  { key: "matchMySearches", label: "Arayışlarımla eşleşenler", type: "boolean" },
+  { key: "newMatches", label: "Yeni eşleşme gelenler", type: "boolean" },
+  { key: "savedSearchFit", label: "Kaydedilen aramalarıma uygun", type: "boolean" },
+  { key: "aiRecommended", label: "AI önerili portföyler", type: "boolean" },
+  { key: "highDataScore", label: "Veri skoru yüksek portföyler", type: "boolean" },
+];
+
+// ---------------------------------------------------------------------------
+// Mock price histogram distribution (for the Airbnb-style range slider)
+// ---------------------------------------------------------------------------
+
+export const priceHistogram: number[] = [
+  3, 6, 10, 16, 24, 33, 41, 48, 52, 49, 44, 38, 31, 27, 22, 18, 15, 12, 9, 7, 5, 4, 3, 2,
+];
+
+// Price bounds per currency (mock)
+export const priceBounds: Record<string, { min: number; max: number; step: number }> = {
+  TRY: { min: 0, max: 500_000_000, step: 1_000_000 },
+  USD: { min: 0, max: 20_000_000, step: 50_000 },
+  EUR: { min: 0, max: 18_000_000, step: 50_000 },
+};
 
 // ---------------------------------------------------------------------------
 // Filter section registry for /dashboard/search
@@ -522,6 +688,7 @@ export function parsePromptToFilters(prompt: string): ParsedPrompt {
   }
 
   const typeMap: { kw: string[]; sub: string; cat: CategoryKey; label: string }[] = [
+    { kw: ["müstakil", "mustakil"], sub: "mustakil", cat: "konut", label: "Müstakil" },
     { kw: ["villa"], sub: "villa", cat: "konut", label: "Villa" },
     { kw: ["daire", "rezidans"], sub: "daire", cat: "konut", label: "Daire" },
     { kw: ["yalı", "yali"], sub: "yali", cat: "konut", label: "Yalı" },
@@ -529,27 +696,42 @@ export function parsePromptToFilters(prompt: string): ParsedPrompt {
     { kw: ["otel", "butik otel"], sub: "otel", cat: "turizm", label: "Otel" },
     { kw: ["ofis", "dükkan", "mağaza", "ticari"], sub: "ofis", cat: "ticari", label: "Ticari" },
   ];
-  for (const t of typeMap) {
-    if (t.kw.some((k) => lower.includes(k))) {
-      filters.category = t.cat;
-      filters.subcategory = t.sub;
-      summary.push(`Tip: ${t.label}`);
-      break;
+  // villa wins over müstakil when both present
+  if (lower.includes("villa")) {
+    filters.category = "konut";
+    filters.subcategory = "villa";
+    summary.push("Tip: Villa");
+    if (lower.includes("müstakil") || lower.includes("mustakil")) summary.push("Olmazsa olmaz: Müstakil");
+  } else {
+    for (const t of typeMap) {
+      if (t.kw.some((k) => lower.includes(k))) {
+        filters.category = t.cat;
+        filters.subcategory = t.sub;
+        summary.push(`Tip: ${t.label}`);
+        break;
+      }
     }
   }
 
-  // budget like "100m", "50 milyon", "100M TL"
-  const budgetMatch = lower.match(/(\d+)\s*(m|milyon|milyon tl|m tl)/);
+  // currency detection
+  let currency: "TRY" | "USD" | "EUR" = "TRY";
+  if (/(usd|\$|dolar)/.test(lower)) currency = "USD";
+  else if (/(eur|€|euro)/.test(lower)) currency = "EUR";
+  filters.currency = currency;
+
+  // budget like "8m usd", "100m", "50 milyon", "100M TL"
+  const budgetMatch = lower.match(/(\d+(?:[.,]\d+)?)\s*(m|milyon)/);
   if (budgetMatch) {
-    const max = Number(budgetMatch[1]) * 1_000_000;
+    const max = Math.round(Number(budgetMatch[1].replace(",", ".")) * 1_000_000);
     filters.priceMax = max;
-    summary.push(`Bütçe ≤ ${budgetMatch[1]}M`);
+    summary.push(`Bütçe ≤ ${budgetMatch[1]}M ${currency}`);
   }
 
-  // rooms like 5+1
+  // rooms like 5+1 → store room string + min bedroom counter
   const roomMatch = lower.match(/(\d\+\d|\d\+)/);
   if (roomMatch) {
-    filters.rooms = roomMatch[1].includes("+") && !/\d$/.test(roomMatch[1]) ? `${roomMatch[1]}` : roomMatch[1];
+    filters.rooms = roomMatch[1];
+    filters.cntRoom = Number(roomMatch[1].split("+")[0]) || undefined;
     summary.push(`Oda: ${filters.rooms}`);
   }
 
