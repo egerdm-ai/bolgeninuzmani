@@ -528,6 +528,7 @@ export const dashboardKpis = {
   activePortfolios: 24,
   totalViews: 24960,
   detailRequests: 37,
+  savedPortfolios: 18,
   approvalRate: 87,
 };
 
