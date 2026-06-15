@@ -3,11 +3,13 @@ import { MapPin, ShieldCheck, FolderLock, Users } from "lucide-react";
 import type { Broker } from "@/lib/mock/types";
 import { SurfaceCard } from "./cards";
 import { BrokerAvatar } from "./broker-avatar";
-import { MembershipBadge, FeatureChip } from "./badges";
+import { MembershipBadge, RegionExpertBadge } from "./badges";
+import { RegionLinkChip } from "./region-link-chip";
 import { FollowButton } from "./follow-button";
 import { Button } from "@/components/ui/button";
 import { formatNumber } from "@/lib/format";
 import { getProfessionalById } from "@/lib/mock/data";
+import { topExpertRegion } from "@/lib/mock/insights";
 import { useFollow } from "@/lib/follow-store";
 
 export function OwnerCard({ owner }: { owner: Broker }) {
