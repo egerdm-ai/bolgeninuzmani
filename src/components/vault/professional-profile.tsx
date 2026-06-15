@@ -187,7 +187,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           />
         </div>
         <div className="px-5 pb-5 sm:px-7 sm:pb-7">
-          <div className="-mt-12 flex flex-wrap items-end justify-between gap-4">
+          <div className="relative z-10 -mt-12 flex flex-wrap items-end justify-between gap-4">
             <BrokerAvatar
               name={professional.fullName}
               src={professional.avatarUrl || undefined}
