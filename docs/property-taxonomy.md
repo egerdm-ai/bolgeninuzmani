@@ -84,3 +84,36 @@ Weighting: required 75%, optional 25%.
 region, type, budget (`100M`, `50 milyon`), rooms (`5+1`) and luxury features,
 returning a `FilterState` plus a human-readable summary. Used by the
 "AI ile Filtrelere Çevir" button on the Arayış form.
+
+---
+
+## Update — Airbnb-style filter modal additions
+
+New centralized definitions added to `src/lib/taxonomy.ts` for the
+`/dashboard/search` filter modal (see `docs/search-filter-ux.md`):
+
+- `recommendedFilters` — "Önerilenler" cards (Deniz Manzaralı, Havuzlu, PDF
+  Hazır, Bölge Uzmanından, Arayışlarımla Eşleşen, Yeni Eklenen, Detay Talebi
+  Açık, Otoparklı). Each has a lucide `icon` name resolved in the UI.
+- `modalCategories` — Portföy Tipi segmented options (Tümü, Konut, Villa/Yalı,
+  Arsa, Ticari, Otel/Turizm, Endüstriyel, Özel Varlık) mapped to `CategoryKey`.
+- `modalTransactionTypes` — İşlem Tipi (Satılık, Kiralık, Sezonluk, Devren
+  Satılık, Devren Kiralık).
+- `livingSpaceCounters` — plus/minus counters (Oda, Salon, Yatak odası, Banyo,
+  WC, Otopark kapasitesi).
+- `areaRangeFields` — Brüt/Net/Arsa/Kapalı/Açık m² minimum inputs.
+- `konutDetailFields` — Konut/Villa detayları (bina yaşı, kat, ısıtma, eşyalı,
+  site içinde, balkon, teras, bahçe, asansör, güvenlik, akıllı ev, jeneratör).
+- `luxuryFeatures` — extended with Orman Manzarası, Sonsuzluk Havuzu, Spa,
+  Sauna, Hamam, Helipad, etc.
+- `landFields` — extended with Villa/Turizm/Ticari İmarlı, Denize Yakın.
+- `commercialFields` — extended with Ciro Bilgisi, Tır Girişi, OSB İçinde.
+- `privacyAccessFields` — Detay Talebi Gerekli, PDF Kilitli, Tam Adres Gizli,
+  Telefon Gizli, Onaylı Erişimim Olanlar, Daha Önce Talep Ettiklerim.
+- `professionalFields` — doğrulanmış, bölge uzmanı, takip edilen, yüksek aktiflik,
+  yüksek yanıt oranı.
+- `matchSearchFields` — Eşleşme & Arayış toggles (arayışlarımla eşleşen, yeni
+  eşleşme, kaydedilen aramalarıma uygun, AI önerili, veri skoru yüksek).
+- `priceHistogram` / `priceBounds` — mock price distribution + per-currency
+  bounds for the range slider.
+- `searchQuickChips` — horizontal quick chip row (modal vs toggle kinds).
