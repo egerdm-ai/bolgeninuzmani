@@ -12,6 +12,7 @@ import { InfoPanel, SurfaceCard } from "@/components/vault/cards";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
 import { RegionExpertCard } from "@/components/vault/region-expert-card";
 import { FilterSection, FilterFieldGrid } from "@/components/vault/filter-section";
+import { FilterModal } from "@/components/vault/filter-modal";
 import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
