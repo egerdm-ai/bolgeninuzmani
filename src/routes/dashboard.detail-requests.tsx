@@ -14,6 +14,7 @@ import {
   Target,
   History,
   Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -85,6 +86,82 @@ function StatusPipeline({ status }: { status: DetailRequestStatus }) {
   );
 }
 
+/** Compact purpose / budget chip used in list rows. */
+function MetaChip({ icon: Icon, label }: { icon: typeof Target; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+      <Icon className="size-3 text-gold" /> {label}
+    </span>
+  );
+}
+
+function RequestListItem({
+  request,
+  active,
+  onSelect,
+}: {
+  request: DetailRequest;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <button
+      onClick={onSelect}
+      className={cn(
+        "group flex w-full gap-3.5 rounded-2xl border p-3 text-left transition-all",
+        active
+          ? "border-gold/50 bg-gold/[0.06] shadow-gold"
+          : "border-border bg-surface hover:border-border-strong hover:bg-surface-2",
+      )}
+    >
+      {/* Property photo + requester avatar */}
+      <div className="relative shrink-0">
+        <img
+          src={request.portfolio.coverImage}
+          alt={request.portfolio.title}
+          className="h-24 w-32 rounded-xl object-cover sm:w-36"
+        />
+        <span className="absolute left-1.5 top-1.5 rounded-md bg-background/80 px-1.5 py-0.5 text-[10px] font-semibold text-gold backdrop-blur-sm">
+          {formatPrice(request.portfolio.price, request.portfolio.currency)}
+        </span>
+        <BrokerAvatar
+          name={request.requester.fullName}
+          size="sm"
+          className="absolute -bottom-1.5 -right-1.5 ring-2 ring-surface"
+        />
+      </div>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1 text-sm font-semibold text-foreground">
+              <span className="truncate">{request.requester.fullName}</span>
+              <ShieldCheck className="size-3.5 shrink-0 text-gold" />
+            </p>
+            <p className="truncate text-xs text-muted-foreground">{request.requester.companyName}</p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <StatusBadge label={requestStatusLabels[request.status]} tone={requestStatusTones[request.status]} />
+            <span className="text-[11px] text-muted-foreground">{request.createdAt}</span>
+          </div>
+        </div>
+
+        <p className="mt-1 flex items-center gap-1 truncate text-xs font-medium text-secondary-foreground">
+          <MapPin className="size-3 shrink-0 text-gold" />
+          <span className="truncate text-foreground">{request.portfolio.title}</span>
+        </p>
+
+        <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">{request.message}</p>
+
+        <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-2">
+          <MetaChip icon={Target} label={request.purpose} />
+          {request.budgetLabel && <MetaChip icon={Wallet} label={request.budgetLabel} />}
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function DetailRequestsInbox() {
   const [requests, setRequests] = useState<DetailRequest[]>(detailRequests);
   const [tab, setTab] = useState<DetailRequestStatus | "all">("all");
@@ -144,40 +221,25 @@ function DetailRequestsInbox() {
         })}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
         {/* List */}
         <div className="space-y-3">
           {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride talep yok.</p>}
           {filtered.map((r) => (
-            <button
+            <RequestListItem
               key={r.id}
-              onClick={() => setSelectedId(r.id)}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-colors",
-                selected?.id === r.id ? "border-gold/50 bg-gold/[0.06]" : "border-border bg-surface hover:border-border-strong",
-              )}
-            >
-              <BrokerAvatar name={r.requester.fullName} size="md" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-semibold text-foreground">{r.requester.fullName}</p>
-                  <ShieldCheck className="size-3.5 shrink-0 text-gold" />
-                </div>
-                <p className="truncate text-xs text-muted-foreground">{r.requester.companyName} · {r.portfolio.title}</p>
-                <p className="mt-1 line-clamp-1 text-xs text-secondary-foreground">{r.message}</p>
-              </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                <StatusBadge label={requestStatusLabels[r.status]} tone={requestStatusTones[r.status]} />
-                <span className="text-[11px] text-muted-foreground">{r.createdAt}</span>
-              </div>
-            </button>
+              request={r}
+              active={selected?.id === r.id}
+              onSelect={() => setSelectedId(r.id)}
+            />
           ))}
         </div>
 
-        {/* Opportunity panel */}
+        {/* Opportunity panel — header + scroll body + sticky action footer */}
         <div className="lg:sticky lg:top-20 lg:self-start">
           {selected && (
-            <SurfaceCard className="space-y-4 p-0">
+            <SurfaceCard className="flex flex-col p-0 lg:max-h-[calc(100vh-7rem)]">
+              {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                   <Target className="size-4 text-gold" /> Fırsat Detayı
@@ -185,32 +247,45 @@ function DetailRequestsInbox() {
                 <StatusBadge label={requestStatusLabels[selected.status]} tone={requestStatusTones[selected.status]} />
               </div>
 
-              <div className="space-y-4 px-5 pb-5">
-                {/* Pipeline */}
-                <StatusPipeline status={selected.status} />
+              {/* Scrollable body */}
+              <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+                {/* Property hero */}
+                <div className="relative overflow-hidden rounded-xl border border-border">
+                  <img
+                    src={selected.portfolio.coverImage}
+                    alt={selected.portfolio.title}
+                    className="h-32 w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-3">
+                    <p className="truncate text-sm font-semibold text-foreground">{selected.portfolio.title}</p>
+                    <div className="mt-0.5 flex items-center justify-between">
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <MapPin className="size-3 text-gold" /> ~{selected.portfolio.regionLabel}
+                      </p>
+                      <p className="text-sm font-semibold text-gold">
+                        {formatPrice(selected.portfolio.price, selected.portfolio.currency)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                <div className="flex items-center gap-3 border-t border-border pt-4">
+                {/* Requester */}
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-3">
                   <BrokerAvatar name={selected.requester.fullName} size="lg" />
-                  <div className="min-w-0">
-                    <p className="flex items-center gap-1 font-semibold text-foreground">{selected.requester.fullName} <ShieldCheck className="size-3.5 text-gold" /></p>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1 font-semibold text-foreground">
+                      {selected.requester.fullName} <ShieldCheck className="size-3.5 text-gold" />
+                    </p>
                     <p className="text-xs text-muted-foreground">{selected.requester.title}</p>
                     <p className="text-xs text-gold">{selected.requester.companyName}</p>
                   </div>
+                  {selected.requester.expertiseRegions[0] && (
+                    <RegionExpertBadge region={selected.requester.expertiseRegions[0]} />
+                  )}
                 </div>
 
-                {selected.requester.expertiseRegions[0] && (
-                  <RegionExpertBadge region={selected.requester.expertiseRegions[0]} />
-                )}
-
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-3">
-                  <img src={selected.portfolio.coverImage} alt="" className="h-12 w-16 rounded-lg object-cover" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-foreground">{selected.portfolio.title}</p>
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="size-3 text-gold" /> ~{selected.portfolio.regionLabel}</p>
-                    <p className="text-xs text-gold">{formatPrice(selected.portfolio.price, selected.portfolio.currency)}</p>
-                  </div>
-                </div>
-
+                {/* Purpose / budget */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-lg bg-surface-2 px-3 py-2">
                     <p className="flex items-center gap-1 text-xs text-muted-foreground"><Target className="size-3 text-gold" /> Amaç</p>
@@ -222,12 +297,18 @@ function DetailRequestsInbox() {
                   </div>
                 </div>
 
+                {/* Message */}
                 <div>
                   <p className="mb-1.5 text-xs text-muted-foreground">Mesaj</p>
                   <p className="rounded-xl border border-border bg-surface-2 p-3 text-sm leading-relaxed text-secondary-foreground">{selected.message}</p>
                 </div>
 
-                {/* Activity / history placeholder */}
+                {/* Pipeline */}
+                <div className="rounded-xl border border-border bg-surface-2 p-3">
+                  <StatusPipeline status={selected.status} />
+                </div>
+
+                {/* History */}
                 <div>
                   <p className="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     <History className="size-3.5 text-gold" /> Geçmiş
@@ -250,21 +331,24 @@ function DetailRequestsInbox() {
                     ))}
                   </ol>
                 </div>
+              </div>
 
-                <div>
-                  <p className="mb-1.5 text-xs text-muted-foreground">Yanıtınız</p>
-                  <Textarea rows={3} placeholder="Talebe bir not yazın..." />
-                </div>
-
+              {/* Sticky action footer — always visible */}
+              <div className="space-y-3 border-t border-border bg-surface/95 p-4 backdrop-blur-sm">
+                <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
+                <Button
+                  onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
+                  className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+                >
+                  <Send className="size-4" /> Bilgi Paylaş
+                  <ChevronRight className="size-4" />
+                </Button>
                 <div className="grid grid-cols-2 gap-2">
                   <Button onClick={() => updateStatus(selected.id, "read", "Yanıt gönderildi")} variant="outline" className="gap-1.5">
                     <Reply className="size-4" /> Yanıtla
                   </Button>
                   <Button onClick={() => updateStatus(selected.id, "rejected", "Talep reddedildi")} variant="outline" className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10">
                     <X className="size-4" /> Reddet
-                  </Button>
-                  <Button onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")} className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-                    <Send className="size-4" /> Bilgi Paylaş
                   </Button>
                 </div>
               </div>
