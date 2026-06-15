@@ -182,42 +182,14 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           />
         </div>
         <div className="px-5 pb-5 sm:px-7 sm:pb-7">
-          <div className="-mt-14 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-end gap-4">
-              <BrokerAvatar
-                name={professional.fullName}
-                src={professional.avatarUrl || undefined}
-                size="xl"
-                className="size-24 text-2xl ring-4 ring-surface"
-              />
-              <div className="pb-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-                    {professional.fullName}
-                  </h1>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
-                    <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
-                  </span>
-                  <MembershipBadge tier={professional.membershipTier} />
-                  {professional.membershipTier === "elite" ? (
-                    <span className="rounded-md bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold ring-1 ring-inset ring-gold/20">
-                      Elite Member
-                    </span>
-                  ) : (
-                    <span className="rounded-md bg-surface-3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
-                      Private Beta Member
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {professional.title} · <span className="text-gold">{professional.companyName}</span>
-                </p>
-                <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="size-3.5 text-gold" /> {professional.location}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="-mt-14 flex items-end justify-between gap-4">
+            <BrokerAvatar
+              name={professional.fullName}
+              src={professional.avatarUrl || undefined}
+              size="xl"
+              className="size-24 text-2xl ring-4 ring-surface"
+            />
+            <div className="flex flex-wrap items-center justify-end gap-2 pb-1">
               <FollowButton id={professional.id} name={professional.fullName} />
               <ShareProfileButton username={professional.username} />
               <Button
@@ -231,6 +203,33 @@ export function ProfessionalProfile({ professional }: { professional: Profession
                 Portföylerini Gör <ArrowRight className="size-4" />
               </Button>
             </div>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
+                {professional.fullName}
+              </h1>
+              <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
+                <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
+              </span>
+              <MembershipBadge tier={professional.membershipTier} />
+              {professional.membershipTier === "elite" ? (
+                <span className="rounded-md bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold ring-1 ring-inset ring-gold/20">
+                  Elite Member
+                </span>
+              ) : (
+                <span className="rounded-md bg-surface-3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
+                  Private Beta Member
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {professional.title} · <span className="text-gold">{professional.companyName}</span>
+            </p>
+            <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+              <MapPin className="size-3.5 text-gold" /> {professional.location}
+            </p>
           </div>
 
           {/* Stats */}
