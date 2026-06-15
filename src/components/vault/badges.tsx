@@ -83,16 +83,34 @@ export function RegionExpertBadge({ region, className }: { region?: string; clas
       )}
     >
       <Award className="size-3" />
-      {region ? `${region} Uzmanı` : "Bölge Uzmanı"}
+      {region ? (region.endsWith("Uzmanı") ? region : `${region} Uzmanı`) : "Bölge Uzmanı"}
     </span>
   );
 }
 
-export function MembershipBadge({ tier }: { tier: "standard" | "pro" | "elite" }) {
-  if (tier === "standard") return null;
+export function MembershipBadge({
+  tier,
+  label,
+  className,
+}: {
+  tier: "standard" | "pro" | "elite";
+  label?: string;
+  className?: string;
+}) {
+  const text = label ?? (tier === "standard" ? null : tier);
+  if (!text) return null;
+  const muted = text.toLocaleLowerCase("tr") === "private beta" || text.toLocaleLowerCase("tr") === "pro";
   return (
-    <span className="inline-flex items-center rounded-md bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-foreground">
-      {tier}
+    <span
+      className={cn(
+        "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+        muted
+          ? "bg-surface-3 text-secondary-foreground ring-1 ring-inset ring-border-strong"
+          : "bg-gradient-gold text-primary-foreground",
+        className,
+      )}
+    >
+      {text}
     </span>
   );
 }

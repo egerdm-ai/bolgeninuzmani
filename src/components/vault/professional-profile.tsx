@@ -8,7 +8,6 @@ import {
   Eye,
   Compass,
   Search,
-  Lock,
   LayoutGrid,
   List,
   RotateCcw,
@@ -17,6 +16,8 @@ import {
   Image as ImageIcon,
   PencilLine,
   Send,
+  Layers,
+  Send as SendIcon,
 } from "lucide-react";
 import type { Portfolio, Professional, ProfessionalActivity } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
@@ -26,13 +27,16 @@ import {
   professionals,
 } from "@/lib/mock/data";
 import { BrokerAvatar } from "./broker-avatar";
-import { MembershipBadge, CategoryChip, FeatureChip } from "./badges";
+import { MembershipBadge, FeatureChip, RegionExpertBadge } from "./badges";
 import { FollowButton } from "./follow-button";
 import { ShareProfileButton } from "./share-profile-button";
 import { ExpertiseMap } from "./expertise-map";
 import { PortfolioCard } from "./portfolio-card";
 import { PortfolioListRow } from "./portfolio-list-row";
-import { ProfessionalCard } from "./professional-card";
+import { ProfessionalMiniCard } from "./professional-mini-card";
+import { ExpertiseRegionCard } from "./expertise-region-card";
+import { LockedContactCard } from "./locked-contact-card";
+import { RegionLinkChip } from "./region-link-chip";
 import { SurfaceCard, InfoPanel } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
 import { Button } from "@/components/ui/button";
@@ -164,14 +168,15 @@ export function ProfessionalProfile({ professional }: { professional: Profession
     { label: "Takipçi", value: formatNumber(followers), icon: Users },
     { label: "Uzmanlık Bölgesi", value: String(professional.expertiseRegions.length), icon: Compass },
     { label: "Son 30 Gün Görüntülenme", value: formatNumber(professional.views30d), icon: Eye },
+    { label: "Eşleşme Sayısı", value: formatNumber(professional.matchCount), icon: Sparkles },
   ];
 
   return (
     <div className="space-y-8">
       {/* A. Hero header */}
       <SurfaceCard className="overflow-hidden p-0">
-        <div className="relative h-44 sm:h-56">
-          <img src={professional.coverImage} alt="" className="size-full object-cover opacity-40" />
+        <div className="relative h-32 sm:h-40">
+          <img src={professional.coverImage} alt="" className="size-full object-cover opacity-45" />
           <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
           <div
             className="absolute inset-0 opacity-40"
@@ -182,7 +187,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           />
         </div>
         <div className="px-5 pb-5 sm:px-7 sm:pb-7">
-          <div className="-mt-14 flex items-end justify-between gap-4">
+          <div className="-mt-12 flex flex-wrap items-end justify-between gap-4">
             <BrokerAvatar
               name={professional.fullName}
               src={professional.avatarUrl || undefined}
@@ -205,7 +210,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className="mt-3">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">
                 {professional.fullName}
@@ -213,16 +218,8 @@ export function ProfessionalProfile({ professional }: { professional: Profession
               <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
                 <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
               </span>
-              <MembershipBadge tier={professional.membershipTier} />
-              {professional.membershipTier === "elite" ? (
-                <span className="rounded-md bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold ring-1 ring-inset ring-gold/20">
-                  Elite Member
-                </span>
-              ) : (
-                <span className="rounded-md bg-surface-3 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-secondary-foreground">
-                  Private Beta Member
-                </span>
-              )}
+              <MembershipBadge tier={professional.membershipTier} label={professional.membershipBadge} />
+              <RegionExpertBadge region={professional.expertBadge} />
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               {professional.title} · <span className="text-gold">{professional.companyName}</span>
@@ -233,7 +230,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           </div>
 
           {/* Stats */}
-          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {stats.map((s) => (
               <div key={s.label} className="rounded-xl border border-border bg-surface-2 px-4 py-3">
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -246,9 +243,9 @@ export function ProfessionalProfile({ professional }: { professional: Profession
         </div>
       </SurfaceCard>
 
-      {/* B. About + contact */}
+      {/* B. About + contact / region-list / quick actions sidebar */}
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <InfoPanel title="Hakkında">
+        <InfoPanel title="Hakkında" className="self-start">
           <p className="text-sm leading-relaxed text-secondary-foreground">{professional.bio}</p>
           <p className="mt-3 rounded-lg border border-gold/20 bg-gold/[0.05] px-4 py-3 text-sm text-secondary-foreground">
             Bu profesyonel özellikle{" "}
@@ -257,27 +254,72 @@ export function ProfessionalProfile({ professional }: { professional: Profession
             </span>{" "}
             bölgesindeki kapalı luxury portföylerde aktiftir.
           </p>
-        </InfoPanel>
-
-        <SurfaceCard className="border-border-strong">
-          <div className="flex items-center gap-2">
-            <Lock className="size-4 text-gold" />
-            <h3 className="text-sm font-semibold text-foreground">İletişim Bilgileri</h3>
-          </div>
-          <div className="mt-3 space-y-2">
-            {["Telefon", "E-posta", "Ofis Adresi"].map((l) => (
-              <div key={l} className="flex items-center justify-between rounded-lg bg-surface-2 px-3 py-2">
-                <span className="text-xs text-muted-foreground">{l}</span>
-                <span className="flex items-center gap-1 text-xs text-secondary-foreground">
-                  <Lock className="size-3" /> Kilitli
-                </span>
-              </div>
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {professional.expertiseRegions.map((r) => (
+              <RegionLinkChip key={r} region={r} withIcon />
             ))}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            İletişim bilgileri yalnızca detay talebi veya karşılıklı onay sonrası paylaşılır.
-          </p>
-        </SurfaceCard>
+        </InfoPanel>
+
+        <div className="space-y-6">
+          <LockedContactCard />
+
+          {/* Bölge Uzmanlığı */}
+          <SurfaceCard>
+            <div className="flex items-center gap-2">
+              <Layers className="size-4 text-gold" />
+              <h3 className="text-sm font-semibold text-foreground">Bölge Uzmanlığı</h3>
+            </div>
+            <p className="mt-2 text-sm text-secondary-foreground">
+              <span className="font-semibold text-gold">{professional.regionListCount}</span> bölge listesinde yer alıyor
+            </p>
+            <div className="mt-3 space-y-1.5">
+              {[...professional.regionExpertise]
+                .sort((a, b) => b.portfolioCount - a.portfolioCount)
+                .map((r) => (
+                  <button
+                    key={r.region}
+                    onClick={() => focusRegion(r.region)}
+                    className="flex w-full items-center justify-between rounded-lg bg-surface-2 px-3 py-2 text-left transition-colors hover:bg-surface-3"
+                  >
+                    <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
+                      <MapPin className="size-3.5 text-gold" /> {r.region}
+                    </span>
+                    <span className="text-xs font-semibold text-foreground">{r.portfolioCount} portföy</span>
+                  </button>
+                ))}
+            </div>
+          </SurfaceCard>
+
+          {/* Quick actions */}
+          <SurfaceCard>
+            <h3 className="text-sm font-semibold text-foreground">Hızlı İşlemler</h3>
+            <div className="mt-3 space-y-2">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() =>
+                  document.getElementById("portfoy-vitrini")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                }
+              >
+                <FolderLock className="size-4 text-gold" /> Portföylerini Gör
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start gap-2">
+                <Link to="/dashboard/regions">
+                  <Compass className="size-4 text-gold" /> Bölge Uzmanlarını Gör
+                </Link>
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() => featured[0] && setRequestTarget(featured[0])}
+              >
+                <SendIcon className="size-4 text-gold" /> Detay Talebi Gönder
+              </Button>
+              <ShareProfileButton username={professional.username} className="w-full justify-start" />
+            </div>
+          </SurfaceCard>
+        </div>
       </div>
 
       {/* C. Expertise regions */}
@@ -291,30 +333,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
         <div className="grid gap-4 lg:grid-cols-[1fr_420px]">
           <div className="grid gap-3 sm:grid-cols-2">
             {professional.regionExpertise.map((r) => (
-              <SurfaceCard key={r.region} className="p-4" hover>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="flex items-center gap-1.5 font-semibold text-foreground">
-                      <MapPin className="size-4 text-gold" /> {r.region}
-                    </h3>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {r.portfolioCount} aktif portföy
-                    </p>
-                  </div>
-                  <CategoryChip label={`${r.portfolioCount}`} />
-                </div>
-                <div className="mt-2.5 flex flex-wrap gap-1.5">
-                  {r.primaryTypes.map((t) => (
-                    <FeatureChip key={t} label={t} />
-                  ))}
-                </div>
-                <button
-                  onClick={() => focusRegion(r.region)}
-                  className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-gold transition-colors hover:text-gold/80"
-                >
-                  Bu bölgede portföyleri gör <ArrowRight className="size-3" />
-                </button>
-              </SurfaceCard>
+              <ExpertiseRegionCard key={r.region} region={r} onFocus={focusRegion} />
             ))}
           </div>
           <ExpertiseMap
@@ -484,7 +503,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Benzer Profesyoneller</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {similar.map((s) => (
-              <ProfessionalCard key={s.id} professional={s} compact />
+              <ProfessionalMiniCard key={s.id} professional={s} />
             ))}
           </div>
         </div>

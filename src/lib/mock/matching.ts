@@ -163,6 +163,12 @@ export function getPortfoliosByRegion(name: string): Portfolio[] {
   );
 }
 
+/** Returns the region slug for a region NAME if a region page exists, else null. */
+export function regionSlugForName(name: string): string | null {
+  const s = slugify(name);
+  return regions.some((r) => r.slug === s) ? s : null;
+}
+
 export function getExpertsForRegion(region: Region): Professional[] {
   const byId = professionals.filter((pro) => region.expertIds.includes(pro.id));
   const byExpertise = professionals.filter((pro) =>

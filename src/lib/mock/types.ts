@@ -44,13 +44,23 @@ export type ProfessionalActivity = {
   time: string;
 };
 
+/** Membership badge label shown on cards & profile (separate from RLS tier). */
+export type MembershipBadgeLabel = "Elite" | "Pro" | "Private Beta";
+
 /** Rich public profile data, extends Broker so it can be used as a portfolio owner. */
 export type Professional = Broker & {
   bio: string;
   coverImage: string;
+  /** Region-expert headline badge, e.g. "Bodrum Uzmanı". */
+  expertBadge: string;
+  membershipBadge: MembershipBadgeLabel;
   followerCount: number;
   views30d: number;
   activePortfolios: number;
+  /** How many curated region lists this professional appears in. */
+  regionListCount: number;
+  /** Mock 30-day match count surfaced on the profile hero. */
+  matchCount: number;
   regionExpertise: RegionExpertise[];
   activity: ProfessionalActivity[];
 };

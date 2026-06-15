@@ -84,3 +84,6 @@ export function ShareProfileButton({
     </Popover>
   );
 }
+
+/** Alias kept for the component naming used across docs / profile pages. */
+export const ProfileShareButton = ShareProfileButton;
