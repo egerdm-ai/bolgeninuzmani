@@ -74,6 +74,7 @@ function Landing() {
       <Hero />
       <ProblemSection />
       <SolutionSection />
+      <ClosedListingSection />
       <HowItWorks />
       <FeaturesSection />
       <AssistantSection />
