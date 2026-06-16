@@ -1,16 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
   Sparkles,
   ArrowUp,
   Search,
-  FolderLock,
   Users,
-  FileText,
-  Calculator,
   BookmarkPlus,
   Bell,
+  Plus,
+  Compass,
+  GitCompareArrows,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
