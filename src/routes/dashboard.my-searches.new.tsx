@@ -16,6 +16,7 @@ import { FilterModal } from "@/components/vault/filter-modal";
 import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
+import { useMySearches } from "@/lib/my-searches-store";
 import { cn } from "@/lib/utils";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import type { MatchResult, NotificationFrequency, PortfolioType, Professional } from "@/lib/mock/types";
