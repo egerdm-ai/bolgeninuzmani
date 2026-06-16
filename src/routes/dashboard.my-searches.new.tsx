@@ -330,9 +330,11 @@ function NewSearch() {
               <span className="flex size-14 items-center justify-center rounded-2xl bg-gold/10 text-gold">
                 <Search className="size-7" />
               </span>
-              <h3 className="mt-4 font-display text-lg font-semibold text-foreground">Eşleşmeler burada görünecek</h3>
+              <h3 className="mt-4 font-display text-lg font-semibold text-foreground">
+                Şu an {previewMatches.length} portföy eşleşiyor
+              </h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun. Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın.
+                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun. Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın; arayış Arayışlarım'a kaydedilir.
               </p>
             </div>
           ) : (
