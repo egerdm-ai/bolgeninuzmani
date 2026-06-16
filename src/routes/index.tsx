@@ -18,15 +18,13 @@ import {
   Search,
   Share2,
   Bell,
-  ScanSearch,
   Network,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/landing/primitives";
 import { LandingHeroProductMockup } from "@/components/landing/hero-mockup";
 import { StepProcessShowcase } from "@/components/landing/step-showcase";
-import { AIAssistantPreview, LockedPreviewPanel } from "@/components/landing/ai-assistant-preview";
-import { RegionWatchPreview } from "@/components/landing/region-watch-preview";
+import { AIAssistantPreview } from "@/components/landing/ai-assistant-preview";
 import { ProfessionalProfilePreview } from "@/components/landing/professional-profile-preview";
 import { ShareStudioPreview } from "@/components/landing/share-studio-preview";
 import { ApplicationForm } from "@/components/landing/application-form";
