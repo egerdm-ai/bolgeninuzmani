@@ -61,7 +61,7 @@ function RegionDetail() {
 
   const portfolios = getPortfoliosByRegion(region.name).filter((p) => p.status === "active");
   const experts = getExpertsForRegion(region);
-  const searches = buyerSearches.filter(
+  const searches = networkSearches.filter(
     (b) => b.region.toLocaleLowerCase("tr-TR") === region.name.toLocaleLowerCase("tr-TR"),
   );
   const watching = isWatching(region.slug);
