@@ -69,7 +69,7 @@ const navLinks = [
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background pb-20 text-foreground lg:pb-0">
       <BackgroundGlow />
       <Navbar />
       <Hero />
