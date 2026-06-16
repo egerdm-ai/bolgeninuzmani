@@ -31,29 +31,27 @@ export function ProfessionalProfilePreview() {
       </div>
 
       <div className="px-5 pb-5">
-        {/* identity row — avatar in its own visible layer, left-aligned */}
-        <div className="-mt-10 flex items-end gap-4">
-          <div className="relative z-10 shrink-0">
-            <img
-              src={portrait}
-              alt="Taylan Hersek"
-              width={1024}
-              height={1024}
-              loading="lazy"
-              className="size-20 rounded-2xl border-4 border-surface object-cover object-top shadow-elegant ring-1 ring-gold/30"
-            />
-            <span className="absolute -bottom-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border-2 border-surface bg-gradient-gold text-primary-foreground">
-              <ShieldCheck className="size-3" />
-            </span>
-          </div>
-          <div className="min-w-0 flex-1 pb-1">
-            <h3 className="truncate font-display text-xl font-semibold text-foreground">
-              Taylan Hersek
-            </h3>
-            <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-              Private Real Estate Advisor · Hersek Estate
-            </p>
-          </div>
+        {/* identity — avatar overlaps cover in its own layer; text sits below */}
+        <div className="relative z-10 -mt-12 inline-flex">
+          <img
+            src={portrait}
+            alt="Taylan Hersek"
+            width={1024}
+            height={1024}
+            loading="lazy"
+            className="size-20 rounded-2xl border-4 border-surface object-cover object-top shadow-elegant ring-1 ring-gold/30"
+          />
+          <span className="absolute -bottom-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border-2 border-surface bg-gradient-gold text-primary-foreground">
+            <ShieldCheck className="size-3" />
+          </span>
+        </div>
+        <div className="mt-3">
+          <h3 className="truncate font-display text-xl font-semibold text-foreground">
+            Taylan Hersek
+          </h3>
+          <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+            Private Real Estate Advisor · <span className="font-medium text-gold">Hersek Estate</span>
+          </p>
         </div>
 
         {/* badges */}
@@ -65,6 +63,7 @@ export function ProfessionalProfilePreview() {
             <MapPin className="size-2.5 text-gold" /> Yalıkavak
           </span>
         </div>
+
 
         {/* stats */}
         <div className="mt-4 grid grid-cols-3 gap-2">
