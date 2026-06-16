@@ -12,6 +12,7 @@ import { SaveSearchModal, type SaveSearchPayload } from "@/components/vault/save
 import { portfolios } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
+import { useMySearches } from "@/lib/my-searches-store";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import type { Portfolio } from "@/lib/mock/types";
 import {
