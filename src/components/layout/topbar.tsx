@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut, CheckCheck } from "lucide-react";
 import { currentUser } from "@/lib/mock/data";
 import { Button } from "@/components/ui/button";
