@@ -29,7 +29,6 @@ import { Route as DashboardRegionsIndexRouteImport } from './routes/dashboard.re
 import { Route as DashboardProfessionalsIndexRouteImport } from './routes/dashboard.professionals.index'
 import { Route as DashboardPortfoliosIndexRouteImport } from './routes/dashboard.portfolios.index'
 import { Route as DashboardMySearchesIndexRouteImport } from './routes/dashboard.my-searches.index'
-import { Route as DashboardSearchesNewRouteImport } from './routes/dashboard.searches.new'
 import { Route as DashboardSearchesIdRouteImport } from './routes/dashboard.searches.$id'
 import { Route as DashboardRegionsSlugRouteImport } from './routes/dashboard.regions.$slug'
 import { Route as DashboardProfessionalsIdRouteImport } from './routes/dashboard.professionals.$id'
@@ -141,11 +140,6 @@ const DashboardMySearchesIndexRoute =
     path: '/my-searches/',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardSearchesNewRoute = DashboardSearchesNewRouteImport.update({
-  id: '/searches/new',
-  path: '/searches/new',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardSearchesIdRoute = DashboardSearchesIdRouteImport.update({
   id: '/searches/$id',
   path: '/searches/$id',
@@ -206,7 +200,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/regions/$slug': typeof DashboardRegionsSlugRoute
   '/dashboard/searches/$id': typeof DashboardSearchesIdRoute
-  '/dashboard/searches/new': typeof DashboardSearchesNewRoute
   '/dashboard/my-searches/': typeof DashboardMySearchesIndexRoute
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
@@ -235,7 +228,6 @@ export interface FileRoutesByTo {
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/regions/$slug': typeof DashboardRegionsSlugRoute
   '/dashboard/searches/$id': typeof DashboardSearchesIdRoute
-  '/dashboard/searches/new': typeof DashboardSearchesNewRoute
   '/dashboard/my-searches': typeof DashboardMySearchesIndexRoute
   '/dashboard/portfolios': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals': typeof DashboardProfessionalsIndexRoute
@@ -266,7 +258,6 @@ export interface FileRoutesById {
   '/dashboard/professionals/$id': typeof DashboardProfessionalsIdRoute
   '/dashboard/regions/$slug': typeof DashboardRegionsSlugRoute
   '/dashboard/searches/$id': typeof DashboardSearchesIdRoute
-  '/dashboard/searches/new': typeof DashboardSearchesNewRoute
   '/dashboard/my-searches/': typeof DashboardMySearchesIndexRoute
   '/dashboard/portfolios/': typeof DashboardPortfoliosIndexRoute
   '/dashboard/professionals/': typeof DashboardProfessionalsIndexRoute
@@ -298,7 +289,6 @@ export interface FileRouteTypes {
     | '/dashboard/professionals/$id'
     | '/dashboard/regions/$slug'
     | '/dashboard/searches/$id'
-    | '/dashboard/searches/new'
     | '/dashboard/my-searches/'
     | '/dashboard/portfolios/'
     | '/dashboard/professionals/'
@@ -327,7 +317,6 @@ export interface FileRouteTypes {
     | '/dashboard/professionals/$id'
     | '/dashboard/regions/$slug'
     | '/dashboard/searches/$id'
-    | '/dashboard/searches/new'
     | '/dashboard/my-searches'
     | '/dashboard/portfolios'
     | '/dashboard/professionals'
@@ -357,7 +346,6 @@ export interface FileRouteTypes {
     | '/dashboard/professionals/$id'
     | '/dashboard/regions/$slug'
     | '/dashboard/searches/$id'
-    | '/dashboard/searches/new'
     | '/dashboard/my-searches/'
     | '/dashboard/portfolios/'
     | '/dashboard/professionals/'
@@ -516,13 +504,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardMySearchesIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/searches/new': {
-      id: '/dashboard/searches/new'
-      path: '/searches/new'
-      fullPath: '/dashboard/searches/new'
-      preLoaderRoute: typeof DashboardSearchesNewRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/searches/$id': {
       id: '/dashboard/searches/$id'
       path: '/searches/$id'
@@ -592,7 +573,6 @@ interface DashboardRouteChildren {
   DashboardProfessionalsIdRoute: typeof DashboardProfessionalsIdRoute
   DashboardRegionsSlugRoute: typeof DashboardRegionsSlugRoute
   DashboardSearchesIdRoute: typeof DashboardSearchesIdRoute
-  DashboardSearchesNewRoute: typeof DashboardSearchesNewRoute
   DashboardMySearchesIndexRoute: typeof DashboardMySearchesIndexRoute
   DashboardPortfoliosIndexRoute: typeof DashboardPortfoliosIndexRoute
   DashboardProfessionalsIndexRoute: typeof DashboardProfessionalsIndexRoute
@@ -619,7 +599,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardProfessionalsIdRoute: DashboardProfessionalsIdRoute,
   DashboardRegionsSlugRoute: DashboardRegionsSlugRoute,
   DashboardSearchesIdRoute: DashboardSearchesIdRoute,
-  DashboardSearchesNewRoute: DashboardSearchesNewRoute,
   DashboardMySearchesIndexRoute: DashboardMySearchesIndexRoute,
   DashboardPortfoliosIndexRoute: DashboardPortfoliosIndexRoute,
   DashboardProfessionalsIndexRoute: DashboardProfessionalsIndexRoute,
