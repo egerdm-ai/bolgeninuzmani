@@ -53,11 +53,14 @@ function NewSearch() {
   const navigate = useNavigate();
   const { isSaved, toggleSave } = useSaved();
   const { open: openRequest } = useDetailRequest();
+  const { create } = useMySearches();
 
   const [prompt, setPrompt] = useState(
     "Bodrum'da deniz manzaralı, 5+1, havuzlu, 100M TL altı villa arıyorum. Yalıkavak ve Türkbükü öncelikli.",
   );
   const [aiSummary, setAiSummary] = useState<string[]>([]);
+  const [name, setName] = useState("Bodrum Deniz Manzaralı Villa");
+  const [clientNote, setClientNote] = useState("A. Yılmaz (VIP)");
   const [filters, setFilters] = useState<FilterState>({
     category: "konut",
     subcategory: "villa",
@@ -70,7 +73,7 @@ function NewSearch() {
   const [niceToHave, setNiceToHave] = useState<string[]>(["akilli_ev"]);
   const [excluded, setExcluded] = useState<string[]>([]);
   const [notify, setNotify] = useState<NotificationFrequency>("instant");
-  const [visibility, setVisibility] = useState<"private" | "network">("network");
+  const [visibility, setVisibility] = useState<"private" | "network">("private");
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
   const [experts, setExperts] = useState<Professional[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
