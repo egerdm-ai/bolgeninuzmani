@@ -18,15 +18,13 @@ import {
   Search,
   Share2,
   Bell,
-  ScanSearch,
   Network,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/landing/primitives";
 import { LandingHeroProductMockup } from "@/components/landing/hero-mockup";
 import { StepProcessShowcase } from "@/components/landing/step-showcase";
-import { AIAssistantPreview, LockedPreviewPanel } from "@/components/landing/ai-assistant-preview";
-import { RegionWatchPreview } from "@/components/landing/region-watch-preview";
+import { AIAssistantPreview } from "@/components/landing/ai-assistant-preview";
 import { ProfessionalProfilePreview } from "@/components/landing/professional-profile-preview";
 import { ShareStudioPreview } from "@/components/landing/share-studio-preview";
 import { ApplicationForm } from "@/components/landing/application-form";
@@ -78,7 +76,6 @@ function Landing() {
       <HowItWorks />
       <FeaturesSection />
       <AssistantSection />
-      <RegionSection />
       <ProfessionalSection />
       <ShareStudioSection />
       <MembershipSection />
@@ -507,39 +504,6 @@ function AssistantSection() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Region tracking                                                     */
-/* ------------------------------------------------------------------ */
-
-function RegionSection() {
-  return (
-    <section className="relative z-10 border-y border-border/60 bg-surface/30">
-      <div className="mx-auto grid items-center gap-12 px-6 py-20 lg:max-w-[1320px] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div>
-          <SectionHeader
-            eyebrow="Bölge Takibi"
-            title="Bölgeleri takip edin, yeni portföy ve arayışlardan haberdar olun."
-            desc="Yalıkavak, Bebek, Riva veya Çeşme gibi bölgeleri takip edin. Yeni portföy, yeni arayış veya yeni bölge uzmanı aktivitesi olduğunda bildirim alın."
-          />
-          <ul className="mt-8 space-y-3">
-            {["Aktif portföy ve arayış yoğunluğu", "Bölge uzmanı sayısı", "Talep yoğunluğu göstergesi", "Yeni eşleşme bildirimleri"].map(
-              (t) => (
-                <li key={t} className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
-                    <ScanSearch className="size-3" />
-                  </span>
-                  {t}
-                </li>
-              ),
-            )}
-          </ul>
-        </div>
-        <RegionWatchPreview />
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /* Professional network                                                */
 /* ------------------------------------------------------------------ */
 
@@ -585,27 +549,26 @@ function ProfessionalSection() {
 function ShareStudioSection() {
   return (
     <section className="relative z-10 border-y border-border/60 bg-surface/30">
-      <div className="mx-auto grid items-center gap-12 px-6 py-20 lg:max-w-[1320px] lg:grid-cols-2">
-        <div>
+      <div className="mx-auto max-w-[1320px] px-6 py-20">
+        <div className="grid items-end gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
           <SectionHeader
             eyebrow="Share Studio"
-            title="WhatsApp mesajı, link ve PDF tek ekrandan hazır."
-            desc="Portföyünüzü kapalı ağ mantığına uygun şekilde paylaşın. Teaser bilgiler açık kalır, kilitli bilgiler detay talebi sonrası açılır."
+            title="Portföyü sadece listelemek değil, profesyonel şekilde paylaşmak."
+            desc="WhatsApp mesajı, paylaşım linki, teaser PDF ve e-mail tek workstation'dan. Teaser bilgiler açık kalır; tam adres, telefon ve belgeler detay talebi sonrası açılır."
           />
-          <div className="mt-8">
-            <LockedPreviewPanel />
-          </div>
           <Button
             asChild
             size="lg"
-            className="mt-8 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            className="shrink-0 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
           >
             <Link to="/dashboard/portfolios">
               Share Studio'yu Gör <ArrowRight className="size-4" />
             </Link>
           </Button>
         </div>
-        <ShareStudioPreview />
+        <div className="mt-12">
+          <ShareStudioPreview />
+        </div>
       </div>
     </section>
   );
