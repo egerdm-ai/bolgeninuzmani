@@ -312,8 +312,8 @@ function NewSearch() {
               </Field>
               <Field label="Görünürlük">
                 <div className="grid grid-cols-2 gap-2">
-                  <VisBtn active={visibility === "private"} onClick={() => setVisibility("private")} icon={Lock} label="Private" />
-                  <VisBtn active={visibility === "network"} onClick={() => setVisibility("network")} icon={Globe} label="Network'e Açık" />
+                  <VisBtn active={visibility === "private"} onClick={() => setVisibility("private")} icon={Lock} label="Sadece Ben" />
+                  <VisBtn active={visibility === "network"} onClick={() => setVisibility("network")} icon={Globe} label="Network'e Kısıtlı Açık" />
                 </div>
               </Field>
               <Button onClick={findMatches} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
