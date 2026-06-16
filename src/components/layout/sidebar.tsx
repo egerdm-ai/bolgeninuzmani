@@ -5,7 +5,6 @@ import {
   Search,
   FolderLock,
   Inbox,
-  Bookmark,
   Sparkles,
   UserRound,
   Settings,
