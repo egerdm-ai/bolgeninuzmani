@@ -113,17 +113,17 @@ function Assistant() {
                 </div>
 
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                  {quickActions.map((a) => (
-                    <button
+                  {navCards.map((a) => (
+                    <Link
                       key={a.label}
-                      onClick={() => ask(a.label)}
+                      to={a.to}
                       className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 px-3 py-3 text-left text-sm text-secondary-foreground transition-colors hover:border-gold/40 hover:text-foreground"
                     >
                       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-gold">
                         <a.icon className="size-4" />
                       </span>
                       <span className="font-medium">{a.label}</span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
 
