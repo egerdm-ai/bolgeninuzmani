@@ -10,6 +10,7 @@ import {
   UserCheck,
   Bookmark,
   KeyRound,
+  Lock,
   Folder,
   AlertTriangle,
   Layers,
