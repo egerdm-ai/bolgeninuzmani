@@ -62,10 +62,17 @@ function compactPrice(n: number) {
 }
 
 function SearchPage() {
+  const { region } = Route.useSearch();
+  const navigate = useNavigate();
   const { isSaved, toggleSave } = useSaved();
+  const { create } = useMySearches();
   const searchable = useMemo(() => portfolios.filter((p) => p.status === "active"), []);
 
-  const [filters, setFilters] = useState<FilterState>({ ...defaultFilterState, modalCategory: "all" });
+  const [filters, setFilters] = useState<FilterState>({
+    ...defaultFilterState,
+    modalCategory: "all",
+    ...(region ? { region } : {}),
+  });
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>(searchable[0]?.id ?? "");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
