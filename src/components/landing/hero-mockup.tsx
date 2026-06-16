@@ -64,7 +64,7 @@ export function LandingHeroProductMockup() {
       />
 
       {/* Floating — AI match score */}
-      <MatchScoreMiniCard className="absolute -right-5 top-4 hidden md:block" />
+      <MatchScoreMiniCard className="absolute -right-5 top-20 hidden md:block" />
 
       {/* Floating — region expert */}
       <RegionExpertMiniCard
