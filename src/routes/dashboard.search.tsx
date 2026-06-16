@@ -34,6 +34,9 @@ import {
 } from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/dashboard/search")({
+  validateSearch: (s: Record<string, unknown>): { region?: string } => ({
+    region: typeof s.region === "string" ? s.region : undefined,
+  }),
   component: SearchPage,
 });
 
