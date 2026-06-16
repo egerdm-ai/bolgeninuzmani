@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   MapPin,
@@ -6,13 +7,12 @@ import {
   Sparkles,
   ArrowRight,
   Bell,
-  BellOff,
   Pencil,
   PauseCircle,
+  PlayCircle,
   Clock,
   User,
 } from "lucide-react";
-import { toast } from "sonner";
 import type {
   BuyerSearch,
   BuyerSearchStatus,
@@ -21,7 +21,17 @@ import type {
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import { StatusBadge, FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { formatPrice, portfolioTypeLabels } from "@/lib/format";
+import { useMySearches } from "@/lib/my-searches-store";
+import { cn } from "@/lib/utils";
 
 export const buyerSearchStatusLabels: Record<BuyerSearchStatus, string> = {
   active: "Aktif",
@@ -40,34 +50,24 @@ export const buyerSearchStatusTones: Record<
   closed: "muted",
 };
 
-function NotifyBadge({ frequency }: { frequency: NotificationFrequency }) {
-  const off = frequency === "off";
-  return (
-    <span
-      className={
-        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset " +
-        (off
-          ? "bg-surface-2 text-muted-foreground ring-border"
-          : "bg-gold/10 text-gold ring-gold/30")
-      }
-    >
-      {off ? <BellOff className="size-3" /> : <Bell className="size-3" />}
-      {notificationFrequencyLabels[frequency]}
-    </span>
-  );
-}
+const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
 
 export function BuyerSearchCard({ search }: { search: BuyerSearch }) {
+  const { setStatus, setNotify } = useMySearches();
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [freq, setFreq] = useState<NotificationFrequency>(search.notify ?? "instant");
   const notify = search.notify ?? "instant";
+  const isClosed = search.status === "closed";
+  const newMatches = search.status === "matched" ? Math.min(search.matchCount, 2) : 0;
 
   return (
     <div className="flex flex-col rounded-2xl border border-border bg-gradient-surface p-5 shadow-elegant transition-colors hover:border-border-strong">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <Link
-            to="/dashboard/searches/$id"
+            to="/dashboard/my-searches/$id"
             params={{ id: search.id }}
-            className="font-semibold text-foreground transition-colors hover:text-gold"
+            className="font-display text-base font-semibold text-foreground transition-colors hover:text-gold"
           >
             {search.title}
           </Link>
@@ -82,13 +82,23 @@ export function BuyerSearchCard({ search }: { search: BuyerSearch }) {
         />
       </div>
 
+      {/* Region chips */}
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground ring-1 ring-inset ring-border">
+          <MapPin className="size-3 text-gold" /> {search.region}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-[11px] font-medium text-secondary-foreground ring-1 ring-inset ring-border">
+          {search.city}
+        </span>
+      </div>
+
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <Meta icon={MapPin} label={`${search.region} / ${search.city}`} />
         <Meta icon={Home} label={portfolioTypeLabels[search.type]} />
         <Meta
           icon={Wallet}
           label={`${formatPrice(search.budgetMin, search.currency)} – ${formatPrice(search.budgetMax, search.currency)}`}
         />
+        <Meta icon={Bell} label={notificationFrequencyLabels[notify]} />
         <Meta icon={Clock} label={`Son eşleşme: ${search.lastMatchAt ?? "—"}`} />
       </div>
 
@@ -96,41 +106,89 @@ export function BuyerSearchCard({ search }: { search: BuyerSearch }) {
         {search.mustHave.slice(0, 3).map((f) => (
           <FeatureChip key={f} label={f} />
         ))}
-        <NotifyBadge frequency={notify} />
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+      {/* Match counters */}
+      <div className="mt-4 flex items-center gap-4 border-t border-border pt-3">
         <span className="flex items-center gap-1.5 text-sm">
           <Sparkles className="size-4 text-gold" />
           <span className="font-semibold text-gold">{search.matchCount}</span>
           <span className="text-muted-foreground">eşleşme</span>
         </span>
-        <div className="flex items-center gap-1.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
-            aria-label="Düzenle"
-            onClick={() => toast.info("Arayış düzenleme (mock)", { description: search.title })}
-          >
-            <Pencil className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
-            aria-label="Pasifleştir"
-            onClick={() => toast.info("Arayış pasifleştirildi (mock)", { description: search.title })}
-          >
-            <PauseCircle className="size-4" />
-          </Button>
-          <Button asChild size="sm" className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-            <Link to="/dashboard/searches/$id" params={{ id: search.id }}>
-              Eşleşmeleri Gör <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
+        {newMatches > 0 && (
+          <span className="rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success ring-1 ring-inset ring-success/25">
+            {newMatches} yeni
+          </span>
+        )}
       </div>
+
+      {/* Actions */}
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <Button asChild size="sm" className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Link to="/dashboard/my-searches/$id" params={{ id: search.id }}>
+            Eşleşmeleri Gör <ArrowRight className="size-4" />
+          </Link>
+        </Button>
+        <Button asChild size="sm" variant="outline" className="gap-1.5">
+          <Link to="/dashboard/my-searches/$id" params={{ id: search.id }} search={{ mode: "edit" }}>
+            <Pencil className="size-3.5" /> Düzenle
+          </Link>
+        </Button>
+        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setNotifyOpen(true)}>
+          <Bell className="size-3.5" /> Bildirimler
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className={cn("col-span-2 gap-1.5", !isClosed && "text-muted-foreground")}
+          onClick={() => setStatus(search.id, isClosed ? "active" : "closed")}
+        >
+          {isClosed ? <PlayCircle className="size-3.5" /> : <PauseCircle className="size-3.5" />}
+          {isClosed ? "Yeniden Aktifleştir" : "Pasifleştir"}
+        </Button>
+      </div>
+
+      {/* Notification settings modal */}
+      <Dialog open={notifyOpen} onOpenChange={setNotifyOpen}>
+        <DialogContent className="border-border-strong bg-surface">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl">Bildirimleri Yönet</DialogTitle>
+            <DialogDescription>
+              {search.title} için yeni eşleşme bildirim sıklığını seçin.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 py-2">
+            {freqOptions.map((f) => (
+              <button
+                key={f}
+                onClick={() => setFreq(f)}
+                className={cn(
+                  "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
+                  freq === f
+                    ? "border-gold/40 bg-gold/10 text-gold"
+                    : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {notificationFrequencyLabels[f]}
+              </button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNotifyOpen(false)}>
+              İptal
+            </Button>
+            <Button
+              className="bg-gradient-gold text-primary-foreground hover:opacity-90"
+              onClick={() => {
+                setNotify(search.id, freq);
+                setNotifyOpen(false);
+              }}
+            >
+              Kaydet
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
