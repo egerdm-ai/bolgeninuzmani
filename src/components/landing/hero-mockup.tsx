@@ -95,7 +95,7 @@ export function LandingHeroProductMockup() {
       </GlassCard>
 
       {/* Floating — notification */}
-      <NotificationMiniCard className="absolute right-8 -top-6 hidden xl:flex" />
+      <NotificationMiniCard className="absolute -left-6 -top-6 hidden xl:flex" />
     </div>
   );
 }
