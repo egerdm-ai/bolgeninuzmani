@@ -92,22 +92,50 @@ function NewSearch() {
     toast.success("AI filtreleri oluşturdu", { description: parsed.summary.join(" · ") });
   };
 
+  const buildQuery = () => ({
+    region: (filters.region as string) ?? "",
+    city: (filters.city as string) ?? "",
+    type: toPortfolioType(category, filters.subcategory as string),
+    budgetMin: Number(filters.priceMin ?? 0),
+    budgetMax: Number(filters.priceMax ?? 0) || Number.MAX_SAFE_INTEGER,
+    rooms: (filters.rooms as string) ?? "",
+    mustHave: mustHave.map(labelFor),
+  });
+
+  // Live preview match count as the user edits the form.
+  const previewMatches = useMemo(
+    () => getMatchesForSearch(buildQuery()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filters, mustHave],
+  );
+
   const findMatches = () => {
-    const q = {
-      region: (filters.region as string) ?? "",
-      city: (filters.city as string) ?? "",
-      type: toPortfolioType(category, filters.subcategory as string),
-      budgetMin: Number(filters.priceMin ?? 0),
-      budgetMax: Number(filters.priceMax ?? 0) || Number.MAX_SAFE_INTEGER,
-      rooms: (filters.rooms as string) ?? "",
-      mustHave: mustHave.map(labelFor),
-    };
+    const q = buildQuery();
     const results = getMatchesForSearch(q);
     setMatches(results);
     setExperts(getExpertsForSearch(q));
+    const id = create({
+      title: name || "Yeni Arayış",
+      clientLabel: clientNote || undefined,
+      notes: clientNote || prompt,
+      region: q.region,
+      city: q.city,
+      type: q.type,
+      budgetMin: filters.priceMin ? Number(filters.priceMin) : undefined,
+      budgetMax: filters.priceMax ? Number(filters.priceMax) : undefined,
+      currency: (filters.currency as "TRY" | "USD" | "EUR") ?? "TRY",
+      rooms: (filters.rooms as string) || undefined,
+      mustHave: mustHave.map(labelFor),
+      niceToHave: niceToHave.map(labelFor),
+      notify,
+      visibility,
+      matchCount: results.length,
+      status: results.length > 0 ? "matched" : "active",
+    });
     toast.success("Arayış kaydedildi", {
       description: `${results.length} uygun portföy bulundu. Bildirim: ${notificationFrequencyLabels[notify]}.`,
     });
+    navigate({ to: "/dashboard/my-searches/$id", params: { id } });
   };
 
   const detailFields = useMemo(() => {
