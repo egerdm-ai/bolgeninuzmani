@@ -549,27 +549,26 @@ function ProfessionalSection() {
 function ShareStudioSection() {
   return (
     <section className="relative z-10 border-y border-border/60 bg-surface/30">
-      <div className="mx-auto grid items-center gap-12 px-6 py-20 lg:max-w-[1320px] lg:grid-cols-2">
-        <div>
+      <div className="mx-auto max-w-[1320px] px-6 py-20">
+        <div className="grid items-end gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
           <SectionHeader
             eyebrow="Share Studio"
-            title="WhatsApp mesajı, link ve PDF tek ekrandan hazır."
-            desc="Portföyünüzü kapalı ağ mantığına uygun şekilde paylaşın. Teaser bilgiler açık kalır, kilitli bilgiler detay talebi sonrası açılır."
+            title="Portföyü sadece listelemek değil, profesyonel şekilde paylaşmak."
+            desc="WhatsApp mesajı, paylaşım linki, teaser PDF ve e-mail tek workstation'dan. Teaser bilgiler açık kalır; tam adres, telefon ve belgeler detay talebi sonrası açılır."
           />
-          <div className="mt-8">
-            <LockedPreviewPanel />
-          </div>
           <Button
             asChild
             size="lg"
-            className="mt-8 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            className="shrink-0 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
           >
             <Link to="/dashboard/portfolios">
               Share Studio'yu Gör <ArrowRight className="size-4" />
             </Link>
           </Button>
         </div>
-        <ShareStudioPreview />
+        <div className="mt-12">
+          <ShareStudioPreview />
+        </div>
       </div>
     </section>
   );
