@@ -5,7 +5,7 @@ import type {
   Professional,
   Region,
 } from "./types";
-import { portfolios, professionals, currentUser } from "./data";
+import { portfolios, professionals, currentUser, myPortfolios } from "./data";
 import { portfolioTypeLabels } from "@/lib/format";
 
 // ---------------------------------------------------------------------------
