@@ -373,8 +373,8 @@ function NewSearch() {
                 </div>
               )}
 
-              <Button onClick={() => navigate({ to: "/dashboard/searches" })} variant="outline" className="w-full">
-                Arayışlara dön
+              <Button onClick={() => navigate({ to: "/dashboard/my-searches" })} variant="outline" className="w-full">
+                Arayışlarım'a dön
               </Button>
             </>
           )}
