@@ -14,7 +14,7 @@ import type { Portfolio, Professional } from "@/lib/mock/types";
 import { formatNumber } from "@/lib/format";
 import { getPortfoliosByProfessional, professionals } from "@/lib/mock/data";
 import { getBuyerSearchesByProfessional } from "@/lib/mock/matching";
-import { BrokerAvatar } from "./broker-avatar";
+import { ProfessionalIdentityHeader } from "./professional-identity-header";
 import { MembershipBadge, RegionExpertBadge } from "./badges";
 import { FollowButton } from "./follow-button";
 import { ShareProfileButton } from "./share-profile-button";
