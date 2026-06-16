@@ -185,10 +185,10 @@ function NewSearch() {
           <InfoPanel title="Arayış Bilgileri">
             <div className="space-y-3">
               <Field label="Arayış adı">
-                <Input defaultValue="Bodrum Deniz Manzaralı Villa" placeholder="örn. Bodrum Deniz Manzaralı Villa" />
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="örn. Bodrum Deniz Manzaralı Villa" />
               </Field>
               <Field label="Müşteri notu">
-                <Input defaultValue="A. Yılmaz (VIP)" placeholder="Müşteri etiketi / takma ad" />
+                <Input value={clientNote} onChange={(e) => setClientNote(e.target.value)} placeholder="Müşteri etiketi / takma ad" />
               </Field>
 
               <div className="flex items-center justify-between pt-1">
