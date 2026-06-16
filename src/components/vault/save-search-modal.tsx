@@ -105,7 +105,7 @@ export function SaveSearchModal({
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             onClick={() => onSave({ name, note, frequency, notifyNewMatches })}
           >
-            <BookmarkPlus className="size-4" /> Arayışı Kaydet
+            <BookmarkPlus className="size-4" /> Arayışlarım'a Kaydet
           </Button>
         </DialogFooter>
       </DialogContent>
