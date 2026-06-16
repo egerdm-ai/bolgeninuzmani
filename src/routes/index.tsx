@@ -27,6 +27,7 @@ import { StepProcessShowcase } from "@/components/landing/step-showcase";
 import { AIAssistantPreview } from "@/components/landing/ai-assistant-preview";
 import { ProfessionalProfilePreview } from "@/components/landing/professional-profile-preview";
 import { ShareStudioPreview } from "@/components/landing/share-studio-preview";
+import { ClosedListingShowcase } from "@/components/landing/closed-listing-showcase";
 import { ApplicationForm } from "@/components/landing/application-form";
 import { FaqSection } from "@/components/landing/faq";
 
