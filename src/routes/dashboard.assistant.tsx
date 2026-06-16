@@ -32,12 +32,13 @@ export const Route = createFileRoute("/dashboard/assistant")({
   component: Assistant,
 });
 
-const quickActions = [
-  { label: "Portföyden Arayış Eşleştir", icon: FolderLock },
-  { label: "Arayıştan Portföy Bul", icon: Search },
-  { label: "Bölge Uzmanı Bul", icon: Users },
-  { label: "PDF & Paylaşım Hazırla", icon: FileText },
-  { label: "Portföy Değerlemesi Oluştur", icon: Calculator },
+const navCards = [
+  { label: "Portföy Ara", icon: Search, to: "/dashboard/search" as const },
+  { label: "Yeni Arayış Oluştur", icon: Plus, to: "/dashboard/my-searches/new" as const },
+  { label: "Arayışlarımı Yönet", icon: BookmarkPlus, to: "/dashboard/my-searches" as const },
+  { label: "Network Arayışlarını Keşfet", icon: Compass, to: "/dashboard/searches" as const },
+  { label: "Portföyümle Arayış Eşleştir", icon: GitCompareArrows, to: "/dashboard/matches" as const },
+  { label: "Bölge Uzmanı Bul", icon: Users, to: "/dashboard/professionals" as const },
 ];
 
 const promptExamples = [
