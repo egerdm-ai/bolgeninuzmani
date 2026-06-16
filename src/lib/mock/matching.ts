@@ -645,6 +645,26 @@ export function getMatchesForSearch(q: MatchInput): MatchResult[] {
     .sort((a, b) => b.score - a.score);
 }
 
+/** Matches restricted to the current user's OWN portfolios (for network searches). */
+export function getMyMatchesForSearch(q: MatchInput): MatchResult[] {
+  const mine = new Set(myPortfolios.map((p) => p.id));
+  return getMatchesForSearch(q).filter((m) => mine.has(m.portfolio.id));
+}
+
+/** Convenience: my matching portfolios for a given network buyer search. */
+export function getMyMatchesForBuyerSearch(bs: BuyerSearch): MatchResult[] {
+  return getMyMatchesForSearch({
+    region: bs.region,
+    city: bs.city,
+    type: bs.type,
+    budgetMin: bs.budgetMin,
+    budgetMax: bs.budgetMax,
+    rooms: bs.rooms,
+    minM2: bs.minM2,
+    mustHave: bs.mustHave,
+  });
+}
+
 export function getExpertsForSearch(q: MatchInput): Professional[] {
   const regionKey = q.region.toLocaleLowerCase("tr-TR");
   return professionals
@@ -658,9 +678,9 @@ export function getExpertsForSearch(q: MatchInput): Professional[] {
     .slice(0, 4);
 }
 
-/** Buyer searches (across the network) that a given portfolio matches. */
+/** Network buyer searches (created by others) that a given portfolio matches. */
 export function getMatchingSearchesForPortfolio(p: Portfolio): BuyerSearch[] {
-  return buyerSearches.filter((bs) => {
+  return networkSearches.filter((bs) => {
     const m = scorePortfolio(p, {
       region: bs.region,
       city: bs.city,
