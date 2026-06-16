@@ -94,68 +94,53 @@ export function ProfessionalProfile({ professional }: { professional: Profession
   return (
     <div className="space-y-6">
       {/* A. Compact hero */}
-      <SurfaceCard className="overflow-hidden p-0">
-        <div className="relative h-24 sm:h-28">
-          <img src={professional.coverImage} alt="" className="size-full object-cover opacity-45" />
-          <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/70 to-transparent" />
-          <div
-            className="absolute inset-0 opacity-40"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 85% 15%, oklch(0.78 0.12 85 / 0.18), transparent 45%)",
-            }}
-          />
-        </div>
-        <div className="px-5 pb-5 sm:px-7 sm:pb-6">
-          <div className="relative z-10 -mt-10 flex flex-wrap items-end justify-between gap-4">
-            <div className="flex items-end gap-4">
-              <BrokerAvatar
-                name={professional.fullName}
-                src={professional.avatarUrl || undefined}
-                size="xl"
-                className="size-20 text-2xl ring-4 ring-surface"
-              />
-              <div className="pb-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                    {professional.fullName}
-                  </h1>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
-                    <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
-                  </span>
-                  <MembershipBadge tier={professional.membershipTier} label={professional.membershipBadge} />
-                  <RegionExpertBadge region={professional.expertBadge} />
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {professional.title} · <span className="text-gold">{professional.companyName}</span>
-                </p>
-                <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="size-3.5 text-gold" /> {professional.location}
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 pb-1">
+      <SurfaceCard className="group overflow-hidden p-0 pb-5 sm:pb-6">
+        <ProfessionalIdentityHeader
+          variant="hero"
+          name={professional.fullName}
+          title={professional.title}
+          company={professional.companyName}
+          location={professional.location}
+          avatarSrc={professional.avatarUrl || undefined}
+          coverSrc={professional.coverImage}
+          nameSlot={
+            <h1 className="truncate font-display text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {professional.fullName}
+            </h1>
+          }
+          badges={
+            <>
+              <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
+                <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
+              </span>
+              <MembershipBadge tier={professional.membershipTier} label={professional.membershipBadge} />
+              <RegionExpertBadge region={professional.expertBadge} />
+            </>
+          }
+          actions={
+            <>
               <FollowButton id={professional.id} name={professional.fullName} />
               <ShareProfileButton username={professional.username} />
               <HeroPortfolioCta onClick={showPortfolios} />
-            </div>
-          </div>
+            </>
+          }
+        />
 
-          {/* Hero stats */}
-          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-            {stats.map((s) => (
-              <div key={s.label} className="rounded-xl border border-border bg-surface-2 px-3 py-2.5">
-                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <s.icon className="size-3.5 text-gold" /> {s.label}
-                </span>
-                <span className="mt-0.5 block font-display text-xl font-semibold text-foreground">
-                  {s.value}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Hero stats */}
+        <div className="mt-5 grid grid-cols-2 gap-2.5 px-5 sm:grid-cols-3 sm:px-7 lg:grid-cols-5">
+          {stats.map((s) => (
+            <div key={s.label} className="rounded-xl border border-border bg-surface-2 px-3 py-2.5">
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <s.icon className="size-3.5 text-gold" /> {s.label}
+              </span>
+              <span className="mt-0.5 block font-display text-xl font-semibold text-foreground">
+                {s.value}
+              </span>
+            </div>
+          ))}
         </div>
       </SurfaceCard>
+
 
       {/* B. Tabs + content + sidebar */}
       <div id="profile-content" className="scroll-mt-20 grid gap-6 lg:grid-cols-[1fr_320px]">
