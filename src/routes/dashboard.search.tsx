@@ -245,7 +245,7 @@ function SearchPage() {
               onClick={() => (saved ? toast.info("Bu arayış zaten kaydedildi") : setSaveOpen(true))}
             >
               {saved ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
-              {saved ? "Arayış Kaydedildi" : "Arayış Olarak Kaydet"}
+              {saved ? "Arayışlarım'a Kaydedildi" : "Arayışlarım'a Kaydet"}
             </Button>
           </div>
         </div>
