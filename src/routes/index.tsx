@@ -76,7 +76,6 @@ function Landing() {
       <HowItWorks />
       <FeaturesSection />
       <AssistantSection />
-      <RegionSection />
       <ProfessionalSection />
       <ShareStudioSection />
       <MembershipSection />
@@ -499,39 +498,6 @@ function AssistantSection() {
           </div>
         </div>
         <AIAssistantPreview />
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Region tracking                                                     */
-/* ------------------------------------------------------------------ */
-
-function RegionSection() {
-  return (
-    <section className="relative z-10 border-y border-border/60 bg-surface/30">
-      <div className="mx-auto grid items-center gap-12 px-6 py-20 lg:max-w-[1320px] lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-        <div>
-          <SectionHeader
-            eyebrow="Bölge Takibi"
-            title="Bölgeleri takip edin, yeni portföy ve arayışlardan haberdar olun."
-            desc="Yalıkavak, Bebek, Riva veya Çeşme gibi bölgeleri takip edin. Yeni portföy, yeni arayış veya yeni bölge uzmanı aktivitesi olduğunda bildirim alın."
-          />
-          <ul className="mt-8 space-y-3">
-            {["Aktif portföy ve arayış yoğunluğu", "Bölge uzmanı sayısı", "Talep yoğunluğu göstergesi", "Yeni eşleşme bildirimleri"].map(
-              (t) => (
-                <li key={t} className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-gold/15 text-gold">
-                    <ScanSearch className="size-3" />
-                  </span>
-                  {t}
-                </li>
-              ),
-            )}
-          </ul>
-        </div>
-        <RegionWatchPreview />
       </div>
     </section>
   );
