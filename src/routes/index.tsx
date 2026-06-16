@@ -10,6 +10,7 @@ import {
   UserCheck,
   Bookmark,
   KeyRound,
+  Lock,
   Folder,
   AlertTriangle,
   Layers,
@@ -27,6 +28,7 @@ import { StepProcessShowcase } from "@/components/landing/step-showcase";
 import { AIAssistantPreview } from "@/components/landing/ai-assistant-preview";
 import { ProfessionalProfilePreview } from "@/components/landing/professional-profile-preview";
 import { ShareStudioPreview } from "@/components/landing/share-studio-preview";
+import { ClosedListingShowcase } from "@/components/landing/closed-listing-showcase";
 import { ApplicationForm } from "@/components/landing/application-form";
 import { FaqSection } from "@/components/landing/faq";
 
@@ -73,6 +75,7 @@ function Landing() {
       <Hero />
       <ProblemSection />
       <SolutionSection />
+      <ClosedListingSection />
       <HowItWorks />
       <FeaturesSection />
       <AssistantSection />
@@ -345,7 +348,71 @@ function SolutionSection() {
 }
 
 /* ------------------------------------------------------------------ */
-/* How it works                                                        */
+/* Closed listings / portfolio showcase                                */
+/* ------------------------------------------------------------------ */
+
+const closedListingPoints = [
+  {
+    icon: Lock,
+    title: "Kapalı ilan formatı",
+    desc: "Her kapalı portföy, dağınık mesaj yerine tutarlı ve premium bir vitrin sayfasında sunulur.",
+  },
+  {
+    icon: KeyRound,
+    title: "Kontrollü görünürlük",
+    desc: "Teaser bilgiler ağ içinde açık; tam adres, malik, telefon ve belgeler talep sonrası açılır.",
+  },
+  {
+    icon: UserCheck,
+    title: "Detay talebi akışı",
+    desc: "İlgilenen profesyonel tek tıkla detay talebi gönderir, siz onayladıkça bilgiler açılır.",
+  },
+  {
+    icon: Share2,
+    title: "Profesyonel sunum",
+    desc: "Aynı vitrin paylaşılabilir link, teaser PDF ve WhatsApp önizlemesiyle uyumludur.",
+  },
+];
+
+function ClosedListingSection() {
+  return (
+    <section className="relative z-10 mx-auto max-w-[1320px] px-6 py-20">
+      <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+        <div>
+          <SectionHeader
+            eyebrow="Portföy Vitrini"
+            title="Kapalı ilanlar, dağınık mesajlar yerine düzenli bir vitrinde."
+            desc="Kapalı portföyler artık WhatsApp dizilerinde kaybolmaz. VAULT içinde temiz, premium ve kontrollü bir formatta sunulur — herkes aynı profesyonel görünümü görür."
+          />
+          <ul className="mt-8 space-y-3">
+            {closedListingPoints.map((p) => (
+              <li key={p.title} className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold">
+                  <p.icon className="size-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{p.title}</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button
+              asChild
+              size="lg"
+              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/dashboard/search">Vitrini Keşfet <ArrowRight className="size-4" /></Link>
+            </Button>
+          </div>
+        </div>
+        <ClosedListingShowcase />
+      </div>
+    </section>
+  );
+}
+
 /* ------------------------------------------------------------------ */
 
 function HowItWorks() {

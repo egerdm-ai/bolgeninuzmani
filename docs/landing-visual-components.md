@@ -35,12 +35,26 @@ existing local assets + Unsplash portraits). All live under
   Çeşme) with watch toggle and metrics grid.
 
 ## professional-profile-preview.tsx
-- `ProfessionalProfilePreview` — cover + portrait + Bodrum Uzmanı badge + tabs +
-  portfolio catalog list + expertise regions + locked contact + follow button.
+- `ProfessionalProfilePreview` — cover banner + **fully-visible avatar in its own
+  z-10 layer** (left-aligned rounded portrait, `object-top`, no cover collision) +
+  identity (name/role/company) + Doğrulanmış/Bölge Uzmanı badges + 3-stat grid
+  (aktif portföy / takipçi / bölge) + expertise region chips + 2 portfolio rows +
+  CTA hierarchy (Portföylerini Gör / Profili Gör / Takip Et).
+- Uses generated `@/assets/professional-portrait.jpg` (centered face) to fix the
+  previous cropped/hidden-avatar issue.
+
+## closed-listing-showcase.tsx
+- `ClosedListingShowcase` — premium "kapalı ilan" / portfolio detail mockup.
+  Hero image (`@/assets/listing-hero.jpg`) + Kapalı İlan badge + save/share actions
+  + title/location/price/type overlay + 4 key-fact tiles (oda/m²/arsa/tip) + teaser
+  description + gallery thumbnails with locked "+12" tile + feature chips + controlled
+  visibility block (tam adres/malik/telefon/tapu = talep sonrası) + Detay Talebi CTA.
 
 ## share-studio-preview.tsx
-- `ShareStudioPreview` — WhatsApp preview, teaser PDF cover, public link, QR placeholder,
-  locked-info warning, share analytics mini stats.
+- `ShareStudioPreview` — 3-column sharing workstation.
+  - Left: WhatsApp rich-link teaser card (thumbnail, title, location/rooms/m², price, url) + message bubble.
+  - Center: message composer (with caret) + 4 channel toggles (WhatsApp/Link/PDF/E-mail, active states) + "Paylaşımı Oluştur" CTA.
+  - Right: share link card + QR + analytics tiles (görüntülenme/PDF indirme/detay talebi) + controlled-access rules + pending-requests row.
 
 ## application-form.tsx
 - `ApplicationForm` — waitlist form with local mock submit + success state.

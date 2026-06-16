@@ -1,21 +1,21 @@
-import { MapPin, Lock, Star, ShieldCheck, Folder, Users } from "lucide-react";
+import { MapPin, Lock, Star, ShieldCheck, Folder, Users, Network } from "lucide-react";
 import { propertyImages } from "@/lib/mock/data";
 import profileCover from "@/assets/profile-cover.jpg";
+import portrait from "@/assets/professional-portrait.jpg";
 import { GlassCard } from "./primitives";
-
-const PORTRAIT =
-  "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&crop=faces&w=240&h=240&q=80";
 
 /**
  * ProfessionalProfilePreview — premium luxury-network professional card.
- * Cover + fully-visible centered portrait, identity, stats, expertise chips,
- * portfolio catalog and CTA hierarchy.
+ *
+ * Composition: cover banner + a fully-visible avatar that sits in its OWN
+ * layer below the cover edge (z-10) so the face is never clipped or hidden
+ * behind the cover. Identity, stats, expertise chips, portfolio rows + CTAs.
  */
 export function ProfessionalProfilePreview() {
   return (
     <GlassCard className="overflow-hidden">
-      {/* cover */}
-      <div className="relative h-28">
+      {/* cover banner */}
+      <div className="relative h-24">
         <img
           src={profileCover}
           alt="Kapak"
@@ -24,32 +24,46 @@ export function ProfessionalProfilePreview() {
           loading="lazy"
           className="size-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/30 to-transparent" />
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-md border border-gold/30 bg-background/70 px-2 py-0.5 text-[10px] font-medium text-gold backdrop-blur">
+          <ShieldCheck className="size-3" /> Doğrulanmış
+        </span>
       </div>
 
       <div className="px-5 pb-5">
-        {/* portrait — fully visible, framed avatar over the cover edge */}
-        <div className="-mt-12 flex flex-col items-center text-center">
-          <img
-            src={PORTRAIT}
-            alt="Taylan Hersek"
-            className="size-24 rounded-full border-4 border-surface object-cover shadow-elegant ring-1 ring-gold/30"
-          />
-          <div className="mt-3 flex items-center gap-2">
-            <h3 className="font-display text-xl font-semibold text-foreground">Taylan Hersek</h3>
-            <ShieldCheck className="size-4 text-gold" />
-          </div>
-          <p className="mt-0.5 text-[12px] text-muted-foreground">
-            Private Real Estate Advisor · Hersek Estate
-          </p>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-md border border-gold/30 bg-gold/10 px-2 py-0.5 text-[10.5px] font-medium text-gold">
-              <Star className="size-2.5" /> Bodrum Bölge Uzmanı
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-md border border-border-strong bg-surface-2/60 px-2 py-0.5 text-[10.5px] text-foreground">
-              <MapPin className="size-2.5 text-gold" /> Yalıkavak
+        {/* identity row — avatar in its own visible layer, left-aligned */}
+        <div className="-mt-10 flex items-end gap-4">
+          <div className="relative z-10 shrink-0">
+            <img
+              src={portrait}
+              alt="Taylan Hersek"
+              width={1024}
+              height={1024}
+              loading="lazy"
+              className="size-20 rounded-2xl border-4 border-surface object-cover object-top shadow-elegant ring-1 ring-gold/30"
+            />
+            <span className="absolute -bottom-1.5 -right-1.5 flex size-6 items-center justify-center rounded-full border-2 border-surface bg-gradient-gold text-primary-foreground">
+              <ShieldCheck className="size-3" />
             </span>
           </div>
+          <div className="min-w-0 flex-1 pb-1">
+            <h3 className="truncate font-display text-xl font-semibold text-foreground">
+              Taylan Hersek
+            </h3>
+            <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
+              Private Real Estate Advisor · Hersek Estate
+            </p>
+          </div>
+        </div>
+
+        {/* badges */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-md border border-gold/30 bg-gold/10 px-2 py-0.5 text-[10.5px] font-medium text-gold">
+            <Star className="size-2.5" /> Bodrum Bölge Uzmanı
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-md border border-border-strong bg-surface-2/60 px-2 py-0.5 text-[10.5px] text-foreground">
+            <MapPin className="size-2.5 text-gold" /> Yalıkavak
+          </span>
         </div>
 
         {/* stats */}
@@ -57,7 +71,7 @@ export function ProfessionalProfilePreview() {
           {[
             { icon: Folder, value: "24", label: "Aktif portföy" },
             { icon: Users, value: "1.2K", label: "Takipçi" },
-            { icon: MapPin, value: "5", label: "Bölge" },
+            { icon: Network, value: "5", label: "Bölge" },
           ].map((s) => (
             <div
               key={s.label}
