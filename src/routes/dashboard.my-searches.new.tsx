@@ -149,8 +149,8 @@ function NewSearch() {
     <PageContainer className="space-y-6">
       <PageHeader
         title="Yeni Arayış Oluştur"
-        subtitle="Müşterinizin kriterlerini girin, VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
-        breadcrumbs={[{ label: "Arayışlar", to: "/dashboard/searches" }, { label: "Yeni Arayış" }]}
+        subtitle="Müşterinizin ihtiyacını tarif edin; VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
+        breadcrumbs={[{ label: "Arayışlarım", to: "/dashboard/my-searches" }, { label: "Yeni Arayış" }]}
       />
 
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
