@@ -191,9 +191,30 @@ function SearchPage() {
   const confirmSave = (payload: SaveSearchPayload) => {
     setSaved(true);
     setSaveOpen(false);
-    toast.success("Arayış olarak kaydedildi", {
+    const first = filtered[0];
+    const id = create({
+      title: payload.name || "Yeni Arayış",
+      clientLabel: payload.note || undefined,
+      notes: payload.note || undefined,
+      region: (filters.region as string) || first?.regionLabel || "",
+      city: (filters.city as string) || first?.city || "",
+      type: first?.type ?? "villa",
+      budgetMin: filters.priceMin ? Number(filters.priceMin) : undefined,
+      budgetMax: filters.priceMax ? Number(filters.priceMax) : undefined,
+      currency: (filters.currency as "TRY" | "USD" | "EUR") ?? "TRY",
+      rooms: (filters.rooms as string) || undefined,
+      mustHave: Array.isArray(filters.luxuryFeatures)
+        ? (filters.luxuryFeatures as string[]).map(
+            (v) => luxuryFeatures.find((f) => f.value === v)?.label ?? v,
+          )
+        : [],
+      notify: payload.frequency,
+      matchCount: filtered.length,
+    });
+    toast.success("Arayışlarım'a kaydedildi", {
       description: `${payload.name} · ${filtered.length} sonuç · Bildirim: ${notificationFrequencyLabels[payload.frequency]}`,
     });
+    navigate({ to: "/dashboard/my-searches/$id", params: { id } });
   };
 
   return (
