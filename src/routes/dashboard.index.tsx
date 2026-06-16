@@ -76,7 +76,7 @@ function DashboardHome() {
       {/* Quick actions */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link to="/dashboard/portfolios/new"><QuickActionCard label="Portföy Oluştur" description="Yeni lüks portföy ekle" icon={Plus} accent /></Link>
-        <Link to="/dashboard/searches/new"><QuickActionCard label="Yeni Arayış" description="Alıcı için portföy eşleştir" icon={Target} /></Link>
+        <Link to="/dashboard/my-searches/new"><QuickActionCard label="Yeni Arayış" description="Müşteri için portföy eşleştir" icon={Target} /></Link>
         <Link to="/dashboard/search"><QuickActionCard label="Portföy Ara" description="Harita üzerinde keşfet" icon={Search} /></Link>
         <Link to="/dashboard/assistant"><QuickActionCard label="VAULT Asistan" description="Akıllı eşleştirme & değerleme" icon={Sparkles} /></Link>
       </div>

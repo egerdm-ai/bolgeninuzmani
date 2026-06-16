@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   CheckCheck,
@@ -63,12 +63,17 @@ function Notifications() {
 
 function NotificationRow({ n, onRead }: { n: AppNotification; onRead: () => void }) {
   const Icon = kindIcon[n.kind];
+  const navigate = useNavigate();
   return (
-    <Link
-      to={n.link}
-      onClick={onRead}
+    <button
+      type="button"
+      onClick={() => {
+        onRead();
+        // Typed union of route targets; cast keeps TanStack navigate happy.
+        navigate(n.link as never);
+      }}
       className={cn(
-        "flex items-start gap-3 rounded-2xl border p-4 shadow-elegant transition-colors",
+        "flex w-full items-start gap-3 rounded-2xl border p-4 text-left shadow-elegant transition-colors",
         n.read
           ? "border-border bg-surface/50 hover:border-border-strong"
           : "border-gold/30 bg-gold/[0.05] hover:border-gold/50",
@@ -90,6 +95,6 @@ function NotificationRow({ n, onRead }: { n: AppNotification; onRead: () => void
         <p className="mt-0.5 text-sm text-secondary-foreground">{n.body}</p>
         <p className="mt-1 text-[11px] text-muted-foreground">{n.time}</p>
       </div>
-    </Link>
+    </button>
   );
 }

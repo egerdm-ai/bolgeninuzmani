@@ -1,16 +1,16 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
   Sparkles,
   ArrowUp,
   Search,
-  FolderLock,
   Users,
-  FileText,
-  Calculator,
   BookmarkPlus,
   Bell,
+  Plus,
+  Compass,
+  GitCompareArrows,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
@@ -32,12 +32,13 @@ export const Route = createFileRoute("/dashboard/assistant")({
   component: Assistant,
 });
 
-const quickActions = [
-  { label: "Portföyden Arayış Eşleştir", icon: FolderLock },
-  { label: "Arayıştan Portföy Bul", icon: Search },
-  { label: "Bölge Uzmanı Bul", icon: Users },
-  { label: "PDF & Paylaşım Hazırla", icon: FileText },
-  { label: "Portföy Değerlemesi Oluştur", icon: Calculator },
+const navCards = [
+  { label: "Portföy Ara", icon: Search, to: "/dashboard/search" as const },
+  { label: "Yeni Arayış Oluştur", icon: Plus, to: "/dashboard/my-searches/new" as const },
+  { label: "Arayışlarımı Yönet", icon: BookmarkPlus, to: "/dashboard/my-searches" as const },
+  { label: "Network Arayışlarını Keşfet", icon: Compass, to: "/dashboard/searches" as const },
+  { label: "Portföyümle Arayış Eşleştir", icon: GitCompareArrows, to: "/dashboard/matches" as const },
+  { label: "Bölge Uzmanı Bul", icon: Users, to: "/dashboard/professionals" as const },
 ];
 
 const promptExamples = [
@@ -112,17 +113,17 @@ function Assistant() {
                 </div>
 
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                  {quickActions.map((a) => (
-                    <button
+                  {navCards.map((a) => (
+                    <Link
                       key={a.label}
-                      onClick={() => ask(a.label)}
+                      to={a.to}
                       className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 px-3 py-3 text-left text-sm text-secondary-foreground transition-colors hover:border-gold/40 hover:text-foreground"
                     >
                       <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-gold">
                         <a.icon className="size-4" />
                       </span>
                       <span className="font-medium">{a.label}</span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
 

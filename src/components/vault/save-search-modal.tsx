@@ -50,9 +50,9 @@ export function SaveSearchModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="border-border-strong bg-surface">
         <DialogHeader>
-          <DialogTitle className="font-display text-xl">Arayış Olarak Kaydet</DialogTitle>
+          <DialogTitle className="font-display text-xl">Arayışlarım'a Kaydet</DialogTitle>
           <DialogDescription>
-            Bu aramayı kaydedin; uygun yeni portföyler eklendiğinde bildirim alın.
+            Bu aramayı müşteriniz için Arayışlarım'a kaydedin; uygun yeni portföyler eklendiğinde bildirim alın.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-1">
@@ -105,7 +105,7 @@ export function SaveSearchModal({
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             onClick={() => onSave({ name, note, frequency, notifyNewMatches })}
           >
-            <BookmarkPlus className="size-4" /> Arayışı Kaydet
+            <BookmarkPlus className="size-4" /> Arayışlarım'a Kaydet
           </Button>
         </DialogFooter>
       </DialogContent>

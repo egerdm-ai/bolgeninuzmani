@@ -17,12 +17,12 @@ import { InfoPanel, SurfaceCard, KpiCard, EmptyStateCard } from "@/components/va
 import { FeatureChip } from "@/components/vault/badges";
 import { PortfolioCard } from "@/components/vault/portfolio-card";
 import { RegionExpertCard } from "@/components/vault/region-expert-card";
-import { BuyerSearchCard } from "@/components/vault/buyer-search-card";
+import { NetworkSearchCard } from "@/components/vault/network-search-card";
 import {
   getRegionBySlug,
   getPortfoliosByRegion,
   getExpertsForRegion,
-  buyerSearches,
+  networkSearches,
 } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useRegionWatch } from "@/lib/region-watch-store";
@@ -61,7 +61,7 @@ function RegionDetail() {
 
   const portfolios = getPortfoliosByRegion(region.name).filter((p) => p.status === "active");
   const experts = getExpertsForRegion(region);
-  const searches = buyerSearches.filter(
+  const searches = networkSearches.filter(
     (b) => b.region.toLocaleLowerCase("tr-TR") === region.name.toLocaleLowerCase("tr-TR"),
   );
   const watching = isWatching(region.slug);
@@ -145,7 +145,7 @@ function RegionDetail() {
               <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Bu Bölgedeki Arayışlar</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {searches.map((s) => (
-                  <BuyerSearchCard key={s.id} search={s} />
+                  <NetworkSearchCard key={s.id} search={s} />
                 ))}
               </div>
             </div>

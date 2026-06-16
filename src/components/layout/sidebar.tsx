@@ -5,7 +5,6 @@ import {
   Search,
   FolderLock,
   Inbox,
-  Bookmark,
   Sparkles,
   UserRound,
   Settings,
@@ -33,17 +32,18 @@ const primaryNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
 ] as const;
 
-// Keşfet parent area — keeps discovery routes grouped and the sidebar compact.
+// Keşfet (discovery) — network / public areas the user browses.
 const discoverChildren = [
   { label: "Portföyler", to: "/dashboard/search", icon: Search },
   { label: "Bölgeler", to: "/dashboard/regions", icon: Map },
   { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
-  { label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark },
+  { label: "Arayışlar", to: "/dashboard/searches", icon: Compass },
 ] as const;
 
+// Main workspace — items that belong to the current user.
 const workNav = [
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
-  { label: "Arayışlar", to: "/dashboard/searches", icon: Target },
+  { label: "Arayışlarım", to: "/dashboard/my-searches", icon: Target },
   { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
   { label: "VAULT Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },

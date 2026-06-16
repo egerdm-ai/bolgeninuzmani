@@ -5,7 +5,7 @@ import type {
   Professional,
   Region,
 } from "./types";
-import { portfolios, professionals, currentUser } from "./data";
+import { portfolios, professionals, currentUser, myPortfolios } from "./data";
 import { portfolioTypeLabels } from "@/lib/format";
 
 // ---------------------------------------------------------------------------
@@ -328,24 +328,214 @@ export const buyerSearches: BuyerSearch[] = [
   },
 ];
 
+/**
+ * "Arayışlarım" — the current user's own saved buyer searches (their customers).
+ * Alias kept for clarity; `buyerSearches` rows are all owned by `currentUser`.
+ * TODO[backend]: buyer_searches where owner_id = auth.uid().
+ */
+export const mySearches: BuyerSearch[] = buyerSearches;
+
+export function getMySearchById(id: string) {
+  return mySearches.find((b) => b.id === id);
+}
+
+// ---------------------------------------------------------------------------
+// "Arayışlar" — network buyer searches created by OTHER professionals.
+// These are discovery items: the current user browses them to find demand
+// their own portfolios can satisfy.
+// TODO[backend]: buyer_searches where owner_id != auth.uid() and visibility = 'network'.
+// ---------------------------------------------------------------------------
+
+export const networkSearches: BuyerSearch[] = [
+  {
+    id: "ns_001",
+    title: "Yalıkavak Sonsuzluk Havuzlu Ultra Lüks Villa",
+    clientType: "Yüksek Net Değer (HNW)",
+    city: "Muğla",
+    region: "Yalıkavak",
+    type: "villa",
+    budgetMin: 55000000,
+    budgetMax: 80000000,
+    currency: "TRY",
+    rooms: "5+1",
+    minM2: 350,
+    mustHave: ["Deniz Manzarası", "Havuz", "5+1"],
+    niceToHave: ["Marina Yakını", "Akıllı Ev"],
+    urgency: "high",
+    notes: "Yurt dışından dönen müşterim için Yalıkavak marina hattında sezon öncesi teslim villa.",
+    visibility: "network",
+    status: "active",
+    matchCount: 7,
+    createdAt: "5 saat önce",
+    owner: professionals[1],
+    views: 96,
+    responses: 5,
+    savedBy: 12,
+    clientLabel: "HNW Müşteri",
+    lastMatchAt: "2 saat önce",
+  },
+  {
+    id: "ns_002",
+    title: "Bebek Boğaz Manzaralı Yatırımlık Daire",
+    clientType: "Kurumsal Yatırımcı",
+    city: "İstanbul",
+    region: "Bebek",
+    type: "apartment",
+    budgetMin: 42000000,
+    budgetMax: 65000000,
+    currency: "TRY",
+    rooms: "3+1",
+    minM2: 180,
+    mustHave: ["Boğaz Manzarası", "Concierge"],
+    niceToHave: ["Otopark", "Site İçi"],
+    urgency: "medium",
+    notes: "Kurumsal fon için Bebek hattında kira getirisi yüksek daire aranıyor.",
+    visibility: "network",
+    status: "active",
+    matchCount: 4,
+    createdAt: "1 gün önce",
+    owner: professionals[2],
+    views: 74,
+    responses: 3,
+    savedBy: 8,
+    clientLabel: "Kurumsal Fon",
+    lastMatchAt: "6 saat önce",
+  },
+  {
+    id: "ns_003",
+    title: "Türkbükü Denize Sıfır Tasarım Villa",
+    clientType: "Bireysel Alıcı",
+    city: "Muğla",
+    region: "Türkbükü",
+    type: "villa",
+    budgetMin: 85000000,
+    budgetMax: 120000000,
+    currency: "TRY",
+    rooms: "6+1",
+    minM2: 420,
+    mustHave: ["Denize Sıfır", "Havuz"],
+    niceToHave: ["Özel İskele", "Misafir Evi"],
+    urgency: "high",
+    notes: "Acil — peşin alıcı, denize sıfır tasarım villa, özel iskele tercih sebebi.",
+    visibility: "network",
+    status: "active",
+    matchCount: 3,
+    createdAt: "2 gün önce",
+    owner: professionals[1],
+    views: 130,
+    responses: 6,
+    savedBy: 15,
+    clientLabel: "Peşin Alıcı",
+    lastMatchAt: "1 gün önce",
+  },
+  {
+    id: "ns_004",
+    title: "Çeşme / Alaçatı Yatırımlık Arsa",
+    clientType: "Geliştirici",
+    city: "İzmir",
+    region: "Çeşme",
+    type: "land",
+    budgetMin: 20000000,
+    budgetMax: 40000000,
+    currency: "TRY",
+    mustHave: ["İmarlı", "Yatırımlık"],
+    niceToHave: ["Deniz Yakını", "Köşe Parsel"],
+    urgency: "medium",
+    notes: "Butik konut projesi için imarlı arsa; Alaçatı çevresi öncelikli.",
+    visibility: "network",
+    status: "active",
+    matchCount: 2,
+    createdAt: "3 gün önce",
+    owner: professionals[4],
+    views: 58,
+    responses: 2,
+    savedBy: 5,
+    clientLabel: "Geliştirici",
+    lastMatchAt: "2 gün önce",
+  },
+  {
+    id: "ns_005",
+    title: "Göcek Marina Çevresi Korunaklı Villa",
+    clientType: "Aile",
+    city: "Muğla",
+    region: "Göcek",
+    type: "villa",
+    budgetMin: 45000000,
+    budgetMax: 70000000,
+    currency: "TRY",
+    rooms: "4+1",
+    minM2: 300,
+    mustHave: ["Deniz Manzarası", "Site İçi"],
+    niceToHave: ["Marina Yakını", "Orman İçi"],
+    urgency: "low",
+    notes: "Yazlık kullanım için Göcek marina çevresinde güvenlikli sitede villa.",
+    visibility: "network",
+    status: "active",
+    matchCount: 2,
+    createdAt: "4 gün önce",
+    owner: professionals[3],
+    views: 41,
+    responses: 1,
+    savedBy: 3,
+    clientLabel: "Aile (5 kişi)",
+    lastMatchAt: "3 gün önce",
+  },
+  {
+    id: "ns_006",
+    title: "Etiler Bahçeli Lüks Müstakil Villa",
+    clientType: "Yüksek Net Değer (HNW)",
+    city: "İstanbul",
+    region: "Etiler",
+    type: "villa",
+    budgetMin: 75000000,
+    budgetMax: 110000000,
+    currency: "TRY",
+    rooms: "6+1",
+    minM2: 450,
+    mustHave: ["Bahçe", "Müstakil"],
+    niceToHave: ["Havuz", "Akıllı Ev"],
+    urgency: "medium",
+    notes: "Şehir içinde bahçeli, müstakil yaşam isteyen aile için Etiler / Levent çevresi.",
+    visibility: "network",
+    status: "active",
+    matchCount: 1,
+    createdAt: "6 gün önce",
+    owner: professionals[2],
+    views: 88,
+    responses: 4,
+    savedBy: 9,
+    clientLabel: "HNW Aile",
+    lastMatchAt: "5 gün önce",
+  },
+];
+
+export function getNetworkSearchById(id: string) {
+  return networkSearches.find((b) => b.id === id);
+}
+
+/** Looks up a search across both network and my-search collections. */
 export function getBuyerSearchById(id: string) {
-  return buyerSearches.find((b) => b.id === id);
+  return networkSearches.find((b) => b.id === id) ?? mySearches.find((b) => b.id === id);
 }
 
 /**
- * Mock-only: buyer searches ("Arayışlar") a professional is currently tracking.
- * Matched by overlap between the professional's expertise regions and the
- * search region. Falls back to the first two searches so every profile shows
- * something. TODO[backend]: query buyer_searches where owner = professional.id.
+ * Mock-only: network buyer searches created by a given professional, shown on
+ * their public profile. Falls back to region overlap, then first two searches.
+ * TODO[backend]: query buyer_searches where owner_id = professional.id.
  */
 export function getBuyerSearchesByProfessional(pro: {
+  id?: string;
   expertiseRegions: string[];
 }): BuyerSearch[] {
+  if (pro.id) {
+    const owned = networkSearches.filter((b) => b.owner.id === pro.id);
+    if (owned.length) return owned;
+  }
   const regions = new Set(pro.expertiseRegions.map((r) => r.toLocaleLowerCase("tr")));
-  const matched = buyerSearches.filter((b) =>
+  const matched = networkSearches.filter((b) =>
     regions.has(b.region.toLocaleLowerCase("tr")),
   );
-  return matched.length ? matched : buyerSearches.slice(0, 2);
+  return matched.length ? matched : networkSearches.slice(0, 2);
 }
 
 
@@ -455,6 +645,26 @@ export function getMatchesForSearch(q: MatchInput): MatchResult[] {
     .sort((a, b) => b.score - a.score);
 }
 
+/** Matches restricted to the current user's OWN portfolios (for network searches). */
+export function getMyMatchesForSearch(q: MatchInput): MatchResult[] {
+  const mine = new Set(myPortfolios.map((p) => p.id));
+  return getMatchesForSearch(q).filter((m) => mine.has(m.portfolio.id));
+}
+
+/** Convenience: my matching portfolios for a given network buyer search. */
+export function getMyMatchesForBuyerSearch(bs: BuyerSearch): MatchResult[] {
+  return getMyMatchesForSearch({
+    region: bs.region,
+    city: bs.city,
+    type: bs.type,
+    budgetMin: bs.budgetMin,
+    budgetMax: bs.budgetMax,
+    rooms: bs.rooms,
+    minM2: bs.minM2,
+    mustHave: bs.mustHave,
+  });
+}
+
 export function getExpertsForSearch(q: MatchInput): Professional[] {
   const regionKey = q.region.toLocaleLowerCase("tr-TR");
   return professionals
@@ -468,9 +678,9 @@ export function getExpertsForSearch(q: MatchInput): Professional[] {
     .slice(0, 4);
 }
 
-/** Buyer searches (across the network) that a given portfolio matches. */
+/** Network buyer searches (created by others) that a given portfolio matches. */
 export function getMatchingSearchesForPortfolio(p: Portfolio): BuyerSearch[] {
-  return buyerSearches.filter((bs) => {
+  return networkSearches.filter((bs) => {
     const m = scorePortfolio(p, {
       region: bs.region,
       city: bs.city,

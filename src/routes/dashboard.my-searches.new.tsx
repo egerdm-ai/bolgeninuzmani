@@ -16,6 +16,7 @@ import { FilterModal } from "@/components/vault/filter-modal";
 import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
+import { useMySearches } from "@/lib/my-searches-store";
 import { cn } from "@/lib/utils";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import type { MatchResult, NotificationFrequency, PortfolioType, Professional } from "@/lib/mock/types";
@@ -34,7 +35,7 @@ import {
   type FilterValue,
 } from "@/lib/taxonomy";
 
-export const Route = createFileRoute("/dashboard/searches/new")({
+export const Route = createFileRoute("/dashboard/my-searches/new")({
   component: NewSearch,
 });
 
@@ -53,11 +54,14 @@ function NewSearch() {
   const navigate = useNavigate();
   const { isSaved, toggleSave } = useSaved();
   const { open: openRequest } = useDetailRequest();
+  const { create } = useMySearches();
 
   const [prompt, setPrompt] = useState(
     "Bodrum'da deniz manzaralı, 5+1, havuzlu, 100M TL altı villa arıyorum. Yalıkavak ve Türkbükü öncelikli.",
   );
   const [aiSummary, setAiSummary] = useState<string[]>([]);
+  const [name, setName] = useState("Bodrum Deniz Manzaralı Villa");
+  const [clientNote, setClientNote] = useState("A. Yılmaz (VIP)");
   const [filters, setFilters] = useState<FilterState>({
     category: "konut",
     subcategory: "villa",
@@ -70,7 +74,7 @@ function NewSearch() {
   const [niceToHave, setNiceToHave] = useState<string[]>(["akilli_ev"]);
   const [excluded, setExcluded] = useState<string[]>([]);
   const [notify, setNotify] = useState<NotificationFrequency>("instant");
-  const [visibility, setVisibility] = useState<"private" | "network">("network");
+  const [visibility, setVisibility] = useState<"private" | "network">("private");
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
   const [experts, setExperts] = useState<Professional[]>([]);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -88,22 +92,50 @@ function NewSearch() {
     toast.success("AI filtreleri oluşturdu", { description: parsed.summary.join(" · ") });
   };
 
+  const buildQuery = () => ({
+    region: (filters.region as string) ?? "",
+    city: (filters.city as string) ?? "",
+    type: toPortfolioType(category, filters.subcategory as string),
+    budgetMin: Number(filters.priceMin ?? 0),
+    budgetMax: Number(filters.priceMax ?? 0) || Number.MAX_SAFE_INTEGER,
+    rooms: (filters.rooms as string) ?? "",
+    mustHave: mustHave.map(labelFor),
+  });
+
+  // Live preview match count as the user edits the form.
+  const previewMatches = useMemo(
+    () => getMatchesForSearch(buildQuery()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filters, mustHave],
+  );
+
   const findMatches = () => {
-    const q = {
-      region: (filters.region as string) ?? "",
-      city: (filters.city as string) ?? "",
-      type: toPortfolioType(category, filters.subcategory as string),
-      budgetMin: Number(filters.priceMin ?? 0),
-      budgetMax: Number(filters.priceMax ?? 0) || Number.MAX_SAFE_INTEGER,
-      rooms: (filters.rooms as string) ?? "",
-      mustHave: mustHave.map(labelFor),
-    };
+    const q = buildQuery();
     const results = getMatchesForSearch(q);
     setMatches(results);
     setExperts(getExpertsForSearch(q));
+    const id = create({
+      title: name || "Yeni Arayış",
+      clientLabel: clientNote || undefined,
+      notes: clientNote || prompt,
+      region: q.region,
+      city: q.city,
+      type: q.type,
+      budgetMin: filters.priceMin ? Number(filters.priceMin) : undefined,
+      budgetMax: filters.priceMax ? Number(filters.priceMax) : undefined,
+      currency: (filters.currency as "TRY" | "USD" | "EUR") ?? "TRY",
+      rooms: (filters.rooms as string) || undefined,
+      mustHave: mustHave.map(labelFor),
+      niceToHave: niceToHave.map(labelFor),
+      notify,
+      visibility,
+      matchCount: results.length,
+      status: results.length > 0 ? "matched" : "active",
+    });
     toast.success("Arayış kaydedildi", {
       description: `${results.length} uygun portföy bulundu. Bildirim: ${notificationFrequencyLabels[notify]}.`,
     });
+    navigate({ to: "/dashboard/my-searches/$id", params: { id } });
   };
 
   const detailFields = useMemo(() => {
@@ -117,8 +149,8 @@ function NewSearch() {
     <PageContainer className="space-y-6">
       <PageHeader
         title="Yeni Arayış Oluştur"
-        subtitle="Müşterinizin kriterlerini girin, VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
-        breadcrumbs={[{ label: "Arayışlar", to: "/dashboard/searches" }, { label: "Yeni Arayış" }]}
+        subtitle="Müşterinizin ihtiyacını tarif edin; VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
+        breadcrumbs={[{ label: "Arayışlarım", to: "/dashboard/my-searches" }, { label: "Yeni Arayış" }]}
       />
 
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
@@ -153,10 +185,10 @@ function NewSearch() {
           <InfoPanel title="Arayış Bilgileri">
             <div className="space-y-3">
               <Field label="Arayış adı">
-                <Input defaultValue="Bodrum Deniz Manzaralı Villa" placeholder="örn. Bodrum Deniz Manzaralı Villa" />
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="örn. Bodrum Deniz Manzaralı Villa" />
               </Field>
               <Field label="Müşteri notu">
-                <Input defaultValue="A. Yılmaz (VIP)" placeholder="Müşteri etiketi / takma ad" />
+                <Input value={clientNote} onChange={(e) => setClientNote(e.target.value)} placeholder="Müşteri etiketi / takma ad" />
               </Field>
 
               <div className="flex items-center justify-between pt-1">
@@ -280,8 +312,8 @@ function NewSearch() {
               </Field>
               <Field label="Görünürlük">
                 <div className="grid grid-cols-2 gap-2">
-                  <VisBtn active={visibility === "private"} onClick={() => setVisibility("private")} icon={Lock} label="Private" />
-                  <VisBtn active={visibility === "network"} onClick={() => setVisibility("network")} icon={Globe} label="Network'e Açık" />
+                  <VisBtn active={visibility === "private"} onClick={() => setVisibility("private")} icon={Lock} label="Sadece Ben" />
+                  <VisBtn active={visibility === "network"} onClick={() => setVisibility("network")} icon={Globe} label="Network'e Kısıtlı Açık" />
                 </div>
               </Field>
               <Button onClick={findMatches} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
@@ -298,9 +330,11 @@ function NewSearch() {
               <span className="flex size-14 items-center justify-center rounded-2xl bg-gold/10 text-gold">
                 <Search className="size-7" />
               </span>
-              <h3 className="mt-4 font-display text-lg font-semibold text-foreground">Eşleşmeler burada görünecek</h3>
+              <h3 className="mt-4 font-display text-lg font-semibold text-foreground">
+                Şu an {previewMatches.length} portföy eşleşiyor
+              </h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun. Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın.
+                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun. Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın; arayış Arayışlarım'a kaydedilir.
               </p>
             </div>
           ) : (
@@ -339,8 +373,8 @@ function NewSearch() {
                 </div>
               )}
 
-              <Button onClick={() => navigate({ to: "/dashboard/searches" })} variant="outline" className="w-full">
-                Arayışlara dön
+              <Button onClick={() => navigate({ to: "/dashboard/my-searches" })} variant="outline" className="w-full">
+                Arayışlarım'a dön
               </Button>
             </>
           )}

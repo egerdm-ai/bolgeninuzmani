@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut, CheckCheck } from "lucide-react";
 import { currentUser } from "@/lib/mock/data";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ export function Topbar({
   searchPlaceholder?: string;
 }) {
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
+  const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md lg:px-6">
       <button
@@ -76,21 +77,22 @@ export function Topbar({
             <DropdownMenuSeparator className="my-0" />
             <div className="max-h-80 overflow-y-auto py-1">
               {notifications.slice(0, 5).map((n) => (
-                <DropdownMenuItem key={n.id} asChild className="cursor-pointer">
-                  <Link
-                    to={n.link}
-                    onClick={() => markRead(n.id)}
-                    className="flex flex-col items-start gap-0.5 px-3 py-2"
-                  >
-                    <span className="flex w-full items-center gap-2">
-                      {!n.read && <span className="size-1.5 shrink-0 rounded-full bg-gold" />}
-                      <span className={cn("text-xs font-semibold", n.read ? "text-secondary-foreground" : "text-foreground")}>
-                        {n.title}
-                      </span>
+                <DropdownMenuItem
+                  key={n.id}
+                  className="cursor-pointer flex-col items-start gap-0.5 px-3 py-2"
+                  onSelect={() => {
+                    markRead(n.id);
+                    navigate(n.link as never);
+                  }}
+                >
+                  <span className="flex w-full items-center gap-2">
+                    {!n.read && <span className="size-1.5 shrink-0 rounded-full bg-gold" />}
+                    <span className={cn("text-xs font-semibold", n.read ? "text-secondary-foreground" : "text-foreground")}>
+                      {n.title}
                     </span>
-                    <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
-                    <span className="text-[10px] text-muted-foreground">{n.time}</span>
-                  </Link>
+                  </span>
+                  <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
+                  <span className="text-[10px] text-muted-foreground">{n.time}</span>
                 </DropdownMenuItem>
               ))}
             </div>

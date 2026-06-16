@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Search, SlidersHorizontal, BookmarkPlus, Sparkles, X, Check } from "lucide-react";
@@ -12,6 +12,7 @@ import { SaveSearchModal, type SaveSearchPayload } from "@/components/vault/save
 import { portfolios } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
+import { useMySearches } from "@/lib/my-searches-store";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import type { Portfolio } from "@/lib/mock/types";
 import {
@@ -34,6 +35,9 @@ import {
 } from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/dashboard/search")({
+  validateSearch: (s: Record<string, unknown>): { region?: string } => ({
+    region: typeof s.region === "string" ? s.region : undefined,
+  }),
   component: SearchPage,
 });
 
@@ -59,10 +63,17 @@ function compactPrice(n: number) {
 }
 
 function SearchPage() {
+  const { region } = Route.useSearch();
+  const navigate = useNavigate();
   const { isSaved, toggleSave } = useSaved();
+  const { create } = useMySearches();
   const searchable = useMemo(() => portfolios.filter((p) => p.status === "active"), []);
 
-  const [filters, setFilters] = useState<FilterState>({ ...defaultFilterState, modalCategory: "all" });
+  const [filters, setFilters] = useState<FilterState>({
+    ...defaultFilterState,
+    modalCategory: "all",
+    ...(region ? { region } : {}),
+  });
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string>(searchable[0]?.id ?? "");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -180,9 +191,30 @@ function SearchPage() {
   const confirmSave = (payload: SaveSearchPayload) => {
     setSaved(true);
     setSaveOpen(false);
-    toast.success("Arayış olarak kaydedildi", {
+    const first = filtered[0];
+    const id = create({
+      title: payload.name || "Yeni Arayış",
+      clientLabel: payload.note || undefined,
+      notes: payload.note || undefined,
+      region: (filters.region as string) || first?.regionLabel || "",
+      city: (filters.city as string) || first?.city || "",
+      type: first?.type ?? "villa",
+      budgetMin: filters.priceMin ? Number(filters.priceMin) : undefined,
+      budgetMax: filters.priceMax ? Number(filters.priceMax) : undefined,
+      currency: (filters.currency as "TRY" | "USD" | "EUR") ?? "TRY",
+      rooms: (filters.rooms as string) || undefined,
+      mustHave: Array.isArray(filters.luxuryFeatures)
+        ? (filters.luxuryFeatures as string[]).map(
+            (v) => luxuryFeatures.find((f) => f.value === v)?.label ?? v,
+          )
+        : [],
+      notify: payload.frequency,
+      matchCount: filtered.length,
+    });
+    toast.success("Arayışlarım'a kaydedildi", {
       description: `${payload.name} · ${filtered.length} sonuç · Bildirim: ${notificationFrequencyLabels[payload.frequency]}`,
     });
+    navigate({ to: "/dashboard/my-searches/$id", params: { id } });
   };
 
   return (
@@ -213,7 +245,7 @@ function SearchPage() {
               onClick={() => (saved ? toast.info("Bu arayış zaten kaydedildi") : setSaveOpen(true))}
             >
               {saved ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
-              {saved ? "Arayış Kaydedildi" : "Arayış Olarak Kaydet"}
+              {saved ? "Arayışlarım'a Kaydedildi" : "Arayışlarım'a Kaydet"}
             </Button>
           </div>
         </div>
