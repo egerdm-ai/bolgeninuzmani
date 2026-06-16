@@ -17,12 +17,12 @@ import { InfoPanel, SurfaceCard, KpiCard, EmptyStateCard } from "@/components/va
 import { FeatureChip } from "@/components/vault/badges";
 import { PortfolioCard } from "@/components/vault/portfolio-card";
 import { RegionExpertCard } from "@/components/vault/region-expert-card";
-import { BuyerSearchCard } from "@/components/vault/buyer-search-card";
+import { NetworkSearchCard } from "@/components/vault/network-search-card";
 import {
   getRegionBySlug,
   getPortfoliosByRegion,
   getExpertsForRegion,
-  buyerSearches,
+  networkSearches,
 } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useRegionWatch } from "@/lib/region-watch-store";
