@@ -145,7 +145,7 @@ function RegionDetail() {
               <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Bu Bölgedeki Arayışlar</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {searches.map((s) => (
-                  <BuyerSearchCard key={s.id} search={s} />
+                  <NetworkSearchCard key={s.id} search={s} />
                 ))}
               </div>
             </div>
