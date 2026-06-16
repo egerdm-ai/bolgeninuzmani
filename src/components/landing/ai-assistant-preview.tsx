@@ -1,4 +1,4 @@
-import { Bot, Send, Lock, MapPin, Sparkles, Search, Bookmark, FileText, UserCheck } from "lucide-react";
+import { Bot, Send, Lock, MapPin, Sparkles, Search, Bookmark, FileText, UserCheck, Check } from "lucide-react";
 import { propertyImages } from "@/lib/mock/data";
 import { GlassCard } from "./primitives";
 
@@ -14,8 +14,27 @@ const tools = [
   { icon: UserCheck, label: "Bölge uzmanı bul" },
 ];
 
+const matches = [
+  {
+    img: propertyImages.villa1,
+    name: "Bodrum Yalıkavak Deniz Villa",
+    meta: "5+1 · Havuzlu · ₺92M",
+    score: 96,
+    reasons: ["Bölge uyumu yüksek", "Deniz manzarası mevcut", "Fiyat aralığına yakın"],
+  },
+  {
+    img: propertyImages.villa2,
+    name: "Türkbükü Panorama Villa",
+    meta: "5+1 · Havuzlu · ₺110M",
+    score: 88,
+    reasons: ["Deniz manzarası mevcut", "Bütçeye kısmen uygun"],
+  },
+];
+
 /**
- * AIAssistantPreview — product-like chat mockup for "VAULT Asistan".
+ * AIAssistantPreview — polished product-demo chat for "VAULT Asistan".
+ * User asks in natural Turkish; assistant returns scored portfolio matches
+ * with reasoning lines, an expert suggestion and next-step actions.
  */
 export function AIAssistantPreview() {
   return (
@@ -32,52 +51,69 @@ export function AIAssistantPreview() {
         </div>
 
         <div className="space-y-4 p-5">
+          {/* user */}
           <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-gold/15 px-4 py-2.5 text-sm text-foreground">
-            Bodrum'da deniz manzaralı, 5+1, havuzlu, 100M TL altı villa arıyorum.
+            Bodrum'da deniz manzaralı, havuzlu villa arıyorum.
           </p>
 
-          <div className="w-fit max-w-[94%] rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3 text-sm text-muted-foreground">
-            Bu arayış için <span className="font-medium text-foreground">6 uygun portföy</span> ve{" "}
-            <span className="font-medium text-foreground">4 bölge uzmanı</span> buldum. En güçlü
-            eşleşmeler Yalıkavak ve Türkbükü bölgelerinde.
-            <div className="mt-3 space-y-2">
-              {/* matching portfolio */}
-              <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/50 p-2">
-                <img
-                  src={propertyImages.villa1}
-                  alt="Yalıkavak villa"
-                  className="size-11 rounded-lg object-cover"
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-foreground">
-                    Yalıkavak Deniz Manzaralı Private Villa
-                  </p>
-                  <p className="truncate text-[11px] text-muted-foreground">5+1 · Havuzlu · ₺92M</p>
+          {/* assistant */}
+          <div className="w-fit max-w-[96%] space-y-3 rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3.5">
+            <p className="text-sm text-muted-foreground">
+              Bu arayışla en güçlü eşleşen <span className="font-medium text-foreground">2 portföyü</span>{" "}
+              listeledim ve bölgenin aktif uzmanını ekledim.
+            </p>
+
+            {/* portfolio matches */}
+            <div className="space-y-2.5">
+              {matches.map((m) => (
+                <div
+                  key={m.name}
+                  className="rounded-xl border border-border/60 bg-background/50 p-2.5"
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={m.img} alt={m.name} className="size-12 rounded-lg object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-foreground">{m.name}</p>
+                      <p className="truncate text-[11px] text-muted-foreground">{m.meta}</p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className="rounded-md bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        %{m.score}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground">uyum skoru</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {m.reasons.map((r) => (
+                      <span
+                        key={r}
+                        className="inline-flex items-center gap-1 rounded-md bg-success/10 px-1.5 py-0.5 text-[10px] text-success"
+                      >
+                        <Check className="size-2.5" /> {r}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <span className="shrink-0 rounded-md bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
-                  %92
-                </span>
-              </div>
-              {/* region expert */}
-              <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-background/50 p-2">
-                <img src={EXPERT_AVATAR} alt="Taylan Hersek" className="size-11 rounded-full object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-foreground">Taylan Hersek</p>
-                  <p className="inline-flex items-center gap-1 truncate text-[11px] text-gold">
-                    <MapPin className="size-3" /> Bodrum Uzmanı
-                  </p>
-                </div>
-                <UserCheck className="size-4 shrink-0 text-muted-foreground" />
-              </div>
-              {/* region insight */}
-              <div className="rounded-xl border border-gold/25 bg-gold/5 p-2.5 text-[11.5px] text-foreground">
-                <span className="font-semibold text-gold">Bölge içgörüsü: </span>
-                Yalıkavak ve Türkbükü, bu arayışla güçlü eşleşiyor.
-              </div>
+              ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {["Arayış Olarak Kaydet", "Detay Talebi Gönder", "Bölge Uzmanlarını Gör"].map((b, i) => (
+            {/* expert suggestion */}
+            <div className="flex items-center gap-3 rounded-xl border border-gold/25 bg-gold/5 p-2.5">
+              <img src={EXPERT_AVATAR} alt="Taylan Hersek" className="size-9 rounded-full object-cover ring-2 ring-gold/30" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] text-muted-foreground">Bu bölgede aktif uzman</p>
+                <p className="inline-flex items-center gap-1 text-[12px] font-semibold text-foreground">
+                  Taylan Hersek <MapPin className="size-3 text-gold" />
+                </p>
+              </div>
+              <span className="shrink-0 rounded-md border border-gold/30 px-2 py-1 text-[10px] font-medium text-gold">
+                Profili Gör
+              </span>
+            </div>
+
+            {/* next-step actions */}
+            <div className="flex flex-wrap gap-1.5">
+              {["Arayış Olarak Kaydet", "Detay Talebi Gönder", "PDF Hazırla"].map((b, i) => (
                 <span
                   key={b}
                   className={`rounded-lg px-2.5 py-1 text-[11px] font-medium ${
