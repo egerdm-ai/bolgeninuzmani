@@ -265,13 +265,17 @@ export type NotificationKind =
   | "request"
   | "search";
 
-/** `link` is constrained to the static section routes so typed routing stays happy. */
+/** Typed navigation target for a notification (route + params/search). */
 export type NotificationLink =
-  | "/dashboard/searches"
-  | "/dashboard/matches"
-  | "/dashboard/regions"
-  | "/dashboard/detail-requests"
-  | "/dashboard/portfolios";
+  | { to: "/dashboard/my-searches/$id"; params: { id: string }; search?: { tab?: "matches" } }
+  | { to: "/dashboard/my-searches" }
+  | { to: "/dashboard/searches/$id"; params: { id: string } }
+  | { to: "/dashboard/searches"; search?: { region?: string } }
+  | { to: "/dashboard/search"; search?: { region?: string } }
+  | { to: "/dashboard/matches"; search?: { portfolioId?: string } }
+  | { to: "/dashboard/regions" }
+  | { to: "/dashboard/detail-requests" }
+  | { to: "/dashboard/portfolios" };
 
 export type AppNotification = {
   id: string;
