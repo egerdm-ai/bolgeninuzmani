@@ -1,462 +1,293 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import { Search, SlidersHorizontal, BookmarkPlus, Sparkles, X, Check } from "lucide-react";
-import { PageContainer } from "@/components/layout/app-shell";
-import { Button } from "@/components/ui/button";
-import { SearchResultCard } from "@/components/vault/search-result-card";
-import { MapCanvasMock } from "@/components/vault/map-canvas-mock";
-import { DetailRequestModal } from "@/components/vault/detail-request-modal";
-import { FilterModal } from "@/components/vault/filter-modal";
-import { SaveSearchModal, type SaveSearchPayload } from "@/components/vault/save-search-modal";
-import { portfolios } from "@/lib/mock/data";
-import { cn } from "@/lib/utils";
-import { useSaved } from "@/lib/saved-store";
-import { useMySearches } from "@/lib/my-searches-store";
-import { featureFlags } from "@/lib/feature-flags";
-import { notificationFrequencyLabels } from "@/lib/mock/types";
-import type { Portfolio } from "@/lib/mock/types";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
-  searchQuickChips,
-  modalCategories,
-  modalTransactionTypes,
-  luxuryFeatures,
-  livingSpaceCounters,
-  recommendedFilters,
-  privacyAccessFields,
-  professionalFields,
-  matchSearchFields,
-  konutDetailFields,
-  landFields,
-  commercialFields,
-  defaultFilterState,
-  type FilterState,
-  type FilterValue,
-  type CategoryKey,
-} from "@/lib/taxonomy";
+  Search,
+  SlidersHorizontal,
+  ImageOff,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { PageContainer } from "@/components/layout/app-shell";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  listNetworkPortfolios,
+  type NetworkFilters,
+  type PortfolioWithCover,
+} from "@/lib/data/portfolios";
+import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 
 export const Route = createFileRoute("/dashboard/search")({
-  validateSearch: (s: Record<string, unknown>): { region?: string } => ({
-    region: typeof s.region === "string" ? s.region : undefined,
-  }),
-  component: SearchPage,
+  component: Kesfet,
 });
 
-// label lookup for active-filter chips
-const boolLabels: Record<string, string> = {};
-[
-  ...recommendedFilters.map((r) => ({ key: r.key, label: r.label })),
-  ...searchQuickChips
-    .filter((c) => c.kind === "toggle")
-    .map((c) => ({ key: c.key!, label: c.label })),
-  ...privacyAccessFields,
-  ...professionalFields,
-  ...matchSearchFields,
-  ...konutDetailFields.filter((f) => f.type === "boolean"),
-  ...landFields.filter((f) => f.type === "boolean"),
-  ...commercialFields.filter((f) => f.type === "boolean"),
-].forEach((f) => {
-  boolLabels[f.key] = f.label;
-});
+const PAGE_SIZE = 12;
+const emptyDraft = {
+  q: "",
+  city: "",
+  district: "",
+  neighborhood: "",
+  transaction_type: "",
+  category: "",
+  priceMin: "",
+  priceMax: "",
+  room_count: "",
+};
 
-function compactPrice(n: number) {
-  if (n >= 1_000_000)
-    return `${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
-  if (n >= 1000) return `${Math.round(n / 1000)}K`;
-  return `${n}`;
-}
+function Kesfet() {
+  const { user } = useAuth();
+  const [draft, setDraft] = useState(emptyDraft);
+  const [filters, setFilters] = useState<NetworkFilters>({});
+  const [page, setPage] = useState(0);
+  const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-function SearchPage() {
-  const { region } = Route.useSearch();
-  const navigate = useNavigate();
-  const { isSaved, toggleSave } = useSaved();
-  const { create } = useMySearches();
-  const searchable = useMemo(() => portfolios.filter((p) => p.status === "active"), []);
-
-  const [filters, setFilters] = useState<FilterState>({
-    ...defaultFilterState,
-    modalCategory: "all",
-    ...(region ? { region } : {}),
-  });
-  const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string>(searchable[0]?.id ?? "");
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [saveOpen, setSaveOpen] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const setFilter = (key: string, value: FilterValue) =>
-    setFilters((prev) => ({ ...prev, [key]: value }));
-
-  const resetFilters = () => setFilters({ ...defaultFilterState, modalCategory: "all" });
-
-  // ---- Mock filtering ----
-  const filtered = useMemo(() => {
-    const cat: CategoryKey | undefined = modalCategories.find(
-      (c) => c.value === filters.modalCategory,
-    )?.category;
-    const featureHas = (p: Portfolio, kw: string) =>
-      p.features.some((f) => f.toLocaleLowerCase("tr-TR").includes(kw.toLocaleLowerCase("tr-TR")));
-    const isRecent = (p: Portfolio) => {
-      const created = new Date(p.createdAt).getTime();
-      return Date.now() - created < 1000 * 60 * 60 * 24 * 14;
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    setResult(null);
+    setError(null);
+    listNetworkPortfolios(user.id, filters, page, PAGE_SIZE)
+      .then((r) => active && setResult(r))
+      .catch((e) => active && setError(e instanceof Error ? e.message : String(e)));
+    return () => {
+      active = false;
     };
-    const isExpert = (p: Portfolio) =>
-      p.owner.expertiseRegions.some(
-        (r) => p.neighborhood === r || p.district === r || p.regionLabel.includes(r),
-      );
-    const hasPdf = (p: Portfolio) => p.documents.some((d) => d.type === "pdf");
+  }, [user, filters, page]);
 
-    return searchable.filter((p) => {
-      const q = query.trim().toLocaleLowerCase("tr-TR");
-      if (q) {
-        const hay =
-          `${p.title} ${p.regionLabel} ${p.district} ${p.city} ${p.owner.fullName} ${p.owner.companyName}`.toLocaleLowerCase(
-            "tr-TR",
-          );
-        if (!hay.includes(q)) return false;
-      }
-      if (filters.modalCategory && filters.modalCategory !== "all" && cat && p.category !== cat)
-        return false;
-      if (
-        filters.city &&
-        !p.city
-          .toLocaleLowerCase("tr-TR")
-          .includes((filters.city as string).toLocaleLowerCase("tr-TR"))
-      )
-        return false;
-      if (
-        filters.region &&
-        !`${p.regionLabel} ${p.district}`
-          .toLocaleLowerCase("tr-TR")
-          .includes((filters.region as string).toLocaleLowerCase("tr-TR"))
-      )
-        return false;
-      if (
-        filters.neighborhood &&
-        !`${p.neighborhood ?? ""} ${p.regionLabel}`
-          .toLocaleLowerCase("tr-TR")
-          .includes((filters.neighborhood as string).toLocaleLowerCase("tr-TR"))
-      )
-        return false;
-      if (filters.priceMin && p.price < Number(filters.priceMin)) return false;
-      if (filters.priceMax && p.price > Number(filters.priceMax)) return false;
-      if (filters.grossM2 && (p.grossM2 ?? 0) < Number(filters.grossM2)) return false;
-      if (filters.netM2 && (p.netM2 ?? 0) < Number(filters.netM2)) return false;
-      if (filters.landM2 && (p.landM2 ?? 0) < Number(filters.landM2)) return false;
-
-      // bedroom counter (mock: parse "5+1" → 5)
-      const beds = Number((p.rooms ?? "").split("+")[0]) || 0;
-      if (filters.cntRoom && beds < Number(filters.cntRoom)) return false;
-      if (filters.cntBedroom && beds < Number(filters.cntBedroom)) return false;
-      if (filters.cntBath && (p.bathrooms ?? 0) < Number(filters.cntBath)) return false;
-      if (filters.cntParking && (p.parkingCapacity ?? 0) < Number(filters.cntParking)) return false;
-
-      // luxury features
-      const lux = Array.isArray(filters.luxuryFeatures) ? filters.luxuryFeatures : [];
-      if (lux.length) {
-        const labels = lux.map((v) => luxuryFeatures.find((f) => f.value === v)?.label ?? "");
-        if (!labels.every((l) => p.features.includes(l))) return false;
-      }
-
-      // recommended + quick toggles
-      if ((filters.recDeniz || filters.qcDeniz) && !featureHas(p, "Deniz")) return false;
-      if ((filters.recHavuz || filters.qcHavuz) && !featureHas(p, "Havuz")) return false;
-      if ((filters.recPdf || filters.qcPdf) && !hasPdf(p)) return false;
-      if ((filters.recUzman || filters.qcUzman || filters.regionExpertsOnly) && !isExpert(p))
-        return false;
-      if ((filters.recYeni || filters.qcYeni) && !isRecent(p)) return false;
-      if ((filters.recTalep || filters.qcTalep || filters.requestRequired) && !p.requestRequired)
-        return false;
-      if (
-        (filters.recOtopark || filters.qcOtopark) &&
-        (p.parkingCapacity ?? 0) <= 0 &&
-        !featureHas(p, "Otopark")
-      )
-        return false;
-      if (filters.qc5Oda && beds < 5) return false;
-      if (filters.verifiedOnly && !isExpert(p) && p.owner.membershipTier === "standard")
-        return false;
-
-      return true;
+  const apply = () => {
+    setFilters({
+      q: draft.q.trim() || undefined,
+      city: draft.city.trim() || undefined,
+      district: draft.district.trim() || undefined,
+      neighborhood: draft.neighborhood.trim() || undefined,
+      transaction_type: (draft.transaction_type || undefined) as NetworkFilters["transaction_type"],
+      category: (draft.category || undefined) as NetworkFilters["category"],
+      priceMin: draft.priceMin ? Number(draft.priceMin) : undefined,
+      priceMax: draft.priceMax ? Number(draft.priceMax) : undefined,
+      room_count: draft.room_count.trim() || undefined,
     });
-  }, [searchable, filters, query]);
-
-  const selected = filtered.find((p) => p.id === selectedId) ?? filtered[0];
-
-  // ---- Active filter chips ----
-  const activeChips = useMemo(() => {
-    const chips: { key: string; label: string; onRemove: () => void }[] = [];
-    const remove = (k: string, v?: FilterValue) => () => setFilter(k, v);
-
-    if (filters.modalCategory && filters.modalCategory !== "all") {
-      const label = modalCategories.find((c) => c.value === filters.modalCategory)?.label ?? "";
-      chips.push({ key: "modalCategory", label, onRemove: remove("modalCategory", "all") });
-    }
-    if (filters.transaction && filters.transaction !== "satilik") {
-      const label = modalTransactionTypes.find((t) => t.value === filters.transaction)?.label ?? "";
-      if (label)
-        chips.push({ key: "transaction", label, onRemove: remove("transaction", "satilik") });
-    }
-    for (const k of ["city", "region", "neighborhood"]) {
-      if (filters[k])
-        chips.push({ key: k, label: `${filters[k]}`, onRemove: remove(k, undefined) });
-    }
-    if (filters.priceMin || filters.priceMax) {
-      const lo = filters.priceMin ? compactPrice(Number(filters.priceMin)) : "0";
-      const hi = filters.priceMax ? compactPrice(Number(filters.priceMax)) : "∞";
-      chips.push({
-        key: "price",
-        label: `${lo} – ${hi} ${filters.currency ?? "TRY"}`,
-        onRemove: () => {
-          setFilter("priceMin", undefined);
-          setFilter("priceMax", undefined);
-        },
-      });
-    }
-    for (const c of livingSpaceCounters) {
-      if (filters[c.key])
-        chips.push({
-          key: c.key,
-          label: `${c.label} ${filters[c.key]}+`,
-          onRemove: remove(c.key, undefined),
-        });
-    }
-    const lux = Array.isArray(filters.luxuryFeatures) ? filters.luxuryFeatures : [];
-    for (const v of lux) {
-      const label = luxuryFeatures.find((f) => f.value === v)?.label ?? v;
-      chips.push({
-        key: `lux-${v}`,
-        label,
-        onRemove: () =>
-          setFilter(
-            "luxuryFeatures",
-            lux.filter((x) => x !== v),
-          ),
-      });
-    }
-    for (const [k, v] of Object.entries(filters)) {
-      if (v === true && boolLabels[k]) {
-        chips.push({ key: k, label: boolLabels[k], onRemove: remove(k, false) });
-      }
-    }
-    return chips;
-  }, [filters]);
-
-  const activeCount = activeChips.length;
-
-  const confirmSave = (payload: SaveSearchPayload) => {
-    setSaved(true);
-    setSaveOpen(false);
-    const first = filtered[0];
-    const id = create({
-      title: payload.name || "Yeni Arayış",
-      clientLabel: payload.note || undefined,
-      notes: payload.note || undefined,
-      region: (filters.region as string) || first?.regionLabel || "",
-      city: (filters.city as string) || first?.city || "",
-      type: first?.type ?? "villa",
-      budgetMin: filters.priceMin ? Number(filters.priceMin) : undefined,
-      budgetMax: filters.priceMax ? Number(filters.priceMax) : undefined,
-      currency: (filters.currency as "TRY" | "USD" | "EUR") ?? "TRY",
-      rooms: (filters.rooms as string) || undefined,
-      mustHave: Array.isArray(filters.luxuryFeatures)
-        ? (filters.luxuryFeatures as string[]).map(
-            (v) => luxuryFeatures.find((f) => f.value === v)?.label ?? v,
-          )
-        : [],
-      notify: payload.frequency,
-      matchCount: filtered.length,
-    });
-    toast.success("Arayışlarım'a kaydedildi", {
-      description: `${payload.name} · ${filtered.length} sonuç · Bildirim: ${notificationFrequencyLabels[payload.frequency]}`,
-    });
-    navigate({ to: "/dashboard/my-searches/$id", params: { id } });
+    setPage(0);
   };
 
+  const reset = () => {
+    setDraft(emptyDraft);
+    setFilters({});
+    setPage(0);
+  };
+
+  const sd = (k: keyof typeof draft) => (v: string) => setDraft((p) => ({ ...p, [k]: v }));
+  const total = result?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
   return (
-    <PageContainer className="space-y-0">
-      {/* Sticky top search/filter bar */}
-      <div className="sticky top-0 z-30 -mx-4 border-b border-border bg-background/85 px-4 pb-3 pt-4 backdrop-blur md:-mx-6 md:px-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Keşfet"
+        subtitle="Ağdaki doğrulanmış emlakçıların yayındaki portföylerini keşfedin (teaser)."
+      />
+
+      {/* Search + filters */}
+      <div className="space-y-4 rounded-2xl border border-border bg-surface p-4">
+        <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Portföy, bölge veya profesyonel ara..."
-              className="h-11 w-full rounded-xl border border-border bg-surface-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-gold/40"
+            <Input
+              value={draft.q}
+              onChange={(e) => sd("q")(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && apply()}
+              placeholder="Başlık, şehir, ilçe, mahalle ara…"
+              className="pl-9"
             />
           </div>
-          <div className="flex items-center gap-2">
-            {featureFlags.assistant && (
-              <Button
-                asChild
-                variant="outline"
-                className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10"
-              >
-                <Link to="/dashboard/assistant">
-                  <Sparkles className="size-4" /> Asistan'a Sor
-                </Link>
-              </Button>
-            )}
-            <Button
-              variant="outline"
-              className={cn("gap-1.5", activeCount > 0 && "border-gold/40 text-gold")}
-              onClick={() => setFilterOpen(true)}
-            >
-              <SlidersHorizontal className="size-4" /> Filtreler
-              {activeCount > 0 && (
-                <span className="rounded-full bg-gold/15 px-1.5 text-[10px] font-bold text-gold">
-                  {activeCount}
-                </span>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              className={cn("gap-1.5", saved && "border-gold/40 text-gold")}
-              onClick={() => (saved ? toast.info("Bu arayış zaten kaydedildi") : setSaveOpen(true))}
-            >
-              {saved ? <Check className="size-4" /> : <BookmarkPlus className="size-4" />}
-              {saved ? "Arayışlarım'a Kaydedildi" : "Arayışlarım'a Kaydet"}
-            </Button>
+          <Button
+            onClick={apply}
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            <SlidersHorizontal className="size-4" /> Filtrele
+          </Button>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <FilterField label="Kategori">
+            <Select value={draft.category} onValueChange={sd("category")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tümü" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(CATEGORY_LABELS).map(([v, l]) => (
+                  <SelectItem key={v} value={v}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FilterField>
+          <FilterField label="İşlem">
+            <Select value={draft.transaction_type} onValueChange={sd("transaction_type")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tümü" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(TRANSACTION_LABELS).map(([v, l]) => (
+                  <SelectItem key={v} value={v}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FilterField>
+          <FilterField label="Şehir">
+            <Input value={draft.city} onChange={(e) => sd("city")(e.target.value)} />
+          </FilterField>
+          <FilterField label="İlçe">
+            <Input value={draft.district} onChange={(e) => sd("district")(e.target.value)} />
+          </FilterField>
+          <FilterField label="Mahalle">
+            <Input
+              value={draft.neighborhood}
+              onChange={(e) => sd("neighborhood")(e.target.value)}
+            />
+          </FilterField>
+          <FilterField label="Oda">
+            <Input
+              value={draft.room_count}
+              onChange={(e) => sd("room_count")(e.target.value)}
+              placeholder="5+1"
+            />
+          </FilterField>
+          <FilterField label="Min Fiyat">
+            <Input
+              type="number"
+              value={draft.priceMin}
+              onChange={(e) => sd("priceMin")(e.target.value)}
+            />
+          </FilterField>
+          <FilterField label="Maks Fiyat">
+            <Input
+              type="number"
+              value={draft.priceMax}
+              onChange={(e) => sd("priceMax")(e.target.value)}
+            />
+          </FilterField>
+        </div>
+        <div className="flex justify-end">
+          <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
+            Filtreleri temizle
+          </Button>
+        </div>
+      </div>
+
+      {/* Results */}
+      {error ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-12 text-center text-sm text-destructive">
+          Yüklenemedi: {error}
+        </div>
+      ) : result === null ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+          <Loader2 className="size-6 animate-spin text-gold" />
+        </div>
+      ) : result.items.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center text-sm text-muted-foreground">
+          Filtrelerinize uygun yayında portföy bulunamadı.
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground">{total} portföy bulundu</p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {result.items.map((p) => (
+              <TeaserCard key={p.id} p={p} />
+            ))}
           </div>
-        </div>
-
-        {/* Quick filter chips */}
-        <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-0.5">
-          {searchQuickChips.map((c) => {
-            const active = c.kind === "toggle" ? !!filters[c.key!] : false;
-            return (
-              <button
-                key={c.id}
-                onClick={() =>
-                  c.kind === "modal" ? setFilterOpen(true) : setFilter(c.key!, !active)
-                }
-                className={cn(
-                  "inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors",
-                  active
-                    ? "bg-gold/15 text-gold ring-gold/40"
-                    : "bg-surface-2 text-secondary-foreground ring-border hover:ring-border-strong",
-                )}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page === 0}
+                onClick={() => setPage((x) => Math.max(0, x - 1))}
+                className="gap-1"
               >
-                {c.label}
-                {active && <X className="size-3" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Result count + applied chips */}
-      <div className="flex flex-wrap items-center gap-2 py-3">
-        <p className="text-sm">
-          <span className="font-display text-lg font-semibold text-foreground">
-            {filtered.length}
-          </span>
-          <span className="text-muted-foreground"> portföy</span>
-        </p>
-        {activeChips.length > 0 && (
-          <>
-            <span className="text-border-strong">·</span>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {activeChips.map((chip) => (
-                <button
-                  key={chip.key}
-                  onClick={chip.onRemove}
-                  className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-border transition-colors hover:text-foreground"
-                >
-                  {chip.label}
-                  <X className="size-3" />
-                </button>
-              ))}
-              <button
-                onClick={resetFilters}
-                className="px-2 text-xs font-medium text-gold underline-offset-2 hover:underline"
+                <ChevronLeft className="size-4" /> Önceki
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {page + 1} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page + 1 >= totalPages}
+                onClick={() => setPage((x) => x + 1)}
+                className="gap-1"
               >
-                Temizle
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Split layout: list (left) + map (right) */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_minmax(380px,44%)]">
-        {/* Results list */}
-        <div className="space-y-3">
-          {filtered.length > 0 ? (
-            filtered.map((p) => (
-              <SearchResultCard
-                key={p.id}
-                portfolio={p}
-                selected={selected?.id === p.id}
-                saved={isSaved(p.id)}
-                onSelect={(x) => setSelectedId(x.id)}
-                onHover={(x) => setHoveredId(x?.id ?? null)}
-                onToggleSave={toggleSave}
-                onRequestDetail={setRequestTarget}
-              />
-            ))
-          ) : (
-            <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-dashed border-border-strong bg-surface-2 text-sm text-muted-foreground">
-              Bu filtrelerle eşleşen portföy yok.
+                Sonraki <ChevronRight className="size-4" />
+              </Button>
             </div>
           )}
-        </div>
-
-        {/* Map */}
-        <div className="hidden lg:block">
-          <div className="sticky top-[8.5rem] h-[calc(100vh-10rem)]">
-            <div className="relative size-full">
-              <MapCanvasMock
-                portfolios={filtered}
-                selectedId={selected?.id}
-                hoveredId={hoveredId}
-                onSelect={(p) => setSelectedId(p.id)}
-                onHover={(p) => setHoveredId(p?.id ?? null)}
-                className="h-full"
-              />
-              {/* Floating selected card */}
-              {selected && (
-                <div className="absolute inset-x-3 bottom-10 z-10 mx-auto max-w-md">
-                  <SearchResultCard
-                    portfolio={selected}
-                    selected
-                    saved={isSaved(selected.id)}
-                    onToggleSave={toggleSave}
-                    onRequestDetail={setRequestTarget}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <DetailRequestModal
-        portfolio={requestTarget}
-        open={!!requestTarget}
-        onOpenChange={(o) => !o && setRequestTarget(null)}
-      />
-
-      <FilterModal
-        open={filterOpen}
-        onOpenChange={setFilterOpen}
-        filters={filters}
-        setFilter={setFilter}
-        resultCount={filtered.length}
-        onClear={resetFilters}
-      />
-
-      <SaveSearchModal
-        open={saveOpen}
-        onOpenChange={setSaveOpen}
-        activeCount={activeCount}
-        resultCount={filtered.length}
-        onSave={confirmSave}
-      />
+        </>
+      )}
     </PageContainer>
+  );
+}
+
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs text-muted-foreground">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function TeaserCard({ p }: { p: PortfolioWithCover }) {
+  return (
+    <Link
+      to="/dashboard/portfolios/$id"
+      params={{ id: p.id }}
+      className={cn(
+        "group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong",
+      )}
+    >
+      <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
+        {p.cover_url ? (
+          <img
+            src={p.cover_url}
+            alt={p.title}
+            loading="lazy"
+            decoding="async"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center text-muted-foreground">
+            <ImageOff className="size-7" />
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <span>{CATEGORY_LABELS[p.category]}</span>
+          <span>·</span>
+          <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
+        </div>
+        <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">{p.title}</h3>
+        <p className="text-xs text-muted-foreground">
+          {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—"}
+        </p>
+        <p className="mt-2 font-display text-lg font-semibold text-gold">
+          {formatPortfolioPrice(p.price, p.currency)}
+        </p>
+      </div>
+    </Link>
   );
 }

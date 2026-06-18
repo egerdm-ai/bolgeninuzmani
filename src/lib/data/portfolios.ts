@@ -180,6 +180,86 @@ async function imageUrlFor(img: Pick<PortfolioImage, "path" | "visibility">): Pr
   return portfolioImageUrl(img.path);
 }
 
+/** Keşfet filters (Slice 5). All optional; combined with AND (q is a text OR). */
+export type NetworkFilters = {
+  q?: string;
+  city?: string;
+  district?: string;
+  neighborhood?: string;
+  transaction_type?: TransactionType | null;
+  category?: PortfolioCategory | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  room_count?: string;
+};
+
+export type NetworkResult = { items: PortfolioWithCover[]; total: number };
+
+const coverUrlFromJoin = (
+  images: Pick<PortfolioImage, "path" | "is_cover" | "sort_order" | "visibility">[],
+): string | null => {
+  const pub = images.filter((i) => i.visibility === "public");
+  const cover =
+    pub.find((i) => i.is_cover) ?? [...pub].sort((a, b) => a.sort_order - b.sort_order)[0];
+  return cover ? portfolioImageUrl(cover.path) : null;
+};
+
+/**
+ * Keşfet (Slice 5): other agents' ACTIVE portfolios as TEASER, server-side
+ * filtered + paginated. RLS (`portfolios_select_network`) already restricts to
+ * active + verified viewer; we additionally exclude the viewer's own. Teaser
+ * columns only (D13-safe) + public cover.
+ */
+export async function listNetworkPortfolios(
+  viewerId: string,
+  filters: NetworkFilters,
+  page: number,
+  pageSize = 12,
+): Promise<NetworkResult> {
+  let query = supabase
+    .from("portfolios")
+    .select("*, portfolio_images(path, is_cover, sort_order, visibility)", { count: "exact" })
+    .eq("status", "active")
+    .neq("owner_id", viewerId);
+
+  if (filters.city) query = query.ilike("city", `%${filters.city}%`);
+  if (filters.district) query = query.ilike("district", `%${filters.district}%`);
+  if (filters.neighborhood) query = query.ilike("neighborhood", `%${filters.neighborhood}%`);
+  if (filters.transaction_type) query = query.eq("transaction_type", filters.transaction_type);
+  if (filters.category) query = query.eq("category", filters.category);
+  if (filters.priceMin != null) query = query.gte("price", filters.priceMin);
+  if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
+  if (filters.room_count) query = query.eq("room_count", filters.room_count);
+  if (filters.q) {
+    // sanitize for the PostgREST or() filter grammar
+    const safe = filters.q.replace(/[,()*%]/g, " ").trim();
+    if (safe)
+      query = query.or(
+        `title.ilike.%${safe}%,city.ilike.%${safe}%,district.ilike.%${safe}%,neighborhood.ilike.%${safe}%`,
+      );
+  }
+
+  const from = page * pageSize;
+  query = query.order("created_at", { ascending: false }).range(from, from + pageSize - 1);
+
+  const { data, error, count } = await query;
+  if (error) throw error;
+
+  const items: PortfolioWithCover[] = (data ?? []).map((row) => {
+    const images = (row.portfolio_images ?? []) as Pick<
+      PortfolioImage,
+      "path" | "is_cover" | "sort_order" | "visibility"
+    >[];
+    const { portfolio_images: _drop, ...portfolio } = row as typeof row & {
+      portfolio_images: unknown;
+    };
+    void _drop;
+    return { ...(portfolio as Portfolio), cover_url: coverUrlFromJoin(images) };
+  });
+
+  return { items, total: count ?? 0 };
+}
+
 // ---------------------------------------------------------------------------
 // Writes (owner-only via RLS; insert requires is_verified)
 // ---------------------------------------------------------------------------

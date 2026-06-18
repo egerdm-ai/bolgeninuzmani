@@ -67,4 +67,22 @@ const ps = mig.indexOf("create or replace function public.get_public_profile");
 const pe = mig.indexOf("$$;", ps);
 assertNoForbidden("get_public_profile body", stripSqlComments(mig.slice(ps, pe)));
 
-console.log("\npublic teaser: no locked field leaks ✓");
+// 5) Keşfet (Slice 5) network list path — must select ONLY teaser (no locked
+//    tables). Scope to the listNetworkPortfolios function body (the file also
+//    holds getMyPortfolioFull which legitimately reads locked tables for owners).
+const portfoliosTs = readFileSync(join(root, "src/lib/data/portfolios.ts"), "utf8");
+const nfStart = portfoliosTs.indexOf("export async function listNetworkPortfolios");
+const nfEnd = portfoliosTs.indexOf("// Writes (owner-only", nfStart);
+assert.ok(nfStart >= 0 && nfEnd > nfStart, "could not locate listNetworkPortfolios body");
+assertNoForbidden(
+  "listNetworkPortfolios body",
+  stripTsComments(portfoliosTs.slice(nfStart, nfEnd)),
+);
+
+// 6) Keşfet page itself.
+assertNoForbidden(
+  "dashboard.search.tsx (Keşfet)",
+  stripTsComments(readFileSync(join(root, "src/routes/dashboard.search.tsx"), "utf8")),
+);
+
+console.log("\npublic teaser + Keşfet: no locked field leaks ✓");

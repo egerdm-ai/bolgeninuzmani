@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Pencil, Share2, Loader2, Lock, MapPin, ImageOff, FileText, ArrowLeft } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -87,7 +88,12 @@ function OwnerPortfolioDetail() {
     <PageContainer className="space-y-6">
       <PageHeader
         title="Portföy Detayı"
-        breadcrumbs={[{ label: "Portföylerim", to: "/dashboard/portfolios" }, { label: p.title }]}
+        breadcrumbs={[
+          isOwner
+            ? { label: "Portföylerim", to: "/dashboard/portfolios" }
+            : { label: "Keşfet", to: "/dashboard/search" },
+          { label: p.title },
+        ]}
         actions={
           isOwner && (
             <>
@@ -206,25 +212,42 @@ function OwnerPortfolioDetail() {
               <h3 className="text-sm font-semibold text-foreground">Kilitli Bilgiler</h3>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20).
+              {isOwner
+                ? "Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20)."
+                : "Tam adres, malik bilgisi, belgeler ve özel notlar erişim onayı ile açılır."}
             </p>
-            {full.private ? (
-              <dl className="space-y-2 text-sm">
-                <LockRow label="Tam Adres" value={full.private.exact_address} />
-                <LockRow
-                  label="Tam Koordinat"
-                  value={
-                    full.private.exact_lat != null && full.private.exact_lng != null
-                      ? `${full.private.exact_lat}, ${full.private.exact_lng}`
-                      : null
-                  }
-                />
-                <LockRow label="Özel Açıklama" value={full.private.private_description} />
-                <LockRow label="Özel Notlar" value={full.private.private_notes} />
-                <AttrList data={full.private.attributes} />
-              </dl>
+            {isOwner ? (
+              full.private ? (
+                <dl className="space-y-2 text-sm">
+                  <LockRow label="Tam Adres" value={full.private.exact_address} />
+                  <LockRow
+                    label="Tam Koordinat"
+                    value={
+                      full.private.exact_lat != null && full.private.exact_lng != null
+                        ? `${full.private.exact_lat}, ${full.private.exact_lng}`
+                        : null
+                    }
+                  />
+                  <LockRow label="Özel Açıklama" value={full.private.private_description} />
+                  <LockRow label="Özel Notlar" value={full.private.private_notes} />
+                  <AttrList data={full.private.attributes} />
+                </dl>
+              ) : (
+                <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
+              )
             ) : (
-              <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
+              // Non-owner (logged-in verified agent): no values (RLS returns none). The
+              // Detay Talebi / controlled-access engine is M3 — not built this turn.
+              <div className="rounded-lg border border-gold/25 bg-gold/[0.06] p-3 text-center">
+                <p className="text-xs font-medium text-foreground">🔒 Detay Talebi gerekli</p>
+                <Button
+                  size="sm"
+                  className="mt-2 w-full bg-gradient-gold text-primary-foreground hover:opacity-90"
+                  onClick={() => toast.info("Kontrollü erişim (Detay Talebi) yakında")}
+                >
+                  Detay Talebi Gönder
+                </Button>
+              </div>
             )}
           </SurfaceCard>
 
@@ -242,7 +265,9 @@ function OwnerPortfolioDetail() {
           {/* Documents (locked) */}
           <SurfaceCard className="space-y-2">
             <h3 className="text-sm font-semibold text-foreground">Belgeler (kilitli)</h3>
-            {full.documents.length === 0 ? (
+            {!isOwner ? (
+              <p className="text-xs text-muted-foreground">🔒 Erişim onayı ile görünür.</p>
+            ) : full.documents.length === 0 ? (
               <p className="text-xs text-muted-foreground">Belge eklenmemiş.</p>
             ) : (
               full.documents.map((d) => (
