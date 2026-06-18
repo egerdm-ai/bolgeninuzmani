@@ -2,7 +2,13 @@ import { ShieldCheck, MapPin, ImagePlus, Lock, X } from "lucide-react";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  PUBLIC_ATTRIBUTES,
+  LOCKED_ATTRIBUTES,
+  type AttributeDef,
+} from "@/lib/portfolio-attributes";
 import {
   Select,
   SelectContent,
@@ -78,6 +84,10 @@ export const emptyPrivate: PrivateFormState = {
   private_notes: "",
 };
 
+// Flat attribute form state keyed by registry key (D33). Split on submit.
+export type AttrFormState = Record<string, string | boolean>;
+export const emptyAttrs: AttrFormState = {};
+
 const toNum = (s: string): number | null => (s.trim() === "" ? null : Number(s));
 const toList = (s: string) =>
   s
@@ -136,6 +146,8 @@ export function PortfolioFormFields({
   setPriv,
   files,
   setFiles,
+  attrs,
+  setAttrs,
   existingImages = [],
 }: {
   teaser: TeaserFormState;
@@ -144,10 +156,13 @@ export function PortfolioFormFields({
   setPriv: (p: PrivateFormState) => void;
   files: File[];
   setFiles: (f: File[]) => void;
+  attrs: AttrFormState;
+  setAttrs: (a: AttrFormState) => void;
   existingImages?: { url: string; is_cover: boolean }[];
 }) {
   const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
   const sp = (k: keyof PrivateFormState) => (v: string) => setPriv({ ...priv, [k]: v });
+  const setAttr = (k: string, v: string | boolean) => setAttrs({ ...attrs, [k]: v });
 
   return (
     <>
@@ -278,6 +293,7 @@ export function PortfolioFormFields({
             placeholder="Havuz, Deniz manzarası, Otopark"
           />
         </Field>
+        <AttrGrid defs={PUBLIC_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
       </SurfaceCard>
 
       <SurfaceCard className="space-y-4">
@@ -389,8 +405,71 @@ export function PortfolioFormFields({
             onChange={(e) => sp("private_notes")(e.target.value)}
           />
         </Field>
+        <AttrGrid defs={LOCKED_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
       </SurfaceCard>
     </>
+  );
+}
+
+function AttrGrid({
+  defs,
+  attrs,
+  onChange,
+}: {
+  defs: AttributeDef[];
+  attrs: AttrFormState;
+  onChange: (key: string, value: string | boolean) => void;
+}) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-3">
+      {defs.map((def) => (
+        <div key={def.key} className="space-y-1.5">
+          <Label>{def.label}</Label>
+          <AttrInput def={def} value={attrs[def.key]} onChange={(v) => onChange(def.key, v)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AttrInput({
+  def,
+  value,
+  onChange,
+}: {
+  def: AttributeDef;
+  value: string | boolean | undefined;
+  onChange: (v: string | boolean) => void;
+}) {
+  if (def.type === "boolean") {
+    return (
+      <div className="flex h-9 items-center">
+        <Switch checked={value === true} onCheckedChange={onChange} />
+      </div>
+    );
+  }
+  if (def.type === "select") {
+    return (
+      <Select value={typeof value === "string" ? value : ""} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Seçin" />
+        </SelectTrigger>
+        <SelectContent>
+          {def.options?.map((o) => (
+            <SelectItem key={o.value} value={o.value}>
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  }
+  return (
+    <Input
+      type={def.type === "number" ? "number" : "text"}
+      value={typeof value === "string" ? value : ""}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 

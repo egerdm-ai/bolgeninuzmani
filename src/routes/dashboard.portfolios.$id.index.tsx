@@ -13,6 +13,7 @@ import {
   STATUS_LABELS,
   formatPortfolioPrice,
 } from "@/lib/portfolio-labels";
+import { attributeDef } from "@/lib/portfolio-attributes";
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/")({
   component: OwnerPortfolioDetail,
@@ -173,6 +174,7 @@ function OwnerPortfolioDetail() {
                 ))}
               </div>
             )}
+            <AttrList data={p.attributes} />
             {p.public_description && (
               <p className="pt-1 text-sm leading-relaxed text-secondary-foreground">
                 {p.public_description}
@@ -204,6 +206,7 @@ function OwnerPortfolioDetail() {
                 />
                 <LockRow label="Özel Açıklama" value={full.private.private_description} />
                 <LockRow label="Özel Notlar" value={full.private.private_notes} />
+                <AttrList data={full.private.attributes} />
               </dl>
             ) : (
               <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
@@ -240,6 +243,35 @@ function OwnerPortfolioDetail() {
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+function AttrList({ data }: { data: unknown }) {
+  if (!data || typeof data !== "object") return null;
+  const entries = Object.entries(data as Record<string, unknown>).filter(([k]) => attributeDef(k));
+  if (entries.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5 pt-1">
+      {entries.map(([k, v]) => {
+        const def = attributeDef(k)!;
+        const val =
+          def.type === "boolean"
+            ? v
+              ? "Evet"
+              : "Hayır"
+            : def.type === "select"
+              ? (def.options?.find((o) => o.value === v)?.label ?? String(v))
+              : String(v);
+        return (
+          <span
+            key={k}
+            className="rounded-md bg-surface-2 px-2 py-0.5 text-xs text-secondary-foreground"
+          >
+            {def.label}: {val}
+          </span>
+        );
+      })}
+    </div>
   );
 }
 

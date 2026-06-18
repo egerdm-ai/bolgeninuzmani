@@ -1,8 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5";
   };
@@ -83,6 +81,7 @@ export type Database = {
           path: string;
           portfolio_id: string;
           sort_order: number;
+          visibility: Database["public"]["Enums"]["image_visibility"];
         };
         Insert: {
           id?: string;
@@ -90,6 +89,7 @@ export type Database = {
           path: string;
           portfolio_id: string;
           sort_order?: number;
+          visibility?: Database["public"]["Enums"]["image_visibility"];
         };
         Update: {
           id?: string;
@@ -97,6 +97,7 @@ export type Database = {
           path?: string;
           portfolio_id?: string;
           sort_order?: number;
+          visibility?: Database["public"]["Enums"]["image_visibility"];
         };
         Relationships: [
           {
@@ -110,6 +111,7 @@ export type Database = {
       };
       portfolio_private: {
         Row: {
+          attributes: Json;
           exact_address: string | null;
           exact_lat: number | null;
           exact_lng: number | null;
@@ -119,6 +121,7 @@ export type Database = {
           private_notes: string | null;
         };
         Insert: {
+          attributes?: Json;
           exact_address?: string | null;
           exact_lat?: number | null;
           exact_lng?: number | null;
@@ -128,6 +131,7 @@ export type Database = {
           private_notes?: string | null;
         };
         Update: {
+          attributes?: Json;
           exact_address?: string | null;
           exact_lat?: number | null;
           exact_lng?: number | null;
@@ -150,6 +154,7 @@ export type Database = {
         Row: {
           approx_lat: number | null;
           approx_lng: number | null;
+          attributes: Json;
           category: Database["public"]["Enums"]["portfolio_category"];
           city: string | null;
           created_at: string;
@@ -175,6 +180,7 @@ export type Database = {
         Insert: {
           approx_lat?: number | null;
           approx_lng?: number | null;
+          attributes?: Json;
           category: Database["public"]["Enums"]["portfolio_category"];
           city?: string | null;
           created_at?: string;
@@ -200,6 +206,7 @@ export type Database = {
         Update: {
           approx_lat?: number | null;
           approx_lng?: number | null;
+          attributes?: Json;
           category?: Database["public"]["Enums"]["portfolio_category"];
           city?: string | null;
           created_at?: string;
@@ -351,6 +358,7 @@ export type Database = {
       application_status: "new" | "reviewed" | "invited" | "rejected";
       currency: "TRY" | "USD" | "EUR";
       document_kind: "tapu" | "ruhsat" | "imar_plani" | "proje" | "pdf" | "diger";
+      image_visibility: "public" | "locked";
       membership_tier: "standard" | "pro" | "elite";
       portfolio_category: "konut" | "ticari" | "arsa" | "turizm" | "isletme" | "ozel_varlik";
       portfolio_status: "draft" | "active" | "passive" | "sold";
@@ -485,6 +493,7 @@ export const Constants = {
       application_status: ["new", "reviewed", "invited", "rejected"],
       currency: ["TRY", "USD", "EUR"],
       document_kind: ["tapu", "ruhsat", "imar_plani", "proje", "pdf", "diger"],
+      image_visibility: ["public", "locked"],
       membership_tier: ["standard", "pro", "elite"],
       portfolio_category: ["konut", "ticari", "arsa", "turizm", "isletme", "ozel_varlik"],
       portfolio_status: ["draft", "active", "passive", "sold"],

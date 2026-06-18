@@ -13,6 +13,7 @@ import {
   buildPrivateInput,
   emptyTeaser,
   emptyPrivate,
+  emptyAttrs,
 } from "@/components/portfolio/portfolio-form-fields";
 
 export const Route = createFileRoute("/dashboard/portfolios/new")({
@@ -24,6 +25,7 @@ function NewPortfolio() {
   const { user } = useAuth();
   const [teaser, setTeaser] = useState(emptyTeaser);
   const [priv, setPriv] = useState(emptyPrivate);
+  const [attrs, setAttrs] = useState(emptyAttrs);
   const [files, setFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -41,6 +43,7 @@ function NewPortfolio() {
         buildTeaserInput(teaser, status),
         buildPrivateInput(priv),
         files,
+        attrs,
       );
       toast.success(status === "active" ? "Portföy yayınlandı" : "Taslak kaydedildi");
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
@@ -70,6 +73,8 @@ function NewPortfolio() {
           setPriv={setPriv}
           files={files}
           setFiles={setFiles}
+          attrs={attrs}
+          setAttrs={setAttrs}
         />
         <div className="flex items-center justify-end gap-2">
           <Button

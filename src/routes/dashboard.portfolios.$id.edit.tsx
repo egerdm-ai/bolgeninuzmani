@@ -27,9 +27,24 @@ import {
   buildPrivateInput,
   emptyTeaser,
   emptyPrivate,
+  emptyAttrs,
   type TeaserFormState,
   type PrivateFormState,
+  type AttrFormState,
 } from "@/components/portfolio/portfolio-form-fields";
+
+// Merge public + locked attribute bags into the flat form state (numbers → strings).
+function mergeAttrs(pub: unknown, lock: unknown): AttrFormState {
+  const out: AttrFormState = {};
+  for (const src of [pub, lock]) {
+    if (src && typeof src === "object") {
+      for (const [k, v] of Object.entries(src as Record<string, unknown>)) {
+        out[k] = typeof v === "boolean" ? v : String(v);
+      }
+    }
+  }
+  return out;
+}
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/edit")({
   component: EditPortfolio,
@@ -44,6 +59,7 @@ function EditPortfolio() {
 
   const [teaser, setTeaser] = useState<TeaserFormState>(emptyTeaser);
   const [priv, setPriv] = useState<PrivateFormState>(emptyPrivate);
+  const [attrs, setAttrs] = useState<AttrFormState>(emptyAttrs);
   const [status, setStatus] = useState<PortfolioStatus>("draft");
   const [existingImages, setExistingImages] = useState<{ url: string; is_cover: boolean }[]>([]);
   const [files, setFiles] = useState<File[]>([]);
@@ -93,6 +109,7 @@ function EditPortfolio() {
           private_description: full.private?.private_description ?? "",
           private_notes: full.private?.private_notes ?? "",
         });
+        setAttrs(mergeAttrs(p.attributes, full.private?.attributes));
         setExistingImages(full.images.map((i) => ({ url: i.url, is_cover: i.is_cover })));
         setLoading(false);
       })
@@ -115,7 +132,7 @@ function EditPortfolio() {
     }
     setSaving(true);
     try {
-      await updatePortfolio(id, buildTeaserInput(teaser, status), buildPrivateInput(priv));
+      await updatePortfolio(id, buildTeaserInput(teaser, status), buildPrivateInput(priv), attrs);
       if (files.length) await uploadImages(id, files);
       toast.success("Portföy güncellendi");
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
@@ -188,6 +205,8 @@ function EditPortfolio() {
           setPriv={setPriv}
           files={files}
           setFiles={setFiles}
+          attrs={attrs}
+          setAttrs={setAttrs}
           existingImages={existingImages}
         />
         <div className="flex items-center justify-end gap-2">

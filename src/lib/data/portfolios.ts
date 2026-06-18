@@ -1,5 +1,10 @@
 import { supabase } from "@/lib/supabase/client";
 import type { Database, Json } from "@/lib/database.types";
+import {
+  splitAttributes,
+  assertNoLockedInPublic,
+  type AttributesInput,
+} from "@/lib/portfolio-attributes";
 
 // ---------------------------------------------------------------------------
 // Portfolio data access (M2). Typed CRUD. NO business logic in components.
@@ -157,41 +162,60 @@ export async function createPortfolio(
   teaser: PortfolioTeaserInput,
   priv: PortfolioPrivateInput = {},
   files: File[] = [],
+  attributes: AttributesInput = {},
 ): Promise<{ id: string; slug: string }> {
+  // D33: split attributes by the registry; the guard hard-fails if any locked
+  // key reaches the public bag (which would leak via the teaser table).
+  const { publicAttrs, lockedAttrs } = splitAttributes(attributes);
+  assertNoLockedInPublic(publicAttrs);
+
   // slug:"" → the BEFORE INSERT trigger derives it from title (runs before the
   // NOT NULL/unique check). approx_lat/lng omitted → set by the private trigger.
   const { data: created, error } = await supabase
     .from("portfolios")
-    .insert({ owner_id: ownerId, slug: "", ...teaser })
+    .insert({ owner_id: ownerId, slug: "", ...teaser, attributes: publicAttrs as Json })
     .select("id, slug")
     .single();
   if (error) throw error;
 
   await uploadImages(created.id, files);
 
-  if (privateHasData(priv)) {
+  const hasLockedAttrs = Object.keys(lockedAttrs).length > 0;
+  if (privateHasData(priv) || hasLockedAttrs) {
     const { error: pErr } = await supabase
       .from("portfolio_private")
-      .insert({ portfolio_id: created.id, ...priv });
+      .insert({ portfolio_id: created.id, ...priv, attributes: lockedAttrs as Json });
     if (pErr) throw pErr;
   }
 
   return created;
 }
 
-/** Update teaser columns and upsert the locked private row. */
+/** Update teaser columns + public attributes, and upsert the locked private row. */
 export async function updatePortfolio(
   id: string,
   teaser: Partial<PortfolioTeaserInput>,
   priv?: PortfolioPrivateInput,
+  attributes: AttributesInput = {},
 ): Promise<void> {
-  const { error } = await supabase.from("portfolios").update(teaser).eq("id", id);
+  const { publicAttrs, lockedAttrs } = splitAttributes(attributes);
+  assertNoLockedInPublic(publicAttrs);
+
+  const { error } = await supabase
+    .from("portfolios")
+    .update({ ...teaser, attributes: publicAttrs as Json })
+    .eq("id", id);
   if (error) throw error;
 
-  if (priv && privateHasData(priv)) {
+  // Only touch portfolio_private when the caller actually manages it (edit form
+  // always sends priv) — avoids wiping locked data on a teaser-only update.
+  if (priv !== undefined || Object.keys(lockedAttrs).length > 0) {
     const { error: pErr } = await supabase
       .from("portfolio_private")
-      .upsert({ portfolio_id: id, ...priv }, { onConflict: "portfolio_id" });
+      .upsert(
+        { portfolio_id: id, ...(priv ?? {}), attributes: lockedAttrs as Json },
+        { onConflict: "portfolio_id" },
+      );
     if (pErr) throw pErr;
   }
 }

@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:attrs": "npx tsx scripts/test-portfolio-attributes.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
