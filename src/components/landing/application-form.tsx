@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 /**
- * ApplicationForm — private beta / waitlist application.
+ * ApplicationForm — Kurucu Üyelik başvuru formu.
  * Local/mock submit only. No backend.
- * TODO[backend]: POST to `applications` table + notify VAULT team (email).
+ * TODO[backend]: POST to `applications` table + notify team (email).
  */
 export function ApplicationForm() {
   const [submitted, setSubmitted] = React.useState(false);
@@ -29,7 +29,7 @@ export function ApplicationForm() {
           Başvurunuz alındı
         </h3>
         <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
-          VAULT ekibi başvurunuzu inceleyip kısa süre içinde sizinle iletişime geçecek.
+          Ekibimiz başvurunuzu inceleyip kısa süre içinde sizinle iletişime geçecek.
         </p>
         <Button
           variant="outline"
@@ -49,18 +49,18 @@ export function ApplicationForm() {
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="name" label="Ad Soyad" placeholder="Adınız ve soyadınız" required />
-        <Field id="company" label="Şirket" placeholder="Çalıştığınız şirket" />
+        <Field id="company" label="Şirket / Ofis" placeholder="Çalıştığınız şirket / ofis" />
         <Field id="phone" label="Telefon" placeholder="+90 5xx xxx xx xx" type="tel" required />
         <Field id="email" label="E-posta" placeholder="ornek@firma.com" type="email" required />
         <Field
           id="regions"
-          label="Çalıştığınız bölgeler"
-          placeholder="Bodrum, Yalıkavak, Bebek…"
+          label="Uzmanlık bölgeleri"
+          placeholder="Bodrum, Yalıkavak, Tuzla…"
           className="sm:col-span-2"
         />
         <div className="sm:col-span-2">
           <Label htmlFor="ptype" className="text-xs text-muted-foreground">
-            Portföy tipi
+            En çok çalıştığınız portföy tipi
           </Label>
           <select
             id="ptype"
@@ -70,21 +70,52 @@ export function ApplicationForm() {
             <option value="" disabled>
               Seçin
             </option>
-            <option>Villa</option>
-            <option>Yalı</option>
-            <option>Daire / Rezidans</option>
+            <option>Konut / Daire</option>
+            <option>Villa / Yalı</option>
             <option>Arsa</option>
-            <option>Ticari</option>
-            <option>Karma</option>
+            <option>Ticari mülk</option>
+            <option>Fabrika / Depo</option>
+            <option>Otel / Restoran</option>
+            <option>İşletme devri</option>
+            <option>Yatırım varlığı</option>
           </select>
         </div>
         <div className="sm:col-span-2">
+          <Label htmlFor="license" className="text-xs text-muted-foreground">
+            Yetki belgeniz var mı?
+          </Label>
+          <select
+            id="license"
+            className="mt-1.5 h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm text-foreground outline-none focus:border-gold/50"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Seçin
+            </option>
+            <option>Evet, taşınmaz ticareti yetki belgem var</option>
+            <option>Başvuru sürecinde</option>
+            <option>Hayır</option>
+          </select>
+        </div>
+        <Field
+          id="social"
+          label="LinkedIn veya Instagram profiliniz"
+          placeholder="linkedin.com/in/… veya @kullaniciadi"
+          className="sm:col-span-2"
+        />
+        <Field
+          id="referral"
+          label="Davet eden kişi / referans"
+          placeholder="Sizi yönlendiren profesyonel (opsiyonel)"
+          className="sm:col-span-2"
+        />
+        <div className="sm:col-span-2">
           <Label htmlFor="note" className="text-xs text-muted-foreground">
-            Not
+            Notunuz
           </Label>
           <Textarea
             id="note"
-            placeholder="VAULT'tan beklentileriniz veya eklemek istedikleriniz…"
+            placeholder="Beklentileriniz veya eklemek istedikleriniz…"
             className="mt-1.5 min-h-[90px] bg-background/60"
           />
         </div>
@@ -97,7 +128,7 @@ export function ApplicationForm() {
         Başvurumu Gönder <Send className="size-4" />
       </Button>
       <p className="mt-3 text-center text-[11px] text-muted-foreground">
-        Başvurular davetli ve doğrulanmış profesyonel kriterlerine göre değerlendirilir.
+        Başvurular doğrulanmış emlak profesyonelleri arasından değerlendirilir.
       </p>
     </form>
   );
