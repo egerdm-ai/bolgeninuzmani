@@ -30,7 +30,7 @@ export function LandingHeroProductMockup() {
         <div className="relative h-[300px] sm:h-[360px]">
           <img
             src={heroMap}
-            alt="VAULT dark luxury harita keşfi"
+            alt="Bölgenin Uzmanı harita keşfi"
             width={1024}
             height={896}
             className="size-full object-cover"
