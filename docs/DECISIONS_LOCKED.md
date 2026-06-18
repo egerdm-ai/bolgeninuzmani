@@ -75,10 +75,11 @@ private_description, private_notes.
   için satıra SELECT hakkı alan başka bir emlakçı kilitli kolonları da okuyabilir.
   Public teaser ise bir **view/RPC** ile sunulur; anon asla `portfolios` taban
   tablosuna dokunmaz.
-- **D14 — Onboarding: açık (self-serve) kayıt YOK.** Admin (kurucular) Supabase
-  invite ile davet eder → emlakçı e-posta linkiyle şifre belirler (email/password).
-  Landing başvuru formu → `applications` tablosu → admin inceler → davet eder. Açık
-  kayıt olmadığı için "kapalı ağ" sınırı otomatik sağlanır.
+- **D14 (REVİZE) — Onboarding: hibrit.** Admin (kurucular) ilk ~10–20 emlakçıyı
+  doğrudan oluşturur (anında `verified`). Self-serve kayıt **serbest**, ama kaydolan
+  kullanıcı `pending` olur ve admin doğrulayana kadar ağda hiçbir şey göremez.
+  Kapalı ağ sınırı "kayıt yok"tan → **"doğrulama olmadan erişim yok"a** taşındı
+  (bkz. D27). Landing başvuru formu → `applications` tablosu → admin inceler (bkz. D28).
 - **D15 — Asistan ismi ertelendi** (AI sonraki faz); şimdilik "Asistan" placeholder.
 - **D16 — Share domain hedefi `bolgeninuzmani.com`** (alınacak); canlıya çıkana
   kadar placeholder kalır.
@@ -106,3 +107,13 @@ private_description, private_notes.
   brand sweep (VAULT→Bölgenin Uzmanı, yalnızca copy/wordmark, redesign değil) ·
   ertelenen route'ları quarantine · Lovable temizliği (D25) · `typecheck` script ekle.
   Sonra Slice 1 (auth+profiles+roles).
+- **D27 — Doğrulama sınırı (verification gate).** `profiles.status ∈ {pending,
+  verified, suspended}`. RLS **tüm ağ okumalarını** (başka emlakçıların portföyleri/
+  teaser, Keşfet, diğer profiller) `verified` şartına bağlar. `pending` kullanıcı
+  yalnızca **kendi profilini** okur/tamamlar; portföy oluşturamaz, Keşfet yapamaz.
+  Admin `pending → verified` yapar (başta Supabase dashboard'dan; sonra admin UI).
+  `suspended` = erişim kapalı. **Public `/p/$slug` bundan etkilenmez** (anon teaser
+  yolu ayrı; D13).
+- **D28 — Landing başvuru formu → `applications` tablosu.** Alanlar: ad, telefon,
+  e-posta, şirket, bölgeler, mesaj, `status`. Kayıt sonrası **admin'e e-posta**
+  (Resend). Başvuru ≠ hesap; admin değerlendirip davet/oluşturma yapar (D14).
