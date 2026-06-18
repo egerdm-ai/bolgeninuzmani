@@ -10,6 +10,7 @@ import {
 import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "../lib/auth/auth-context";
 import { SavedProvider } from "../lib/saved-store";
 import { FollowProvider } from "../lib/follow-store";
 import { DetailRequestProvider } from "../lib/detail-request-store";
@@ -140,21 +141,23 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SavedProvider>
-        <FollowProvider>
-          <RegionWatchProvider>
-            <MySearchesProvider>
-              <NotificationProvider>
-                <DetailRequestProvider>
-                  {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-                  <Outlet />
-                  <Toaster position="top-right" richColors />
-                </DetailRequestProvider>
-              </NotificationProvider>
-            </MySearchesProvider>
-          </RegionWatchProvider>
-        </FollowProvider>
-      </SavedProvider>
+      <AuthProvider>
+        <SavedProvider>
+          <FollowProvider>
+            <RegionWatchProvider>
+              <MySearchesProvider>
+                <NotificationProvider>
+                  <DetailRequestProvider>
+                    {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+                    <Outlet />
+                    <Toaster position="top-right" richColors />
+                  </DetailRequestProvider>
+                </NotificationProvider>
+              </MySearchesProvider>
+            </RegionWatchProvider>
+          </FollowProvider>
+        </SavedProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

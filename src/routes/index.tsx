@@ -174,7 +174,7 @@ function Navbar() {
             variant="ghost"
             className="hidden text-secondary-foreground sm:inline-flex"
           >
-            <Link to="/dashboard">Giriş Yap</Link>
+            <Link to="/login">Giriş Yap</Link>
           </Button>
           <Button
             asChild

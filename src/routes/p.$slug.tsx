@@ -59,7 +59,7 @@ function PublicPortfolioPage() {
               </Link>
             </Button>
             <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
-              <Link to="/dashboard">Üye Girişi</Link>
+              <Link to="/login">Üye Girişi</Link>
             </Button>
           </div>
         </div>
