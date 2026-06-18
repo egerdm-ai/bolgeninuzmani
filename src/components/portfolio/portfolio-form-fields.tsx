@@ -1,0 +1,424 @@
+import { ShieldCheck, MapPin, ImagePlus, Lock, X } from "lucide-react";
+import { SurfaceCard } from "@/components/vault/cards";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CATEGORY_LABELS, TRANSACTION_LABELS, CURRENCY_OPTIONS } from "@/lib/portfolio-labels";
+import type {
+  PortfolioCategory,
+  TransactionType,
+  Currency,
+  PortfolioTeaserInput,
+  PortfolioPrivateInput,
+  PortfolioStatus,
+} from "@/lib/data/portfolios";
+import type { Json } from "@/lib/database.types";
+
+// Form state is all-strings (controlled inputs); converted on submit.
+export type TeaserFormState = {
+  title: string;
+  public_description: string;
+  category: PortfolioCategory;
+  subcategory: string;
+  transaction_type: TransactionType;
+  price: string;
+  currency: Currency;
+  city: string;
+  district: string;
+  neighborhood: string;
+  room_count: string;
+  gross_m2: string;
+  net_m2: string;
+  land_m2: string;
+  features: string;
+};
+
+export type PrivateFormState = {
+  exact_address: string;
+  exact_lat: string;
+  exact_lng: string;
+  malik_name: string;
+  malik_contact: string;
+  private_description: string;
+  private_notes: string;
+};
+
+export const emptyTeaser: TeaserFormState = {
+  title: "",
+  public_description: "",
+  category: "konut",
+  subcategory: "",
+  transaction_type: "satilik",
+  price: "",
+  currency: "TRY",
+  city: "",
+  district: "",
+  neighborhood: "",
+  room_count: "",
+  gross_m2: "",
+  net_m2: "",
+  land_m2: "",
+  features: "",
+};
+
+export const emptyPrivate: PrivateFormState = {
+  exact_address: "",
+  exact_lat: "",
+  exact_lng: "",
+  malik_name: "",
+  malik_contact: "",
+  private_description: "",
+  private_notes: "",
+};
+
+const toNum = (s: string): number | null => (s.trim() === "" ? null : Number(s));
+const toList = (s: string) =>
+  s
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+/** Convert form state → typed teaser input for create/update. */
+export function buildTeaserInput(
+  t: TeaserFormState,
+  status: PortfolioStatus,
+): PortfolioTeaserInput {
+  return {
+    title: t.title.trim(),
+    public_description: t.public_description.trim() || null,
+    category: t.category,
+    subcategory: t.subcategory.trim() || null,
+    transaction_type: t.transaction_type,
+    price: toNum(t.price),
+    currency: t.currency,
+    city: t.city.trim() || null,
+    district: t.district.trim() || null,
+    neighborhood: t.neighborhood.trim() || null,
+    room_count: t.room_count.trim() || null,
+    gross_m2: toNum(t.gross_m2),
+    net_m2: toNum(t.net_m2),
+    land_m2: toNum(t.land_m2),
+    features: toList(t.features),
+    status,
+  };
+}
+
+export function buildPrivateInput(pv: PrivateFormState): PortfolioPrivateInput {
+  const malik =
+    pv.malik_name.trim() || pv.malik_contact.trim()
+      ? ({ name: pv.malik_name.trim() || null, contact: pv.malik_contact.trim() || null } as Json)
+      : null;
+  return {
+    exact_address: pv.exact_address.trim() || null,
+    exact_lat: toNum(pv.exact_lat),
+    exact_lng: toNum(pv.exact_lng),
+    malik_info: malik,
+    private_description: pv.private_description.trim() || null,
+    private_notes: pv.private_notes.trim() || null,
+  };
+}
+
+/**
+ * Shared portfolio form fields (create + edit). Presentational: parent owns
+ * state + submit/actions. Locked section maps to portfolio_private (D20).
+ */
+export function PortfolioFormFields({
+  teaser,
+  setTeaser,
+  priv,
+  setPriv,
+  files,
+  setFiles,
+  existingImages = [],
+}: {
+  teaser: TeaserFormState;
+  setTeaser: (t: TeaserFormState) => void;
+  priv: PrivateFormState;
+  setPriv: (p: PrivateFormState) => void;
+  files: File[];
+  setFiles: (f: File[]) => void;
+  existingImages?: { url: string; is_cover: boolean }[];
+}) {
+  const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
+  const sp = (k: keyof PrivateFormState) => (v: string) => setPriv({ ...priv, [k]: v });
+
+  return (
+    <>
+      <SurfaceCard className="space-y-4">
+        <SectionTitle icon={ShieldCheck} title="Temel Bilgiler" />
+        <Field label="Portföy Başlığı" required>
+          <Input value={teaser.title} onChange={(e) => sf("title")(e.target.value)} />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Kategori">
+            <Select value={teaser.category} onValueChange={sf("category")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(CATEGORY_LABELS).map(([v, label]) => (
+                  <SelectItem key={v} value={v}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Alt Kategori">
+            <Input
+              value={teaser.subcategory}
+              onChange={(e) => sf("subcategory")(e.target.value)}
+              placeholder="Villa, Daire…"
+            />
+          </Field>
+          <Field label="İşlem Tipi">
+            <Select value={teaser.transaction_type} onValueChange={sf("transaction_type")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(TRANSACTION_LABELS).map(([v, label]) => (
+                  <SelectItem key={v} value={v}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+        <Field label="Kısa Açıklama (herkese açık)">
+          <Textarea
+            rows={3}
+            value={teaser.public_description}
+            onChange={(e) => sf("public_description")(e.target.value)}
+          />
+        </Field>
+      </SurfaceCard>
+
+      <SurfaceCard className="space-y-4">
+        <SectionTitle icon={MapPin} title="Konum & Fiyat" />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Field label="Şehir">
+            <Input value={teaser.city} onChange={(e) => sf("city")(e.target.value)} />
+          </Field>
+          <Field label="İlçe">
+            <Input value={teaser.district} onChange={(e) => sf("district")(e.target.value)} />
+          </Field>
+          <Field label="Mahalle">
+            <Input
+              value={teaser.neighborhood}
+              onChange={(e) => sf("neighborhood")(e.target.value)}
+            />
+          </Field>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Fiyat">
+            <Input
+              type="number"
+              value={teaser.price}
+              onChange={(e) => sf("price")(e.target.value)}
+            />
+          </Field>
+          <Field label="Para Birimi">
+            <Select value={teaser.currency} onValueChange={sf("currency")}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+      </SurfaceCard>
+
+      <SurfaceCard className="space-y-4">
+        <SectionTitle icon={ShieldCheck} title="Detaylar" />
+        <div className="grid gap-4 sm:grid-cols-4">
+          <Field label="Oda (5+1)">
+            <Input value={teaser.room_count} onChange={(e) => sf("room_count")(e.target.value)} />
+          </Field>
+          <Field label="Brüt m²">
+            <Input
+              type="number"
+              value={teaser.gross_m2}
+              onChange={(e) => sf("gross_m2")(e.target.value)}
+            />
+          </Field>
+          <Field label="Net m²">
+            <Input
+              type="number"
+              value={teaser.net_m2}
+              onChange={(e) => sf("net_m2")(e.target.value)}
+            />
+          </Field>
+          <Field label="Arsa m²">
+            <Input
+              type="number"
+              value={teaser.land_m2}
+              onChange={(e) => sf("land_m2")(e.target.value)}
+            />
+          </Field>
+        </div>
+        <Field label="Özellikler (virgülle)">
+          <Input
+            value={teaser.features}
+            onChange={(e) => sf("features")(e.target.value)}
+            placeholder="Havuz, Deniz manzarası, Otopark"
+          />
+        </Field>
+      </SurfaceCard>
+
+      <SurfaceCard className="space-y-4">
+        <SectionTitle icon={ImagePlus} title="Görseller (ilk görsel kapak olur)" />
+        {existingImages.length > 0 && (
+          <div className="grid grid-cols-4 gap-3">
+            {existingImages.map((img, i) => (
+              <div
+                key={i}
+                className={`relative aspect-[4/3] overflow-hidden rounded-lg border ${img.is_cover ? "border-gold" : "border-border"}`}
+              >
+                <img src={img.url} alt="" className="size-full object-cover" />
+                {img.is_cover && (
+                  <span className="absolute bottom-1 left-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                    Kapak
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center hover:border-gold/40">
+          <ImagePlus className="size-7 text-gold" />
+          <span className="mt-2 text-sm font-medium text-foreground">
+            {existingImages.length > 0 ? "Yeni fotoğraf ekle" : "Fotoğraf seç"}
+          </span>
+          <span className="text-xs text-muted-foreground">JPG/PNG · maks. 20</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => {
+              if (e.target.files) setFiles([...files, ...Array.from(e.target.files)].slice(0, 20));
+            }}
+          />
+        </label>
+        {files.length > 0 && (
+          <div className="grid grid-cols-4 gap-3">
+            {files.map((f, i) => (
+              <div
+                key={i}
+                className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border"
+              >
+                <img src={URL.createObjectURL(f)} alt="" className="size-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
+                >
+                  <X className="size-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </SurfaceCard>
+
+      <SurfaceCard className="space-y-4 border-gold/25">
+        <SectionTitle icon={Lock} title="Kilitli Bilgiler" />
+        <p className="-mt-2 flex items-center gap-1.5 text-xs text-gold">
+          <Lock className="size-3.5" /> Bu alanlar teaser'da GÖRÜNMEZ; yalnızca size ve erişim
+          onayladığınız emlakçılara açılır. Tam koordinattan ~yaklaşık harita pini otomatik
+          üretilir.
+        </p>
+        <Field label="Tam Adres">
+          <Input value={priv.exact_address} onChange={(e) => sp("exact_address")(e.target.value)} />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tam Enlem (lat)">
+            <Input
+              type="number"
+              value={priv.exact_lat}
+              onChange={(e) => sp("exact_lat")(e.target.value)}
+              placeholder="37.1234"
+            />
+          </Field>
+          <Field label="Tam Boylam (lng)">
+            <Input
+              type="number"
+              value={priv.exact_lng}
+              onChange={(e) => sp("exact_lng")(e.target.value)}
+              placeholder="27.4321"
+            />
+          </Field>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Malik Adı">
+            <Input value={priv.malik_name} onChange={(e) => sp("malik_name")(e.target.value)} />
+          </Field>
+          <Field label="Malik İletişim">
+            <Input
+              value={priv.malik_contact}
+              onChange={(e) => sp("malik_contact")(e.target.value)}
+            />
+          </Field>
+        </div>
+        <Field label="Özel Açıklama">
+          <Textarea
+            rows={3}
+            value={priv.private_description}
+            onChange={(e) => sp("private_description")(e.target.value)}
+          />
+        </Field>
+        <Field label="Özel Notlar">
+          <Textarea
+            rows={2}
+            value={priv.private_notes}
+            onChange={(e) => sp("private_notes")(e.target.value)}
+          />
+        </Field>
+      </SurfaceCard>
+    </>
+  );
+}
+
+function SectionTitle({ icon: Icon, title }: { icon: typeof Lock; title: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="size-4 text-gold" />
+      <h2 className="font-display text-lg font-semibold text-foreground">{title}</h2>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label>
+        {label}
+        {required && <span className="text-gold"> *</span>}
+      </Label>
+      {children}
+    </div>
+  );
+}

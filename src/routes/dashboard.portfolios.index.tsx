@@ -1,17 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Plus, ArrowDownWideNarrow, FolderLock, Eye, Send, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, FolderLock, CheckCircle2, FileEdit, ImageOff, Loader2, Pencil } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
-import { AIButton } from "@/components/vault/ai-button";
-import { PortfolioListRow } from "@/components/vault/portfolio-list-row";
-import { myPortfolios } from "@/lib/mock/data";
-import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { PortfolioStatus } from "@/lib/mock/types";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  listMyPortfolios,
+  type PortfolioWithCover,
+  type PortfolioStatus,
+} from "@/lib/data/portfolios";
+import {
+  CATEGORY_LABELS,
+  TRANSACTION_LABELS,
+  STATUS_LABELS,
+  formatPortfolioPrice,
+} from "@/lib/portfolio-labels";
 
 export const Route = createFileRoute("/dashboard/portfolios/")({
   component: MyPortfolios,
@@ -19,21 +25,42 @@ export const Route = createFileRoute("/dashboard/portfolios/")({
 
 const tabs: { key: PortfolioStatus | "all"; label: string }[] = [
   { key: "all", label: "Tümü" },
-  { key: "active", label: "Aktif" },
+  { key: "active", label: "Yayında" },
   { key: "draft", label: "Taslak" },
   { key: "passive", label: "Pasif" },
-  { key: "sold_or_rented", label: "Satıldı / Kiralandı" },
+  { key: "sold", label: "Satıldı / Kiralandı" },
 ];
 
-function MyPortfolios() {
-  const [tab, setTab] = useState<PortfolioStatus | "all">("all");
-  const [sortByViews, setSortByViews] = useState(false);
-  const base = tab === "all" ? myPortfolios : myPortfolios.filter((p) => p.status === tab);
-  const filtered = sortByViews ? [...base].sort((a, b) => b.viewCount - a.viewCount) : base;
+const statusTone: Record<PortfolioStatus, string> = {
+  active: "bg-success/15 text-success",
+  draft: "bg-surface-3 text-muted-foreground",
+  passive: "bg-warning/15 text-warning",
+  sold: "bg-gold/15 text-gold",
+};
 
-  const totalViews = myPortfolios.reduce((s, p) => s + p.viewCount, 0);
-  const totalRequests = myPortfolios.reduce((s, p) => s + p.requestCount, 0);
-  const activeCount = myPortfolios.filter((p) => p.status === "active").length;
+function MyPortfolios() {
+  const { user } = useAuth();
+  const [tab, setTab] = useState<PortfolioStatus | "all">("all");
+  const [items, setItems] = useState<PortfolioWithCover[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    setItems(null);
+    setError(null);
+    listMyPortfolios(user.id)
+      .then((d) => active && setItems(d))
+      .catch((e) => active && setError(e instanceof Error ? e.message : String(e)));
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const all = items ?? [];
+  const filtered = tab === "all" ? all : all.filter((p) => p.status === tab);
+  const activeCount = all.filter((p) => p.status === "active").length;
+  const draftCount = all.filter((p) => p.status === "draft").length;
 
   return (
     <PageContainer className="space-y-6">
@@ -41,76 +68,124 @@ function MyPortfolios() {
         title="Portföylerim"
         subtitle="Tüm lüks portföylerinizi tek yerden yönetin."
         actions={
-          <>
-            <AIButton />
-            <Button
-              asChild
-              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            >
-              <Link to="/dashboard/portfolios/new">
-                <Plus className="size-4" /> Portföy Oluştur
-              </Link>
-            </Button>
-          </>
+          <Button
+            asChild
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            <Link to="/dashboard/portfolios/new">
+              <Plus className="size-4" /> Portföy Oluştur
+            </Link>
+          </Button>
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Toplam Portföy" value={String(myPortfolios.length)} icon={FolderLock} />
-        <KpiCard label="Aktif Portföy" value={String(activeCount)} icon={CheckCircle2} />
-        <KpiCard label="Görüntülenme" value={formatNumber(totalViews)} icon={Eye} />
-        <KpiCard label="Detay Talebi" value={String(totalRequests)} icon={Send} />
+      <div className="grid gap-3 sm:grid-cols-3">
+        <KpiCard label="Toplam Portföy" value={String(all.length)} icon={FolderLock} />
+        <KpiCard label="Yayında" value={String(activeCount)} icon={CheckCircle2} />
+        <KpiCard label="Taslak" value={String(draftCount)} icon={FileEdit} />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface-2 p-1">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={cn(
-                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                tab === t.key
-                  ? "bg-gradient-gold text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
+      <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface-2 p-1">
+        {tabs.map((tb) => (
+          <button
+            key={tb.key}
+            onClick={() => setTab(tb.key)}
+            className={cn(
+              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              tab === tb.key
+                ? "bg-gradient-gold text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tb.label}
+          </button>
+        ))}
+      </div>
+
+      {/* states */}
+      {error ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-12 text-center text-sm text-destructive">
+          Portföyler yüklenemedi: {error}
+        </div>
+      ) : items === null ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+          <Loader2 className="size-6 animate-spin text-gold" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center">
+          <FolderLock className="mx-auto size-8 text-muted-foreground" />
+          <p className="mt-3 text-sm font-medium text-foreground">
+            {all.length === 0 ? "Henüz portföyünüz yok" : "Bu durumda portföy yok"}
+          </p>
+          {all.length === 0 && (
+            <Button
+              asChild
+              className="mt-4 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             >
-              {t.label}
-            </button>
+              <Link to="/dashboard/portfolios/new">
+                <Plus className="size-4" /> İlk portföyünü ekle
+              </Link>
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((p) => (
+            <PortfolioCard key={p.id} p={p} />
           ))}
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className={cn("gap-1.5", sortByViews && "border-gold/40 text-gold")}
-          onClick={() => {
-            setSortByViews((v) => !v);
-            toast.info(sortByViews ? "Varsayılan sıralama" : "Görüntülenmeye göre sıralandı");
-          }}
-        >
-          <ArrowDownWideNarrow className="size-4" />{" "}
-          {sortByViews ? "En çok görüntülenen" : "Sırala"}
+      )}
+    </PageContainer>
+  );
+}
+
+function PortfolioCard({ p }: { p: PortfolioWithCover }) {
+  return (
+    <div className="group overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong">
+      <Link to="/dashboard/portfolios/$id" params={{ id: p.id }} className="block">
+        <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
+          {p.cover_url ? (
+            <img
+              src={p.cover_url}
+              alt={p.title}
+              className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center text-muted-foreground">
+              <ImageOff className="size-7" />
+            </div>
+          )}
+          <span
+            className={cn(
+              "absolute left-2 top-2 rounded-md px-2 py-0.5 text-[11px] font-semibold",
+              statusTone[p.status],
+            )}
+          >
+            {STATUS_LABELS[p.status]}
+          </span>
+        </div>
+        <div className="p-4">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span>{CATEGORY_LABELS[p.category]}</span>
+            <span>·</span>
+            <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
+          </div>
+          <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">{p.title}</h3>
+          <p className="text-xs text-muted-foreground">
+            {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—"}
+          </p>
+          <p className="mt-2 font-display text-lg font-semibold text-gold">
+            {formatPortfolioPrice(p.price, p.currency)}
+          </p>
+        </div>
+      </Link>
+      <div className="flex border-t border-border">
+        <Button asChild variant="ghost" size="sm" className="flex-1 gap-1.5 rounded-none">
+          <Link to="/dashboard/portfolios/$id/edit" params={{ id: p.id }}>
+            <Pencil className="size-3.5" /> Düzenle
+          </Link>
         </Button>
       </div>
-
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-elegant">
-        <div className="hidden items-center gap-4 border-b border-border bg-surface-2/50 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground lg:flex">
-          <span className="w-20" />
-          <span className="flex-1">Portföy</span>
-          <span className="w-28 text-right">Fiyat</span>
-          <span className="w-24 text-center">Görüntülenme</span>
-          <span className="w-20 text-center">Talep</span>
-          <span className="w-28 text-center">Durum</span>
-          <span className="w-[120px]" />
-        </div>
-        {filtered.length > 0 ? (
-          filtered.map((p) => <PortfolioListRow key={p.id} portfolio={p} />)
-        ) : (
-          <div className="px-4 py-12 text-center text-sm text-muted-foreground">
-            Bu durumda portföy bulunmuyor.
-          </div>
-        )}
-      </div>
-    </PageContainer>
+    </div>
   );
 }
