@@ -10,7 +10,7 @@ import {
   LogOut,
   CheckCheck,
 } from "lucide-react";
-import { currentUser } from "@/lib/mock/data";
+import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { AIButton } from "@/components/vault/ai-button";
@@ -33,6 +33,7 @@ export function Topbar({
   searchPlaceholder?: string;
 }) {
   const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
+  const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md lg:px-6">
@@ -126,14 +127,18 @@ export function Topbar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 py-1 pl-1 pr-2 transition-colors hover:border-border-strong">
-              <BrokerAvatar name={currentUser.fullName} size="sm" />
+              <BrokerAvatar
+                name={profile?.full_name ?? ""}
+                src={profile?.avatar_url ?? undefined}
+                size="sm"
+              />
               <ChevronDown className="size-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
-              <div className="font-semibold">{currentUser.fullName}</div>
-              <div className="text-xs font-normal text-muted-foreground">{currentUser.title}</div>
+              <div className="font-semibold">{profile?.full_name}</div>
+              <div className="text-xs font-normal text-muted-foreground">{profile?.title}</div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -147,10 +152,13 @@ export function Topbar({
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to="/">
-                <LogOut className="size-4" /> Çıkış Yap
-              </Link>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onSelect={() => {
+                void signOut();
+              }}
+            >
+              <LogOut className="size-4" /> Çıkış Yap
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -15,7 +15,8 @@ import {
   Compass,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { currentUser, detailRequests } from "@/lib/mock/data";
+import { useAuth } from "@/lib/auth/auth-context";
+import { detailRequests } from "@/lib/mock/data";
 import { appNotifications } from "@/lib/mock/notifications";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MembershipBadge } from "@/components/vault/badges";
@@ -50,6 +51,7 @@ const accountNav = [
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { profile } = useAuth();
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
@@ -179,18 +181,24 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
             collapsed && "justify-center",
           )}
         >
-          <BrokerAvatar name={currentUser.fullName} size="sm" />
+          <BrokerAvatar
+            name={profile?.full_name ?? ""}
+            src={profile?.avatar_url ?? undefined}
+            size="sm"
+          />
           {!collapsed && (
             <div className="min-w-0">
               <div className="flex items-center gap-1">
                 <span className="truncate text-xs font-semibold text-foreground">
-                  {currentUser.fullName}
+                  {profile?.full_name}
                 </span>
-                <MembershipBadge tier={currentUser.membershipTier} />
+                {profile && <MembershipBadge tier={profile.membership_tier} />}
               </div>
-              <span className="truncate text-[11px] text-muted-foreground">
-                {currentUser.companyName}
-              </span>
+              {profile?.company_name && (
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {profile.company_name}
+                </span>
+              )}
             </div>
           )}
         </Link>

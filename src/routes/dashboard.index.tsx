@@ -26,12 +26,12 @@ import { PortfolioCard } from "@/components/vault/portfolio-card";
 import { DetailRequestModal } from "@/components/vault/detail-request-modal";
 import {
   activities,
-  currentUser,
   dashboardKpis,
   detailRequests,
   myPortfolios,
   propertyImages,
 } from "@/lib/mock/data";
+import { useAuth } from "@/lib/auth/auth-context";
 import { networkAnalytics } from "@/lib/mock/matching";
 import { formatNumber, requestStatusLabels, requestStatusTones } from "@/lib/format";
 import { useSaved } from "@/lib/saved-store";
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/dashboard/")({
 
 function DashboardHome() {
   const { isSaved, toggleSave } = useSaved();
+  const { profile } = useAuth();
   const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
   const recent = myPortfolios.filter((p) => p.status === "active").slice(0, 3);
   const incoming = detailRequests.slice(0, 3);
@@ -63,7 +64,7 @@ function DashboardHome() {
               <Sparkles className="size-3.5" /> Özel Lüks Gayrimenkul Ağı
             </span>
             <h1 className="mt-4 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground lg:text-5xl">
-              Hoş geldiniz, {currentUser.fullName.split(" ")[0]}
+              Hoş geldiniz, {(profile?.full_name ?? "").split(" ")[0]}
             </h1>
             <p className="mt-3 text-base text-secondary-foreground">
               Lüks portföylerinizi yönetin, harita üzerinde keşfedin ve doğrulanmış ağınızla güvenle
