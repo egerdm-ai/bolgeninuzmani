@@ -106,3 +106,83 @@ private_description, private_notes.
   brand sweep (VAULT→Bölgenin Uzmanı, yalnızca copy/wordmark, redesign değil) ·
   ertelenen route'ları quarantine · Lovable temizliği (D25) · `typecheck` script ekle.
   Sonra Slice 1 (auth+profiles+roles).
+
+---
+
+## Revize: onboarding & doğrulama (2026-06-18, Slice 1)
+
+- **D14 (REVİZE) — Onboarding hibrit.** (a) Admin (kurucular) ilk ~10-20 emlakçıyı
+  doğrudan oluşturur → anında `verified`. (b) Self-serve kayıt SERBEST, ancak kendi
+  kaydolan kullanıcı `pending` durumuna düşer ve **admin doğrulayana kadar ağda
+  hiçbir şey göremez**. Kapalı-ağ garantisi "kayıt yok"tan → "doğrulama olmadan
+  erişim yok"a taşındı.
+- **D27 (YENİ) — Doğrulama sınırı.** `profiles.status ∈ {pending, verified,
+  suspended}`. RLS, TÜM ağ okumalarını (başka emlakçıların portföyleri/teaser'ları,
+  keşfet/arama, diğer profiller) `verified` şartına bağlar. `pending` kullanıcı
+  yalnızca KENDİ profilini okuyup tamamlayabilir; portföy oluşturamaz, keşfet
+  yapamaz. Admin `pending → verified` yapar (başta Supabase dashboard'dan; admin UI
+  sonra). Public `/p/$slug` müşteri linkleri bundan etkilenmez (anon, ayrı yol).
+- **D28 — Başvuru formu.** Landing başvuru formu → `applications` tablosu (ad,
+  telefon, e-posta, şirket, bölgeler, mesaj, status) + admin'e e-posta bildirimi
+  (Resend). Admin inceler → davet eder/doğrular. (E-posta wire-up küçük; tablo
+  Slice 1'de, e-posta hemen ardından/Resend ile.)
+
+### Slice 1 kapsamı (güncel)
+M1 migration artık şunları da içerir: `profiles.status` (pending/verified/suspended)
++ `applications` tablosu + ağ okumalarını `verified`'a bağlayan RLS. Admin doğrulama
+UI'ı ertelendi (başta Supabase dashboard yeter).
+
+---
+
+## M2 şema kararları (2026-06-18)
+
+- **D29 — Teaser/locked tablo ayrımı (D13 somutlaştı).**
+  `portfolios` = teaser kolonları (müşteri + her verified emlakçı görür):
+  title, public_description, price, currency, transaction_type, category,
+  room_count, gross/net/land_m2, features[], il/ilçe/mahalle, approx_lat/lng,
+  status, slug. + `portfolio_images` (public).
+  `portfolio_private` (1:1, kendi RLS'i: owner VEYA aktif grant) =
+  exact_address, exact_lat/lng, malik_info (ad+iletişim), private_description,
+  private_notes. + `portfolio_documents` (tapu/belgeler, private bucket).
+- **D30 — Yaklaşık pin otomatik + server-side.** Emlakçı tam adresi girer
+  (kilitli). Sistem yaklaşık koordinatı **server-side** üretir (mahalle merkezi +
+  küçük ofset) ve yalnızca onu teaser'a yazar. Tam koordinat private'ta kalır,
+  asla client'a gitmez.
+- **D31 — Create wizard'ın son adımı kilitli alanlar.** "Sadece sen görürsün"
+  başlıklı ayrı adım; emlakçı neyin gizli olduğunu görsün (güven).
+- **D32 — Emlakçı iletişimi teaser'da profiles'tan gelir** (D8); portfolio_private'a
+  kopyalanmaz. malik_info (mülk sahibi) ise private'ta, kilitli.
+
+---
+
+## Öznitelik modeli (2026-06-18)
+
+- **D33 — Portföy öznitelikleri + görünürlük defteri.** Zengin öznitelikler
+  `attributes jsonb` ile saklanır; kolon **hem `portfolios` (açık/teaser) hem
+  `portfolio_private` (kilitli)** tarafında bulunur. Tek bir **attribute registry**
+  (kodda) her özelliği tanımlar: key, label, tip, seçenekler, **görünürlük
+  (public|locked)**. Wizard + veri yazımı + gösterim bu defterden türer; bir
+  özelliğin görünürlüğünü değiştirmek = defterde tek satır (veri varsa küçük
+  data-migration). 
+- **Kilit kuralı (D33):** Görünürlük, "bu bilgi mülkü/maliki tek başına ya da
+  birleşince teşhis eder mi?" sorusuna göre. 
+  - **PUBLIC (mülkü ifşa etmez, müşteri görür):** cephe, ısıtma tipi, kat, bina
+    yaşı, eşyalı, aidat, oda, m², genel özellikler (havuz, manzara…).
+  - **LOCKED (teşhis edici):** tam adres, tam koordinat, **bina/site adı**,
+    **blok/daire/kapı no**, malik_info, tapu/belgeler, özel notlar.
+
+---
+
+## Fotoğraf görünürlüğü (2026-06-19)
+
+- **D34 — Fotoğraf bazında görünürlük.** Her `portfolio_images` satırı
+  `visibility` (public|locked) taşır; varsayılan **public**. Emlakçı tek tek
+  fotoğrafı "kilitli" yapabilir.
+  - **public fotoğraflar:** `portfolio-images` (public-read) bucket — teaser +
+    müşteri linki (anon) görür.
+  - **locked fotoğraflar:** AYRI bir **private** bucket (`portfolio-images-locked`)
+    — public-read ASLA; erişim yalnızca `has_portfolio_access()` üzerinden kısa
+    ömürlü signed URL (belgelerle aynı model, D20).
+  - `portfolio_images` SELECT RLS dallanır: public → `portfolio_teaser_visible()`;
+    locked → `has_portfolio_access()`. M3'te grant gelince kilitli fotoğraflar da
+    otomatik açılır (politika değişmeden).
