@@ -139,6 +139,8 @@ function OwnerPortfolioDetail() {
                     key={img.id}
                     src={img.url}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     onClick={() => setLightbox(idx)}
                     className="h-16 w-24 shrink-0 cursor-zoom-in rounded-md object-cover"
                   />
