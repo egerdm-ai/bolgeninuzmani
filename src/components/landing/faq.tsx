@@ -7,36 +7,36 @@ import {
 
 const faqs = [
   {
-    q: "VAULT herkese açık mı?",
-    a: "Hayır. VAULT davetli ve doğrulanmış emlak profesyonellerine açık private bir ağdır. Üyelik başvurusu onay sürecinden geçer.",
+    q: "Bölgenin Uzmanı herkese açık mı?",
+    a: "Hayır. Bölgenin Uzmanı, davetli ve doğrulanmış emlak profesyonellerine açık kapalı bir ağdır. Üyelik başvuruları doğrulama sürecinden geçer.",
   },
   {
-    q: "Portföy detaylarını kimler görebilir?",
-    a: "Teaser bilgiler ağdaki doğrulanmış profesyonellere açıktır. Tam adres, telefon, tapu ve belgeler yalnızca portföy sahibinin onayladığı detay talepleri sonrası görünür.",
+    q: "Portföylerimdeki tam adres ve malik bilgisi kimlere görünür?",
+    a: "Teaser bilgiler ağdaki doğrulanmış profesyonellere açıktır. Tam adres, malik bilgisi, telefon ve belgeler yalnızca sizin onayladığınız detay talepleri sonrası görünür.",
   },
   {
-    q: "Tam adres ve telefon ne zaman görünür?",
-    a: "Detay talebinizi gönderdiğinizde portföy sahibi talebi inceler. Onaylandığında tam adres, telefon ve belgeler size açılır.",
+    q: "Arayış oluşturduğumda müşteri bilgilerim görünür mü?",
+    a: "Hayır. Müşteri bilgisi yalnızca sizde kalır. Profilinizde arayış, müşteri kimliği olmadan anonim kriterler olarak görünür.",
   },
   {
-    q: "Arayışlarım nasıl çalışır?",
-    a: "Müşterileriniz için arayış kaydedersiniz. Yeni bir portföy bu kriterlerle eşleştiğinde bildirim alır, doğrudan detay talebi gönderebilirsiniz.",
+    q: "Detay Talebi nasıl çalışır?",
+    a: "İlgilenen profesyonel tek tıkla detay talebi gönderir. Talep eden kişinin profilini görür, onayladığınızda tam adres, malik bilgisi ve belgeler o kişiye açılır. Tüm erişim geçmişi kaydedilir.",
   },
   {
-    q: "Bölge takibi nedir?",
-    a: "Yalıkavak, Bebek, Riva veya Çeşme gibi bölgeleri takibe alırsınız. O bölgede yeni portföy, yeni arayış veya yeni bölge uzmanı aktivitesi olduğunda haberdar olursunuz.",
+    q: "Hangi portföy tipleri paylaşılabilir?",
+    a: "Konut, lüks villa, yalı, arsa, ticari mülk, fabrika, otel, restoran, işletme devri ve yatırım varlıkları dahil tüm gayrimenkul tiplerini paylaşabilirsiniz.",
   },
   {
-    q: "VAULT Asistan ne yapar?",
-    a: "Doğal dille portföy arama, arayış oluşturma, eşleşme analizi, bölge uzmanı önerisi ve PDF hazırlama işlemlerini tek bir konuşma içinde yürütür.",
+    q: "Üyelik başvuruları nasıl onaylanır?",
+    a: "Başvurunuzdaki profesyonel bilgiler, çalıştığınız bölgeler ve yetki belgeniz değerlendirilir. Doğrulama tamamlandığında üyelik erişiminiz açılır.",
   },
   {
-    q: "PDF ve WhatsApp paylaşımı nasıl çalışır?",
-    a: "Share Studio ile portföyünüzü WhatsApp mesajı, teaser PDF, paylaşım linki ve QR koda dönüştürürsünüz. Kilitli bilgiler paylaşımda gizli kalır.",
+    q: "Öne Çıkarma seçenekleri nasıl çalışır?",
+    a: "İlanlarınızı, profilinizi ve arayışlarınızı ana sayfa, şehir ve bölge vitrinlerinde öne çıkarabilir; AI eşleşme önceliği ve aciliyet rozeti gibi ek görünürlük avantajları kullanabilirsiniz.",
   },
   {
-    q: "Üyelik nasıl onaylanır?",
-    a: "Başvurunuzdaki profesyonel bilgiler ve çalıştığınız bölgeler değerlendirilir. Doğrulama tamamlandığında kurucu üye erişiminiz açılır.",
+    q: "AI Asistan hangi bilgileri kullanır?",
+    a: "AI Asistan; portföyleri, açıklamaları, özellikleri ve arayışları analiz ederek en uygun eşleşmeleri getirir. Kilitli bilgiler ve müşteri kimlikleri analize dahil edilmez.",
   },
 ];
 
@@ -44,12 +44,8 @@ export function FaqSection() {
   return (
     <Accordion type="single" collapsible className="w-full">
       {faqs.map((f, i) => (
-        <AccordionItem
-          key={f.q}
-          value={`item-${i}`}
-          className="border-border/60"
-        >
-          <AccordionTrigger className="font-display text-base font-medium text-foreground hover:no-underline">
+        <AccordionItem key={f.q} value={`item-${i}`} className="border-border/60">
+          <AccordionTrigger className="text-left font-display text-base font-medium text-foreground hover:no-underline">
             {f.q}
           </AccordionTrigger>
           <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
