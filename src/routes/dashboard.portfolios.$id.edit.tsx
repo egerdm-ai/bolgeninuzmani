@@ -21,6 +21,7 @@ import {
   type PortfolioStatus,
 } from "@/lib/data/portfolios";
 import { STATUS_LABELS } from "@/lib/portfolio-labels";
+import { PortfolioMediaManager } from "@/components/portfolio/portfolio-media-manager";
 import {
   PortfolioFormFields,
   buildTeaserInput,
@@ -208,6 +209,7 @@ function EditPortfolio() {
           attrs={attrs}
           setAttrs={setAttrs}
           existingImages={existingImages}
+          hideImages
         />
         <div className="flex items-center justify-end gap-2">
           <Button asChild variant="outline">
@@ -224,6 +226,11 @@ function EditPortfolio() {
           </Button>
         </div>
       </form>
+
+      <div className="space-y-3">
+        <h2 className="font-display text-lg font-semibold text-foreground">Medya</h2>
+        <PortfolioMediaManager portfolioId={id} />
+      </div>
     </PageContainer>
   );
 }

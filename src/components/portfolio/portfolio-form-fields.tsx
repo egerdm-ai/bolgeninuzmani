@@ -149,6 +149,7 @@ export function PortfolioFormFields({
   attrs,
   setAttrs,
   existingImages = [],
+  hideImages = false,
 }: {
   teaser: TeaserFormState;
   setTeaser: (t: TeaserFormState) => void;
@@ -159,6 +160,8 @@ export function PortfolioFormFields({
   attrs: AttrFormState;
   setAttrs: (a: AttrFormState) => void;
   existingImages?: { url: string; is_cover: boolean }[];
+  /** Hide the inline image upload card (edit uses the full media manager instead). */
+  hideImages?: boolean;
 }) {
   const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
   const sp = (k: keyof PrivateFormState) => (v: string) => setPriv({ ...priv, [k]: v });
@@ -296,61 +299,64 @@ export function PortfolioFormFields({
         <AttrGrid defs={PUBLIC_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
       </SurfaceCard>
 
-      <SurfaceCard className="space-y-4">
-        <SectionTitle icon={ImagePlus} title="Görseller (ilk görsel kapak olur)" />
-        {existingImages.length > 0 && (
-          <div className="grid grid-cols-4 gap-3">
-            {existingImages.map((img, i) => (
-              <div
-                key={i}
-                className={`relative aspect-[4/3] overflow-hidden rounded-lg border ${img.is_cover ? "border-gold" : "border-border"}`}
-              >
-                <img src={img.url} alt="" className="size-full object-cover" />
-                {img.is_cover && (
-                  <span className="absolute bottom-1 left-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
-                    Kapak
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center hover:border-gold/40">
-          <ImagePlus className="size-7 text-gold" />
-          <span className="mt-2 text-sm font-medium text-foreground">
-            {existingImages.length > 0 ? "Yeni fotoğraf ekle" : "Fotoğraf seç"}
-          </span>
-          <span className="text-xs text-muted-foreground">JPG/PNG · maks. 20</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              if (e.target.files) setFiles([...files, ...Array.from(e.target.files)].slice(0, 20));
-            }}
-          />
-        </label>
-        {files.length > 0 && (
-          <div className="grid grid-cols-4 gap-3">
-            {files.map((f, i) => (
-              <div
-                key={i}
-                className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border"
-              >
-                <img src={URL.createObjectURL(f)} alt="" className="size-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setFiles(files.filter((_, j) => j !== i))}
-                  className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
+      {!hideImages && (
+        <SurfaceCard className="space-y-4">
+          <SectionTitle icon={ImagePlus} title="Görseller (ilk görsel kapak olur)" />
+          {existingImages.length > 0 && (
+            <div className="grid grid-cols-4 gap-3">
+              {existingImages.map((img, i) => (
+                <div
+                  key={i}
+                  className={`relative aspect-[4/3] overflow-hidden rounded-lg border ${img.is_cover ? "border-gold" : "border-border"}`}
                 >
-                  <X className="size-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </SurfaceCard>
+                  <img src={img.url} alt="" className="size-full object-cover" />
+                  {img.is_cover && (
+                    <span className="absolute bottom-1 left-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                      Kapak
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center hover:border-gold/40">
+            <ImagePlus className="size-7 text-gold" />
+            <span className="mt-2 text-sm font-medium text-foreground">
+              {existingImages.length > 0 ? "Yeni fotoğraf ekle" : "Fotoğraf seç"}
+            </span>
+            <span className="text-xs text-muted-foreground">JPG/PNG · maks. 20</span>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files)
+                  setFiles([...files, ...Array.from(e.target.files)].slice(0, 20));
+              }}
+            />
+          </label>
+          {files.length > 0 && (
+            <div className="grid grid-cols-4 gap-3">
+              {files.map((f, i) => (
+                <div
+                  key={i}
+                  className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border"
+                >
+                  <img src={URL.createObjectURL(f)} alt="" className="size-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </SurfaceCard>
+      )}
 
       <SurfaceCard className="space-y-4 border-gold/25">
         <SectionTitle icon={Lock} title="Kilitli Bilgiler" />

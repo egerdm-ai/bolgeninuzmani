@@ -28,6 +28,16 @@ export type TransactionType = Database["public"]["Enums"]["transaction_type"];
 export type Currency = Database["public"]["Enums"]["currency"];
 
 const IMAGES_BUCKET = "portfolio-images";
+const IMAGES_LOCKED_BUCKET = "portfolio-images-locked";
+const DOCS_BUCKET = "portfolio-documents";
+const SIGNED_URL_TTL = 3600; // 1h short-lived signed URLs for locked media (D34/D20)
+
+export type ImageVisibility = Database["public"]["Enums"]["image_visibility"];
+export type DocumentKind = Database["public"]["Enums"]["document_kind"];
+
+function imageBucket(visibility: ImageVisibility) {
+  return visibility === "locked" ? IMAGES_LOCKED_BUCKET : IMAGES_BUCKET;
+}
 
 /** Teaser fields a wizard/edit form collects (no exact location / locked set). */
 export type PortfolioTeaserInput = {
@@ -87,7 +97,7 @@ const privateHasData = (p: PortfolioPrivateInput) =>
 export async function listMyPortfolios(ownerId: string): Promise<PortfolioWithCover[]> {
   const { data, error } = await supabase
     .from("portfolios")
-    .select("*, portfolio_images(path, is_cover, sort_order)")
+    .select("*, portfolio_images(path, is_cover, sort_order, visibility)")
     .eq("owner_id", ownerId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -95,10 +105,13 @@ export async function listMyPortfolios(ownerId: string): Promise<PortfolioWithCo
   return (data ?? []).map((row) => {
     const images = (row.portfolio_images ?? []) as Pick<
       PortfolioImage,
-      "path" | "is_cover" | "sort_order"
+      "path" | "is_cover" | "sort_order" | "visibility"
     >[];
+    // Cover is always a PUBLIC image (locked photos never surface on the teaser).
+    const publicImages = images.filter((i) => i.visibility === "public");
     const cover =
-      images.find((i) => i.is_cover) ?? [...images].sort((a, b) => a.sort_order - b.sort_order)[0];
+      publicImages.find((i) => i.is_cover) ??
+      [...publicImages].sort((a, b) => a.sort_order - b.sort_order)[0];
     // strip the joined relation off the teaser row
     const { portfolio_images: _drop, ...portfolio } = row as typeof row & {
       portfolio_images: unknown;
@@ -139,12 +152,29 @@ export async function getMyPortfolioFull(id: string): Promise<PortfolioFull | nu
       .order("uploaded_at", { ascending: true }),
   ]);
 
+  // Locked images live in the PRIVATE bucket → short-lived signed URL (owner via
+  // has_portfolio_access RLS). Public images → public URL.
+  const images = await Promise.all(
+    (imgs.data ?? []).map(async (i) => ({ ...i, url: await imageUrlFor(i) })),
+  );
+
   return {
     portfolio,
     private: priv.data ?? null,
-    images: (imgs.data ?? []).map((i) => ({ ...i, url: portfolioImageUrl(i.path) })),
+    images,
     documents: docs.data ?? [],
   };
+}
+
+/** Resolve a viewable URL for an image row honoring its visibility. */
+async function imageUrlFor(img: Pick<PortfolioImage, "path" | "visibility">): Promise<string> {
+  if (img.visibility === "locked") {
+    const { data } = await supabase.storage
+      .from(IMAGES_LOCKED_BUCKET)
+      .createSignedUrl(img.path, SIGNED_URL_TTL);
+    return data?.signedUrl ?? "";
+  }
+  return portfolioImageUrl(img.path);
 }
 
 // ---------------------------------------------------------------------------
@@ -232,7 +262,11 @@ export async function deletePortfolio(id: string): Promise<void> {
 }
 
 /** Upload images to portfolio-images/<portfolioId>/<uuid>.<ext> + row them. */
-export async function uploadImages(portfolioId: string, files: File[]): Promise<void> {
+export async function uploadImages(
+  portfolioId: string,
+  files: File[],
+  visibility: ImageVisibility = "public",
+): Promise<void> {
   if (!files.length) return;
   // existing count → continue sort order / cover only if none yet
   const { count } = await supabase
@@ -240,12 +274,13 @@ export async function uploadImages(portfolioId: string, files: File[]): Promise<
     .select("id", { count: "exact", head: true })
     .eq("portfolio_id", portfolioId);
   const startIndex = count ?? 0;
+  const bucket = imageBucket(visibility);
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const ext = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
     const path = `${portfolioId}/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from(IMAGES_BUCKET).upload(path, file, {
+    const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -254,8 +289,113 @@ export async function uploadImages(portfolioId: string, files: File[]): Promise<
       portfolio_id: portfolioId,
       path,
       sort_order: startIndex + i,
-      is_cover: startIndex + i === 0,
+      is_cover: visibility === "public" && startIndex + i === 0,
+      visibility,
     });
     if (rowErr) throw rowErr;
   }
+}
+
+type ImageRef = Pick<PortfolioImage, "id" | "path" | "visibility">;
+
+/** Delete one image: remove the storage object (correct bucket) + the row. */
+export async function deletePortfolioImage(img: ImageRef): Promise<void> {
+  await supabase.storage.from(imageBucket(img.visibility)).remove([img.path]);
+  const { error } = await supabase.from("portfolio_images").delete().eq("id", img.id);
+  if (error) throw error;
+}
+
+/** Set the cover (only a PUBLIC image may be the cover — it shows in the teaser). */
+export async function setCoverImage(portfolioId: string, imageId: string): Promise<void> {
+  const e1 = await supabase
+    .from("portfolio_images")
+    .update({ is_cover: false })
+    .eq("portfolio_id", portfolioId);
+  if (e1.error) throw e1.error;
+  const e2 = await supabase.from("portfolio_images").update({ is_cover: true }).eq("id", imageId);
+  if (e2.error) throw e2.error;
+}
+
+/** Persist a new ordering (array of {id, sort_order}). */
+export async function reorderImages(items: { id: string; sort_order: number }[]): Promise<void> {
+  for (const it of items) {
+    const { error } = await supabase
+      .from("portfolio_images")
+      .update({ sort_order: it.sort_order })
+      .eq("id", it.id);
+    if (error) throw error;
+  }
+}
+
+/**
+ * Toggle a photo's visibility (D34). Moves the bytes between the public and the
+ * private bucket (fetch current URL → re-upload to target → delete source),
+ * then updates the row. A locked photo can't be the cover (cleared).
+ */
+export async function setImageVisibility(
+  img: ImageRef & { url: string },
+  target: ImageVisibility,
+): Promise<void> {
+  if (img.visibility === target) return;
+  const fromBucket = imageBucket(img.visibility);
+  const toBucket = imageBucket(target);
+
+  const res = await fetch(img.url);
+  if (!res.ok) throw new Error("Görsel taşınamadı (kaynak okunamadı)");
+  const blob = await res.blob();
+
+  const { error: upErr } = await supabase.storage.from(toBucket).upload(img.path, blob, {
+    cacheControl: "3600",
+    upsert: true,
+    contentType: blob.type || "image/jpeg",
+  });
+  if (upErr) throw upErr;
+
+  const { error: rowErr } = await supabase
+    .from("portfolio_images")
+    .update({ visibility: target, ...(target === "locked" ? { is_cover: false } : {}) })
+    .eq("id", img.id);
+  if (rowErr) throw rowErr;
+
+  await supabase.storage.from(fromBucket).remove([img.path]);
+}
+
+// ---------------------------------------------------------------------------
+// Documents (locked; private bucket + signed-URL download)
+// ---------------------------------------------------------------------------
+
+export async function uploadDocument(
+  portfolioId: string,
+  file: File,
+  kind: DocumentKind = "diger",
+): Promise<void> {
+  const ext = file.name.includes(".") ? file.name.split(".").pop() : "pdf";
+  const path = `${portfolioId}/${crypto.randomUUID()}.${ext}`;
+  const { error: upErr } = await supabase.storage.from(DOCS_BUCKET).upload(path, file, {
+    upsert: false,
+  });
+  if (upErr) throw upErr;
+  const { error } = await supabase
+    .from("portfolio_documents")
+    .insert({ portfolio_id: portfolioId, path, kind });
+  if (error) throw error;
+}
+
+/**
+ * Short-lived signed URL for a locked document. RLS (has_portfolio_access) gates
+ * minting: a non-owner/non-granted caller gets no URL (returns null) — we NEVER
+ * fabricate a URL for someone without access.
+ */
+export async function documentSignedUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from(DOCS_BUCKET)
+    .createSignedUrl(path, SIGNED_URL_TTL);
+  if (error) return null;
+  return data?.signedUrl ?? null;
+}
+
+export async function deletePortfolioDocument(doc: { id: string; path: string }): Promise<void> {
+  await supabase.storage.from(DOCS_BUCKET).remove([doc.path]);
+  const { error } = await supabase.from("portfolio_documents").delete().eq("id", doc.id);
+  if (error) throw error;
 }
