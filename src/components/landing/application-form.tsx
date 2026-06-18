@@ -1,21 +1,54 @@
 import * as React from "react";
+import { toast } from "sonner";
 import { CheckCircle2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { submitApplication } from "@/lib/data/applications";
 
 /**
- * ApplicationForm — Kurucu Üyelik başvuru formu.
- * Local/mock submit only. No backend.
- * TODO[backend]: POST to `applications` table + notify team (email).
+ * ApplicationForm — Kurucu Üyelik başvuru formu (D28).
+ * Submits (anon) to the `applications` table. Extra fields (portfolio type,
+ * license, socials, referral) are folded into `message` since the table has a
+ * fixed column set. Admin email notice is a P1 Resend TODO (see data/applications).
  */
 export function ApplicationForm() {
   const [submitted, setSubmitted] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO[backend]: POST to Supabase `applications` table (server function).
+    const fd = new FormData(e.currentTarget);
+    const get = (k: string) => ((fd.get(k) as string | null) ?? "").trim();
+    const regions = get("regions")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const extras = [
+      get("ptype") && `Portföy tipi: ${get("ptype")}`,
+      get("license") && `Yetki belgesi: ${get("license")}`,
+      get("social") && `Sosyal: ${get("social")}`,
+      get("referral") && `Referans: ${get("referral")}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const message = [get("note"), extras].filter(Boolean).join("\n\n") || null;
+
+    setSubmitting(true);
+    const { error } = await submitApplication({
+      full_name: get("name"),
+      phone: get("phone"),
+      email: get("email"),
+      company: get("company") || null,
+      regions,
+      message,
+    });
+    setSubmitting(false);
+    if (error) {
+      toast.error("Başvuru gönderilemedi", { description: error.message });
+      return;
+    }
     setSubmitted(true);
   }
 
@@ -64,6 +97,7 @@ export function ApplicationForm() {
           </Label>
           <select
             id="ptype"
+            name="ptype"
             className="mt-1.5 h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm text-foreground outline-none focus:border-gold/50"
             defaultValue=""
           >
@@ -86,6 +120,7 @@ export function ApplicationForm() {
           </Label>
           <select
             id="license"
+            name="license"
             className="mt-1.5 h-10 w-full rounded-md border border-input bg-background/60 px-3 text-sm text-foreground outline-none focus:border-gold/50"
             defaultValue=""
           >
@@ -115,6 +150,7 @@ export function ApplicationForm() {
           </Label>
           <Textarea
             id="note"
+            name="note"
             placeholder="Beklentileriniz veya eklemek istedikleriniz…"
             className="mt-1.5 min-h-[90px] bg-background/60"
           />
@@ -123,9 +159,10 @@ export function ApplicationForm() {
       <Button
         type="submit"
         size="lg"
+        disabled={submitting}
         className="mt-6 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
       >
-        Başvurumu Gönder <Send className="size-4" />
+        {submitting ? "Gönderiliyor…" : "Başvurumu Gönder"} <Send className="size-4" />
       </Button>
       <p className="mt-3 text-center text-[11px] text-muted-foreground">
         Başvurular doğrulanmış emlak profesyonelleri arasından değerlendirilir.
@@ -156,6 +193,7 @@ function Field({
       </Label>
       <Input
         id={id}
+        name={id}
         type={type}
         required={required}
         placeholder={placeholder}
