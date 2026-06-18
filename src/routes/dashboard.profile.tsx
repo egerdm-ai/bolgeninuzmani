@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, MapPin, Eye, Send, FolderLock } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -61,10 +61,11 @@ function Profile() {
               </p>
             )}
           </div>
-          {/* Public profile preview needs the real-data /v/$username page (M2) —
-              disabled until then to avoid a not-found dead end. */}
-          <Button variant="outline" disabled title="Herkese açık profil önizlemesi yakında">
-            Profili Önizle
+          {/* Public profile preview (Slice 3: /v/$username via get_public_profile RPC). */}
+          <Button asChild variant="outline">
+            <Link to="/v/$username" params={{ username: profile.username }}>
+              Profili Önizle
+            </Link>
           </Button>
         </div>
       </SurfaceCard>

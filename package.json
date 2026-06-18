@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "test:attrs": "npx tsx scripts/test-portfolio-attributes.ts"
+    "test:attrs": "npx tsx scripts/test-portfolio-attributes.ts",
+    "test:leak": "npx tsx scripts/test-public-teaser-leak.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

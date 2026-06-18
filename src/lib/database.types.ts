@@ -331,6 +331,11 @@ export type Database = {
       };
       generate_portfolio_slug: { Args: { _title: string }; Returns: string };
       generate_username: { Args: { _email: string }; Returns: string };
+      // STUB (Slice 3 public-teaser RPCs) — migration drafted but NOT yet applied.
+      // Returns jsonb (Json) until `supabase db push` + type regen replaces these
+      // with the real generated signatures. See supabase/migrations/*slice3*.
+      get_public_portfolio: { Args: { _slug: string }; Returns: Json };
+      get_public_profile: { Args: { _username: string }; Returns: Json };
       has_portfolio_access: {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;

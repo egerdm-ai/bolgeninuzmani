@@ -1,0 +1,94 @@
+import { supabase } from "@/lib/supabase/client";
+import type { Database } from "@/lib/database.types";
+
+// Public/customer teaser data (Slice 3). Reads go through anon-callable SECURITY
+// DEFINER RPCs (get_public_portfolio / get_public_profile) — anon NEVER touches a
+// base table (D13). The RPC returns a strict PUBLIC allow-list, so no locked field
+// (exact_*, malik_info, private_*, locked attributes/images, documents) is reachable.
+//
+// NOTE: the RPC migration is DRAFTED but NOT applied yet — these calls will only
+// resolve at runtime after `supabase db push` + type regen. Build/types are green
+// via the stubs in database.types.ts.
+
+const PUBLIC_IMAGES_BUCKET = "portfolio-images";
+
+type Category = Database["public"]["Enums"]["portfolio_category"];
+type Txn = Database["public"]["Enums"]["transaction_type"];
+type Currency = Database["public"]["Enums"]["currency"];
+
+export type PublicTeaserImage = { path: string; sort_order: number; is_cover: boolean };
+
+export type PublicAgent = {
+  username: string;
+  full_name: string;
+  title: string | null;
+  company_name: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  contact_whatsapp: string | null;
+  expertise_regions: string[];
+  expertise_types: string[];
+};
+
+export type PublicPortfolio = {
+  id: string;
+  slug: string;
+  title: string;
+  public_description: string | null;
+  price: number | null;
+  currency: Currency;
+  transaction_type: Txn;
+  category: Category;
+  subcategory: string | null;
+  room_count: string | null;
+  gross_m2: number | null;
+  net_m2: number | null;
+  land_m2: number | null;
+  features: string[];
+  city: string | null;
+  district: string | null;
+  neighborhood: string | null;
+  approx_lat: number | null;
+  approx_lng: number | null;
+  created_at: string;
+  attributes: Record<string, unknown>;
+  images: PublicTeaserImage[];
+  agent: PublicAgent | null;
+};
+
+export type PublicProfile = {
+  username: string;
+  full_name: string;
+  title: string | null;
+  company_name: string | null;
+  location: string | null;
+  avatar_url: string | null;
+  bio: string | null;
+  contact_phone: string | null;
+  contact_email: string | null;
+  contact_whatsapp: string | null;
+  expertise_regions: string[];
+  expertise_types: string[];
+  membership_tier: Database["public"]["Enums"]["membership_tier"];
+};
+
+/** Public bucket URL for a teaser image path (anon-readable). */
+export function publicTeaserImageUrl(path: string): string {
+  return supabase.storage.from(PUBLIC_IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/** Anon teaser for /p/$slug. Returns null if not found / not active. */
+export async function getPublicPortfolio(slug: string): Promise<PublicPortfolio | null> {
+  const { data, error } = await supabase.rpc("get_public_portfolio", { _slug: slug });
+  if (error) throw error;
+  return (data as unknown as PublicPortfolio | null) ?? null;
+}
+
+/** Anon public agent profile for /v/$username. Returns null if not verified. */
+export async function getPublicProfile(username: string): Promise<PublicProfile | null> {
+  const { data, error } = await supabase.rpc("get_public_profile", { _username: username });
+  if (error) throw error;
+  return (data as unknown as PublicProfile | null) ?? null;
+}
