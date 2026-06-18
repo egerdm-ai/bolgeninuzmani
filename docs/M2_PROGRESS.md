@@ -105,3 +105,61 @@
 3f07a76 docs: M2 schema decisions (D29-D32)        # senin
 2d... (storage) 20260618193206_m2b_storage_buckets.sql  # ADIM B commit'inde
 ```
+
+---
+
+# M2 — İŞ 2 (attributes registry · görünürlük · medya · D13 testi)
+
+> Otonom devam. Her adımda typecheck+build+lint yeşil (lint: 0 hata, 23 react-refresh
+> uyarısı). M2c migration **sen uyguladın**; bu turda kod + read-only doğrulama.
+
+## Adımlar & commit'ler
+| # | İş | commit | durum |
+|---|----|--------|-------|
+| 2.0 | TS type regen (attributes/visibility/image_visibility) | `2e29fec` | ✅ |
+| 2.1 | Attribute registry (D33) + split + **guard** + otomatik test (8/8) | `2e29fec` | ✅ |
+| 2.2 | 🔴 Galeri **lightbox** (büyüt + ok/klavye gezinme) | `…lightbox` | ✅ |
+| 2.3 | Foto görünürlüğü (D34) + medya yönetimi (sil/sırala/kapak/görünürlük) | `348a8a7` | ✅ kod; ⚠️ storage runtime testi sende |
+| 2.4 | Belge upload + signed-URL indirme (has_portfolio_access) | `348a8a7` | ✅ kod; ⚠️ storage runtime testi sende |
+| 2.5 | **D13 RLS testi** (otomatik script + canlı read-only kanıt) | bu commit | ✅ kanıtlandı |
+
+## Kritik guard (attribute D33) — KANITLI
+- `src/lib/portfolio-attributes.ts` registry = public/locked ayrımının TEK kaynağı.
+  `splitAttributes` registry'ye göre yönlendirir; `assertNoLockedInPublic` yazma
+  sınırında sert guard (create/updatePortfolio çağırır).
+- **Otomatik test** `scripts/test-portfolio-attributes.ts` (`npm run test:attrs`) → **8/8**:
+  locked key public bag'e ASLA düşmez; düşürülmeye çalışılırsa hata fırlatır; bilinmeyen
+  key reddedilir.
+
+## D13 RLS testi — CANLI KANIT (read-only, yazma yok)
+Gerçek veriyle (1 aktif portföy, owner A + 2. verified kullanıcı B), RLS simülasyonu
+(`set local role authenticated` + `request.jwt.claims`) ile:
+
+| Sorgu | Owner A | Non-owner verified B | Beklenen | Sonuç |
+|-------|---------|----------------------|----------|-------|
+| portfolio_private | **1** | **0** | A görür, B görmez | ✅ |
+| locked images | — | **0** | B görmez | ✅ (veri yok→vacuous; aynı `has_portfolio_access` predicate) |
+| documents | — | **0** | B görmez | ✅ (veri yok→vacuous; aynı predicate) |
+| teaser (active) | 1 | **1** | B görür | ✅ |
+| public images | 5 | **5** | B görür | ✅ |
+
+→ Kilitli veri (private alanlar) owner-olmayan verified kullanıcıya **sızmıyor**; teaser +
+public fotolar görünüyor. Locked foto/belge aynı `has_portfolio_access` RLS predicate'ini
+kullanıyor (M2c migration + portfolio_private kanıtı). **Tekrar çalıştırılabilir script:**
+`scripts/d13-rls-test.sql` (SQL editor'de çalışır; ihlalde RAISE eder, başarıda "D13 PASS").
+> Not: locked foto/belge ile non-vacuous kanıt için, sen bir portföye kilitli foto + belge
+> ekledikten sonra `d13-rls-test.sql`'i tekrar çalıştır → yine 0 dönmeli.
+
+## Runtime doğrulanmamış (sende — storage yazma + tarayıcı gerekir)
+İş kuralı gereği storage'a YAZMADIM; bu yollar **kod-complete ama runtime test edilmedi**:
+- Foto upload (public/locked bucket'a), görünürlük toggle (bucket'lar arası taşıma),
+  locked foto signed-URL gösterimi.
+- Belge upload + signed-URL indirme.
+- Tarayıcıda test: yeni portföyde foto yükle → biri "Kilitli" yap → owner detayda görünür,
+  ikinci verified hesapta locked foto/belge erişilemez (D13 canlı uçtan uca).
+
+## Açık sorular
+- Zengin attribute seti genişletilsin mi (registry'ye daha çok key)? Şimdilik D33 varsayılan
+  set (cephe/ısıtma/kat/bina yaşı/eşyalı/aidat=public; bina-site adı/daire no=locked).
+- M3 (access grants) gelince `has_portfolio_access` grant-aware olacak → locked foto/belge/
+  attribute otomatik açılır (policy değişmeden).
