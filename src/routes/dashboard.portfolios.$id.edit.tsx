@@ -14,14 +14,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/lib/auth/auth-context";
-import {
-  getMyPortfolioFull,
-  updatePortfolio,
-  uploadImages,
-  type PortfolioStatus,
-} from "@/lib/data/portfolios";
+import { getMyPortfolioFull, updatePortfolio, type PortfolioStatus } from "@/lib/data/portfolios";
 import { STATUS_LABELS } from "@/lib/portfolio-labels";
 import { PortfolioMediaManager } from "@/components/portfolio/portfolio-media-manager";
+import { StickyActionBar } from "@/components/portfolio/sticky-action-bar";
 import {
   PortfolioFormFields,
   buildTeaserInput,
@@ -63,7 +59,6 @@ function EditPortfolio() {
   const [attrs, setAttrs] = useState<AttrFormState>(emptyAttrs);
   const [status, setStatus] = useState<PortfolioStatus>("draft");
   const [existingImages, setExistingImages] = useState<{ url: string; is_cover: boolean }[]>([]);
-  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -134,7 +129,6 @@ function EditPortfolio() {
     setSaving(true);
     try {
       await updatePortfolio(id, buildTeaserInput(teaser, status), buildPrivateInput(priv), attrs);
-      if (files.length) await uploadImages(id, files);
       toast.success("Portföy güncellendi");
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
     } catch (err) {
@@ -204,14 +198,12 @@ function EditPortfolio() {
           setTeaser={setTeaser}
           priv={priv}
           setPriv={setPriv}
-          files={files}
-          setFiles={setFiles}
           attrs={attrs}
           setAttrs={setAttrs}
           existingImages={existingImages}
           hideImages
         />
-        <div className="flex items-center justify-end gap-2">
+        <StickyActionBar>
           <Button asChild variant="outline">
             <Link to="/dashboard/portfolios/$id" params={{ id }}>
               İptal
@@ -222,9 +214,10 @@ function EditPortfolio() {
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             disabled={saving}
           >
-            <Save className="size-4" /> {saving ? "Kaydediliyor…" : "Kaydet"}
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            {saving ? "Kaydediliyor…" : "Kaydet"}
           </Button>
-        </div>
+        </StickyActionBar>
       </form>
 
       <div className="space-y-3">

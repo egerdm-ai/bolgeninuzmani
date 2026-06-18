@@ -24,6 +24,7 @@ import type {
   PortfolioTeaserInput,
   PortfolioPrivateInput,
   PortfolioStatus,
+  PendingImage,
 } from "@/lib/data/portfolios";
 import type { Json } from "@/lib/database.types";
 
@@ -144,8 +145,8 @@ export function PortfolioFormFields({
   setTeaser,
   priv,
   setPriv,
-  files,
-  setFiles,
+  images = [],
+  setImages = () => {},
   attrs,
   setAttrs,
   existingImages = [],
@@ -155,8 +156,8 @@ export function PortfolioFormFields({
   setTeaser: (t: TeaserFormState) => void;
   priv: PrivateFormState;
   setPriv: (p: PrivateFormState) => void;
-  files: File[];
-  setFiles: (f: File[]) => void;
+  images?: PendingImage[];
+  setImages?: (i: PendingImage[]) => void;
   attrs: AttrFormState;
   setAttrs: (a: AttrFormState) => void;
   existingImages?: { url: string; is_cover: boolean }[];
@@ -332,24 +333,55 @@ export function PortfolioFormFields({
               className="hidden"
               onChange={(e) => {
                 if (e.target.files)
-                  setFiles([...files, ...Array.from(e.target.files)].slice(0, 20));
+                  setImages(
+                    [
+                      ...images,
+                      ...Array.from(e.target.files).map((file) => ({
+                        file,
+                        visibility: "public" as const,
+                      })),
+                    ].slice(0, 20),
+                  );
               }}
             />
           </label>
-          {files.length > 0 && (
-            <div className="grid grid-cols-4 gap-3">
-              {files.map((f, i) => (
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {images.map((item, i) => (
                 <div
                   key={i}
                   className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border"
                 >
-                  <img src={URL.createObjectURL(f)} alt="" className="size-full object-cover" />
+                  <img
+                    src={URL.createObjectURL(item.file)}
+                    alt=""
+                    className="size-full object-cover"
+                  />
                   <button
                     type="button"
-                    onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                    onClick={() => setImages(images.filter((_, j) => j !== i))}
                     className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
                   >
                     <X className="size-3" />
+                  </button>
+                  {/* D34: pick visibility per photo at create time too */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setImages(
+                        images.map((it, j) =>
+                          j === i
+                            ? {
+                                ...it,
+                                visibility: it.visibility === "locked" ? "public" : "locked",
+                              }
+                            : it,
+                        ),
+                      )
+                    }
+                    className={`absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
+                  >
+                    {item.visibility === "locked" ? "Kilitli" : "Açık"}
                   </button>
                 </div>
               ))}

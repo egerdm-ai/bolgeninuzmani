@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Save, Rocket } from "lucide-react";
+import { Save, Rocket, Loader2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
-import { createPortfolio } from "@/lib/data/portfolios";
+import { createPortfolio, type PendingImage } from "@/lib/data/portfolios";
 import {
   PortfolioFormFields,
   buildTeaserInput,
@@ -15,6 +15,7 @@ import {
   emptyPrivate,
   emptyAttrs,
 } from "@/components/portfolio/portfolio-form-fields";
+import { StickyActionBar } from "@/components/portfolio/sticky-action-bar";
 
 export const Route = createFileRoute("/dashboard/portfolios/new")({
   component: NewPortfolio,
@@ -26,8 +27,8 @@ function NewPortfolio() {
   const [teaser, setTeaser] = useState(emptyTeaser);
   const [priv, setPriv] = useState(emptyPrivate);
   const [attrs, setAttrs] = useState(emptyAttrs);
-  const [files, setFiles] = useState<File[]>([]);
-  const [saving, setSaving] = useState(false);
+  const [images, setImages] = useState<PendingImage[]>([]);
+  const [saving, setSaving] = useState<null | "draft" | "active">(null);
 
   async function submit(e: FormEvent, status: "draft" | "active") {
     e.preventDefault();
@@ -36,13 +37,13 @@ function NewPortfolio() {
       toast.error("Portföy başlığı zorunlu");
       return;
     }
-    setSaving(true);
+    setSaving(status);
     try {
       const { id } = await createPortfolio(
         user.id,
         buildTeaserInput(teaser, status),
         buildPrivateInput(priv),
-        files,
+        images,
         attrs,
       );
       toast.success(status === "active" ? "Portföy yayınlandı" : "Taslak kaydedildi");
@@ -51,10 +52,11 @@ function NewPortfolio() {
       toast.error("Portföy oluşturulamadı", {
         description: err instanceof Error ? err.message : String(err),
       });
-    } finally {
-      setSaving(false);
+      setSaving(null);
     }
   }
+
+  const busy = saving !== null;
 
   return (
     <PageContainer className="space-y-6">
@@ -71,29 +73,45 @@ function NewPortfolio() {
           setTeaser={setTeaser}
           priv={priv}
           setPriv={setPriv}
-          files={files}
-          setFiles={setFiles}
+          images={images}
+          setImages={setImages}
           attrs={attrs}
           setAttrs={setAttrs}
         />
-        <div className="flex items-center justify-end gap-2">
+        <StickyActionBar>
+          {busy && images.length > 1 && (
+            <span className="mr-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="size-3.5 animate-spin text-gold" /> {images.length} görsel
+              yükleniyor…
+            </span>
+          )}
           <Button
             type="button"
             variant="outline"
             className="gap-1.5"
-            disabled={saving}
+            disabled={busy}
             onClick={(e) => submit(e, "draft")}
           >
-            <Save className="size-4" /> Taslak Kaydet
+            {saving === "draft" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Save className="size-4" />
+            )}
+            Taslak Kaydet
           </Button>
           <Button
             type="submit"
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            disabled={saving}
+            disabled={busy}
           >
-            <Rocket className="size-4" /> {saving ? "Kaydediliyor…" : "Yayınla"}
+            {saving === "active" ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Rocket className="size-4" />
+            )}
+            {saving === "active" ? "Yayınlanıyor…" : "Yayınla"}
           </Button>
-        </div>
+        </StickyActionBar>
       </form>
     </PageContainer>
   );

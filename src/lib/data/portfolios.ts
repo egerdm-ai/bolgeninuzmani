@@ -35,6 +35,9 @@ const SIGNED_URL_TTL = 3600; // 1h short-lived signed URLs for locked media (D34
 export type ImageVisibility = Database["public"]["Enums"]["image_visibility"];
 export type DocumentKind = Database["public"]["Enums"]["document_kind"];
 
+/** A picked-but-not-yet-uploaded image with its chosen visibility (create wizard). */
+export type PendingImage = { file: File; visibility: ImageVisibility };
+
 function imageBucket(visibility: ImageVisibility) {
   return visibility === "locked" ? IMAGES_LOCKED_BUCKET : IMAGES_BUCKET;
 }
@@ -191,7 +194,7 @@ export async function createPortfolio(
   ownerId: string,
   teaser: PortfolioTeaserInput,
   priv: PortfolioPrivateInput = {},
-  files: File[] = [],
+  images: PendingImage[] = [],
   attributes: AttributesInput = {},
 ): Promise<{ id: string; slug: string }> {
   // D33: split attributes by the registry; the guard hard-fails if any locked
@@ -208,7 +211,12 @@ export async function createPortfolio(
     .single();
   if (error) throw error;
 
-  await uploadImages(created.id, files);
+  // Upload public first (so the first public image becomes the cover), then
+  // locked → the correct bucket. Each group uploads its files in parallel.
+  const publicFiles = images.filter((i) => i.visibility === "public").map((i) => i.file);
+  const lockedFiles = images.filter((i) => i.visibility === "locked").map((i) => i.file);
+  await uploadImages(created.id, publicFiles, "public");
+  await uploadImages(created.id, lockedFiles, "locked");
 
   const hasLockedAttrs = Object.keys(lockedAttrs).length > 0;
   if (privateHasData(priv) || hasLockedAttrs) {
@@ -276,24 +284,26 @@ export async function uploadImages(
   const startIndex = count ?? 0;
   const bucket = imageBucket(visibility);
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const ext = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-    const path = `${portfolioId}/${crypto.randomUUID()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-    if (upErr) throw upErr;
-    const { error: rowErr } = await supabase.from("portfolio_images").insert({
-      portfolio_id: portfolioId,
-      path,
-      sort_order: startIndex + i,
-      is_cover: visibility === "public" && startIndex + i === 0,
-      visibility,
-    });
-    if (rowErr) throw rowErr;
-  }
+  // Upload all files in parallel (independent work) so many images don't feel slow.
+  await Promise.all(
+    files.map(async (file, i) => {
+      const ext = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
+      const path = `${portfolioId}/${crypto.randomUUID()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+      if (upErr) throw upErr;
+      const { error: rowErr } = await supabase.from("portfolio_images").insert({
+        portfolio_id: portfolioId,
+        path,
+        sort_order: startIndex + i,
+        is_cover: visibility === "public" && startIndex + i === 0,
+        visibility,
+      });
+      if (rowErr) throw rowErr;
+    }),
+  );
 }
 
 type ImageRef = Pick<PortfolioImage, "id" | "path" | "visibility">;

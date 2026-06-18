@@ -1,6 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, FolderLock, CheckCircle2, FileEdit, ImageOff, Loader2, Pencil } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Plus,
+  FolderLock,
+  CheckCircle2,
+  FileEdit,
+  ImageOff,
+  Loader2,
+  Pencil,
+  Rocket,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/vault/cards";
@@ -9,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
   listMyPortfolios,
+  setPortfolioStatus,
   type PortfolioWithCover,
   type PortfolioStatus,
 } from "@/lib/data/portfolios";
@@ -61,6 +72,16 @@ function MyPortfolios() {
   const filtered = tab === "all" ? all : all.filter((p) => p.status === tab);
   const activeCount = all.filter((p) => p.status === "active").length;
   const draftCount = all.filter((p) => p.status === "draft").length;
+
+  async function publish(id: string) {
+    try {
+      await setPortfolioStatus(id, "active");
+      setItems((prev) => prev?.map((p) => (p.id === id ? { ...p, status: "active" } : p)) ?? null);
+      toast.success("Portföy yayınlandı");
+    } catch (e) {
+      toast.error("Yayınlanamadı", { description: e instanceof Error ? e.message : String(e) });
+    }
+  }
 
   return (
     <PageContainer className="space-y-6">
@@ -131,7 +152,7 @@ function MyPortfolios() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((p) => (
-            <PortfolioCard key={p.id} p={p} />
+            <PortfolioCard key={p.id} p={p} onPublish={publish} />
           ))}
         </div>
       )}
@@ -139,7 +160,13 @@ function MyPortfolios() {
   );
 }
 
-function PortfolioCard({ p }: { p: PortfolioWithCover }) {
+function PortfolioCard({
+  p,
+  onPublish,
+}: {
+  p: PortfolioWithCover;
+  onPublish: (id: string) => void;
+}) {
   return (
     <div className="group overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong">
       <Link to="/dashboard/portfolios/$id" params={{ id: p.id }} className="block">
@@ -180,6 +207,16 @@ function PortfolioCard({ p }: { p: PortfolioWithCover }) {
         </div>
       </Link>
       <div className="flex border-t border-border">
+        {p.status === "draft" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex-1 gap-1.5 rounded-none text-gold hover:text-gold-light"
+            onClick={() => onPublish(p.id)}
+          >
+            <Rocket className="size-3.5" /> Yayınla
+          </Button>
+        )}
         <Button asChild variant="ghost" size="sm" className="flex-1 gap-1.5 rounded-none">
           <Link to="/dashboard/portfolios/$id/edit" params={{ id: p.id }}>
             <Pencil className="size-3.5" /> Düzenle
