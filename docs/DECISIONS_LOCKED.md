@@ -63,3 +63,46 @@ private_description, private_notes.
 - Locked fields never leak to teaser/public/customer; masking at RLS/backend.
 - Exploration/reads anon/read-only; service role server-side only.
 - No UI redesign; preserve the dark-luxury system (now Bölgenin Uzmanı).
+
+---
+
+## Audit sonrası kararlar (2026-06-18)
+
+- **D13 — Kilitli veri AYRI tabloda (en kritik düzeltme).** Kilitli alanlar
+  `portfolios` tablosunda kolon DEĞİL; ayrı **`portfolio_private`** (1:1) tablosunda
+  durur, kendi RLS'iyle (SELECT yalnızca sahibi VEYA aktif grant). Sebep: Postgres
+  RLS satır bazlıdır, kolon gizleyemez — kilitli alanlar aynı tabloda olursa, teaser
+  için satıra SELECT hakkı alan başka bir emlakçı kilitli kolonları da okuyabilir.
+  Public teaser ise bir **view/RPC** ile sunulur; anon asla `portfolios` taban
+  tablosuna dokunmaz.
+- **D14 — Onboarding: açık (self-serve) kayıt YOK.** Admin (kurucular) Supabase
+  invite ile davet eder → emlakçı e-posta linkiyle şifre belirler (email/password).
+  Landing başvuru formu → `applications` tablosu → admin inceler → davet eder. Açık
+  kayıt olmadığı için "kapalı ağ" sınırı otomatik sağlanır.
+- **D15 — Asistan ismi ertelendi** (AI sonraki faz); şimdilik "Asistan" placeholder.
+- **D16 — Share domain hedefi `bolgeninuzmani.com`** (alınacak); canlıya çıkana
+  kadar placeholder kalır.
+- **D17 — `components/vault/` klasörü** şimdilik olduğu gibi kalır (düşük değer, yüksek diff).
+- **D18 — Duplicate AI route'ları:** `concierge` → `assistant`'a birleştir, `concierge`
+  emekli; `ai-import` ayrı. Hepsi sonraki faz → flag arkasına al (quarantine), silme.
+- **D19 — Portföy edit route eklenecek:** `/dashboard/portfolios/$id/edit` + "Düzenle"
+  butonu bağlanacak (Portföy CRUD slice'ı).
+- **D20 — Kilitli alan seti:** exact_lat, exact_lng, malik_info (ad+iletişim),
+  private_description, private_notes → `portfolio_private` içinde. Create-wizard
+  bunları yalnızca sahibe görünen adımda toplar.
+- **D21 — membershipTier/badge = sadece görünüm** (billing/display), erişim mantığı
+  yok. Roller `user_roles`'tan (admin/agent).
+- **D22 — Müşteri linki sınırı:** `/p/$slug`'da "Detay Talebi" → login/signup'a
+  yönlendir (üye-only). Teaser emlakçının KENDİ iletişimini gösterir, malik_info'yu asla.
+- **D23 — Jira:** henüz bağlı değil; commit'lerde Jira key olmadan geç. Build başında
+  Atlassian MCP bağlanınca key verilecek.
+- **D24 — QA baseline screenshots:** brand sweep'ten SONRA çekilecek.
+- **D25 — Lovable kalıntıları temizlenecek.** Proje Lovable'da üretildi. `lovable-tagger`
+  (package.json + vite.config), `.lovable/`, lovable.config.*, Lovable env, Lovable
+  Cloud/Supabase bağlantı izleri, index.html/meta + README'deki Lovable/gpt-engineer
+  referansları kaldırılacak. Önce envanter (`docs/lovable-cleanup.md`) → insan onayı →
+  sonra silme. Build'i bozabilecek kalemlerde (Vite plugin) typecheck+build ile doğrula.
+- **D26 — Slice 0 (temizlik) build'den önce:** `bun run format` (773 prettier) ·
+  brand sweep (VAULT→Bölgenin Uzmanı, yalnızca copy/wordmark, redesign değil) ·
+  ertelenen route'ları quarantine · Lovable temizliği (D25) · `typecheck` script ekle.
+  Sonra Slice 1 (auth+profiles+roles).
