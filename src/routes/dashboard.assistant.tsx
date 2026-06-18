@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -26,6 +27,9 @@ import { cn } from "@/lib/utils";
 import type { MatchResult, Professional } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/assistant")({
+  beforeLoad: () => {
+    if (!featureFlags.assistant) throw redirect({ to: "/dashboard" });
+  },
   component: Assistant,
 });
 

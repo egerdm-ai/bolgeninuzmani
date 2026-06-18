@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { Bookmark, Search } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -10,6 +11,9 @@ import { portfolios, savedSearches } from "@/lib/mock/data";
 import { useSaved } from "@/lib/saved-store";
 
 export const Route = createFileRoute("/dashboard/favorites")({
+  beforeLoad: () => {
+    if (!featureFlags.follow) throw redirect({ to: "/dashboard" });
+  },
   component: Favorites,
 });
 

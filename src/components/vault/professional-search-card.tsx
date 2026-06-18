@@ -19,6 +19,7 @@ import { formatPrice, portfolioTypeLabels } from "@/lib/format";
 import { SurfaceCard } from "./cards";
 import { StatusBadge, FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
+import { featureFlags } from "@/lib/feature-flags";
 
 const urgencyLabels: Record<Urgency, string> = {
   high: "Yüksek Aciliyet",
@@ -96,21 +97,26 @@ export function ProfessionalSearchCard({
         </p>
       )}
 
+      {/* Arayış/Eşleşme actions are deferred (D18); only the MVP Keşfet search remains. */}
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <Button asChild size="sm" variant="outline" className="h-8 gap-1">
-          <Link to="/dashboard/searches/$id" params={{ id: search.id }}>
-            Arayışı Gör <ArrowRight className="size-3.5" />
-          </Link>
-        </Button>
-        <Button
-          asChild
-          size="sm"
-          className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
-        >
-          <Link to="/dashboard/matches">
-            <Layers className="size-3.5" /> Portföyümle Eşleştir
-          </Link>
-        </Button>
+        {featureFlags.arayis && (
+          <Button asChild size="sm" variant="outline" className="h-8 gap-1">
+            <Link to="/dashboard/searches/$id" params={{ id: search.id }}>
+              Arayışı Gör <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+        )}
+        {featureFlags.matches && (
+          <Button
+            asChild
+            size="sm"
+            className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            <Link to="/dashboard/matches">
+              <Layers className="size-3.5" /> Portföyümle Eşleştir
+            </Link>
+          </Button>
+        )}
         <Button asChild size="sm" variant="ghost" className="h-8 gap-1">
           <Link to="/dashboard/search">
             <Sparkles className="size-3.5 text-gold" /> Benzer Portföy Ara

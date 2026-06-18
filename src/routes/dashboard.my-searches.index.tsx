@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useMemo, useState } from "react";
 import { Plus, Search, Sparkles, CheckCircle2, Clock, Bell } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
@@ -11,6 +12,9 @@ import { cn } from "@/lib/utils";
 import type { BuyerSearch } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/my-searches/")({
+  beforeLoad: () => {
+    if (!featureFlags.arayis) throw redirect({ to: "/dashboard" });
+  },
   component: MySearches,
 });
 

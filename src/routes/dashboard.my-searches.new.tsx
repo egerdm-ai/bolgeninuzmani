@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Sparkles, Search, Lock, Globe, Wand2 } from "lucide-react";
@@ -41,6 +42,9 @@ import {
 } from "@/lib/taxonomy";
 
 export const Route = createFileRoute("/dashboard/my-searches/new")({
+  beforeLoad: () => {
+    if (!featureFlags.arayis) throw redirect({ to: "/dashboard" });
+  },
   component: NewSearch,
 });
 

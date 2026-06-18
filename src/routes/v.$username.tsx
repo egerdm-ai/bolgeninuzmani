@@ -3,6 +3,7 @@ import { ShieldCheck, ArrowLeft } from "lucide-react";
 import { getProfessionalByUsername } from "@/lib/mock/data";
 import { ProfessionalProfile } from "@/components/vault/professional-profile";
 import { Button } from "@/components/ui/button";
+import { featureFlags } from "@/lib/feature-flags";
 
 export const Route = createFileRoute("/v/$username")({
   loader: ({ params }) => {
@@ -51,11 +52,13 @@ function PublicProfessionalPage() {
             </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
-              <Link to="/dashboard/professionals">
-                <ArrowLeft className="size-4" /> Profesyoneller
-              </Link>
-            </Button>
+            {featureFlags.professionals && (
+              <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
+                <Link to="/dashboard/professionals">
+                  <ArrowLeft className="size-4" /> Profesyoneller
+                </Link>
+              </Button>
+            )}
             <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
               <Link to="/dashboard">Üye Girişi</Link>
             </Button>

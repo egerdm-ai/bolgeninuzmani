@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useMemo, useState } from "react";
 import { Search, Compass, Sparkles, Flame, FolderLock, Award } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
@@ -12,6 +13,9 @@ import type { BuyerSearch } from "@/lib/mock/types";
 type SearchParams = { region?: string };
 
 export const Route = createFileRoute("/dashboard/searches/")({
+  beforeLoad: () => {
+    if (!featureFlags.arayis) throw redirect({ to: "/dashboard" });
+  },
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     region: typeof s.region === "string" ? s.region : undefined,
   }),

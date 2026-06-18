@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -41,6 +42,9 @@ import { cn } from "@/lib/utils";
 type SearchParams = { mode?: "edit"; tab?: "matches" };
 
 export const Route = createFileRoute("/dashboard/my-searches/$id")({
+  beforeLoad: () => {
+    if (!featureFlags.arayis) throw redirect({ to: "/dashboard" });
+  },
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     mode: s.mode === "edit" ? "edit" : undefined,
     tab: s.tab === "matches" ? "matches" : undefined,

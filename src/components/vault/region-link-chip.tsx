@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { regionSlugForName } from "@/lib/mock/matching";
+import { featureFlags } from "@/lib/feature-flags";
 
 /**
  * Region chip that links to /dashboard/regions/$slug when a region page exists,
@@ -30,7 +31,8 @@ export function RegionLinkChip({
     </>
   );
 
-  if (!slug) return <span className={base}>{inner}</span>;
+  // Regions are quarantined (D18) — render a static chip (no link) until enabled.
+  if (!slug || !featureFlags.regions) return <span className={base}>{inner}</span>;
 
   return (
     <Link

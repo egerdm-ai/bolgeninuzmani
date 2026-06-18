@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useState } from "react";
 import {
   MessageCircle,
@@ -19,6 +20,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/ai-import")({
+  beforeLoad: () => {
+    if (!featureFlags.aiImport) throw redirect({ to: "/dashboard" });
+  },
   component: AIImportHub,
 });
 

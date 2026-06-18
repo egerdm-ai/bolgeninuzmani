@@ -4,6 +4,7 @@ import type { Professional, RegionExpertise } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
 import { SurfaceCard } from "./cards";
 import { regionSlugForName } from "@/lib/mock/matching";
+import { featureFlags } from "@/lib/feature-flags";
 
 /**
  * "Uzmanlık Bölgeleri" — clean, scannable list. Each row shows the region,
@@ -99,7 +100,7 @@ function RegionRow({
         >
           Portföyleri Gör <ArrowRight className="size-3" />
         </button>
-        {slug && (
+        {slug && featureFlags.regions && (
           <Link
             to="/dashboard/regions/$slug"
             params={{ slug }}

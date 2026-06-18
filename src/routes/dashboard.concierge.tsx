@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -24,6 +24,10 @@ import { cn } from "@/lib/utils";
 import type { Portfolio } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/concierge")({
+  beforeLoad: () => {
+    // Retired: AI Concierge merged into Asistan (D18).
+    throw redirect({ to: "/dashboard/assistant" });
+  },
   component: Concierge,
 });
 

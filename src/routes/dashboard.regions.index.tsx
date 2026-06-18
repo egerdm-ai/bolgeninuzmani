@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { FolderLock, Search, Users, TrendingUp } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -7,6 +8,9 @@ import { RegionCard } from "@/components/vault/region-card";
 import { regions } from "@/lib/mock/matching";
 
 export const Route = createFileRoute("/dashboard/regions/")({
+  beforeLoad: () => {
+    if (!featureFlags.regions) throw redirect({ to: "/dashboard" });
+  },
   component: Regions,
 });
 

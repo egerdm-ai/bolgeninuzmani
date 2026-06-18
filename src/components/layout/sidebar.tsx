@@ -5,17 +5,12 @@ import {
   Search,
   FolderLock,
   Inbox,
-  Sparkles,
   UserRound,
   Settings,
   ShieldCheck,
   Crown,
   ChevronLeft,
   ChevronDown,
-  Users2,
-  Target,
-  Map,
-  GitCompareArrows,
   Bell,
   Compass,
 } from "lucide-react";
@@ -33,20 +28,18 @@ const primaryNav = [
 ] as const;
 
 // Keşfet (discovery) — network / public areas the user browses.
-const discoverChildren = [
-  { label: "Portföyler", to: "/dashboard/search", icon: Search },
-  { label: "Bölgeler", to: "/dashboard/regions", icon: Map },
-  { label: "Profesyoneller", to: "/dashboard/professionals", icon: Users2 },
-  { label: "Arayışlar", to: "/dashboard/searches", icon: Compass },
-] as const;
+// NOTE: Bölgeler (regions), Arayışlar (searches) and Profesyoneller (professionals)
+// are quarantined (deferred — D18). Routes still exist behind feature flags; see
+// docs/route-quarantine.md.
+const discoverChildren = [{ label: "Portföyler", to: "/dashboard/search", icon: Search }] as const;
 
 // Main workspace — items that belong to the current user.
+// NOTE: Arayışlarım (/dashboard/my-searches), Eşleşmeler (/dashboard/matches) and
+// Asistan (/dashboard/assistant) are quarantined (deferred — D18); see
+// docs/route-quarantine.md.
 const workNav = [
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
-  { label: "Arayışlarım", to: "/dashboard/my-searches", icon: Target },
-  { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
-  { label: "Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
 ] as const;
 

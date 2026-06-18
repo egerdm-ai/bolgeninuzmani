@@ -13,6 +13,7 @@ import { portfolios } from "@/lib/mock/data";
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/lib/saved-store";
 import { useMySearches } from "@/lib/my-searches-store";
+import { featureFlags } from "@/lib/feature-flags";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import type { Portfolio } from "@/lib/mock/types";
 import {
@@ -289,15 +290,17 @@ function SearchPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="outline"
-              className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10"
-            >
-              <Link to="/dashboard/assistant">
-                <Sparkles className="size-4" /> Asistan'a Sor
-              </Link>
-            </Button>
+            {featureFlags.assistant && (
+              <Button
+                asChild
+                variant="outline"
+                className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10"
+              >
+                <Link to="/dashboard/assistant">
+                  <Sparkles className="size-4" /> Asistan'a Sor
+                </Link>
+              </Button>
+            )}
             <Button
               variant="outline"
               className={cn("gap-1.5", activeCount > 0 && "border-gold/40 text-gold")}

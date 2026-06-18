@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import {
   Sparkles,
   GitCompareArrows,
@@ -34,6 +35,9 @@ import { useDetailRequest } from "@/lib/detail-request-store";
 type SearchParams = { searchId?: string; source?: "network"; portfolioId?: string };
 
 export const Route = createFileRoute("/dashboard/matches")({
+  beforeLoad: () => {
+    if (!featureFlags.matches) throw redirect({ to: "/dashboard" });
+  },
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     searchId: typeof s.searchId === "string" ? s.searchId : undefined,
     source: s.source === "network" ? "network" : undefined,

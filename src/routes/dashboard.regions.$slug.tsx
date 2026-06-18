@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import {
   MapPin,
   FolderLock,
@@ -31,6 +32,9 @@ import { cn } from "@/lib/utils";
 import type { NotificationFrequency } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/regions/$slug")({
+  beforeLoad: () => {
+    if (!featureFlags.regions) throw redirect({ to: "/dashboard" });
+  },
   component: RegionDetail,
 });
 

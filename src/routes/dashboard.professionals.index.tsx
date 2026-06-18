@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import { useMemo, useState } from "react";
 import { Search, Users, FolderLock, Award, Sparkles, X } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
@@ -9,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { useFollow } from "@/lib/follow-store";
 
 export const Route = createFileRoute("/dashboard/professionals/")({
+  beforeLoad: () => {
+    if (!featureFlags.professionals) throw redirect({ to: "/dashboard" });
+  },
   component: ProfessionalsPage,
 });
 

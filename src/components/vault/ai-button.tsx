@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { featureFlags } from "@/lib/feature-flags";
 
 export function AIButton({
   children = "AI ile Portföy Oluştur",
@@ -14,6 +15,9 @@ export function AIButton({
   onClick?: () => void;
   size?: "sm" | "default" | "lg";
 }) {
+  // AI (Asistan + içe aktarma) is deferred (D18). Hide all AI entry points until enabled.
+  if (!featureFlags.assistant && !featureFlags.aiImport) return null;
+
   const classes = cn(
     "group relative gap-2 border-gold/40 bg-gold/5 text-gold hover:bg-gold/10 hover:text-gold-light",
     className,

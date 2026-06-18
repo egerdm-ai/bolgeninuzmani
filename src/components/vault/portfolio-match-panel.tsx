@@ -4,6 +4,7 @@ import type { Portfolio } from "@/lib/mock/types";
 import { getMatchingSearchesForPortfolio } from "@/lib/mock/matching";
 import { SurfaceCard } from "./cards";
 import { Button } from "@/components/ui/button";
+import { featureFlags } from "@/lib/feature-flags";
 
 export function PortfolioMatchPanel({
   portfolio,
@@ -12,6 +13,8 @@ export function PortfolioMatchPanel({
   portfolio: Portfolio;
   mode: "public" | "member" | "owner";
 }) {
+  // Arayış/Eşleşme deferred (D18) — hide the match panel until enabled.
+  if (!featureFlags.arayis && !featureFlags.matches) return null;
   const searches = getMatchingSearchesForPortfolio(portfolio);
   if (mode === "public" || searches.length === 0) return null;
 

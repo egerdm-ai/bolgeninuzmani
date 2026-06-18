@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { featureFlags } from "@/lib/feature-flags";
 import {
   Sparkles,
   MapPin,
@@ -33,6 +34,9 @@ import { cn } from "@/lib/utils";
 import type { MatchResult } from "@/lib/mock/types";
 
 export const Route = createFileRoute("/dashboard/searches/$id")({
+  beforeLoad: () => {
+    if (!featureFlags.arayis) throw redirect({ to: "/dashboard" });
+  },
   component: NetworkSearchDetail,
 });
 

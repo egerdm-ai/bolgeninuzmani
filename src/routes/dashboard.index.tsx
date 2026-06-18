@@ -18,6 +18,7 @@ import {
 import { PageContainer } from "@/components/layout/app-shell";
 import { KpiCard, QuickActionCard, InfoPanel, SurfaceCard } from "@/components/vault/cards";
 import { AIButton } from "@/components/vault/ai-button";
+import { featureFlags } from "@/lib/feature-flags";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { StatusBadge } from "@/components/vault/badges";
@@ -93,23 +94,27 @@ function DashboardHome() {
             accent
           />
         </Link>
-        <Link to="/dashboard/my-searches/new">
-          <QuickActionCard
-            label="Yeni Arayış"
-            description="Müşteri için portföy eşleştir"
-            icon={Target}
-          />
-        </Link>
+        {featureFlags.arayis && (
+          <Link to="/dashboard/my-searches/new">
+            <QuickActionCard
+              label="Yeni Arayış"
+              description="Müşteri için portföy eşleştir"
+              icon={Target}
+            />
+          </Link>
+        )}
         <Link to="/dashboard/search">
           <QuickActionCard label="Portföy Ara" description="Harita üzerinde keşfet" icon={Search} />
         </Link>
-        <Link to="/dashboard/assistant">
-          <QuickActionCard
-            label="Asistan"
-            description="Akıllı eşleştirme & değerleme"
-            icon={Sparkles}
-          />
-        </Link>
+        {featureFlags.assistant && (
+          <Link to="/dashboard/assistant">
+            <QuickActionCard
+              label="Asistan"
+              description="Akıllı eşleştirme & değerleme"
+              icon={Sparkles}
+            />
+          </Link>
+        )}
       </div>
 
       {/* KPIs */}
@@ -242,25 +247,27 @@ function DashboardHome() {
 
         {/* Right rail */}
         <div className="space-y-7">
-          {/* Asistan CTA */}
-          <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
-              <Sparkles className="size-5" />
-            </span>
-            <h3 className="mt-3 font-display text-lg font-semibold text-foreground">Asistan</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Arayıştan portföy bulun, portföyü arayışlarla eşleştirin ve bölge uzmanı önerileri
-              alın.
-            </p>
-            <Button
-              asChild
-              className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            >
-              <Link to="/dashboard/assistant">
-                <Sparkles className="size-4" /> Asistan ile Eşleştir
-              </Link>
-            </Button>
-          </SurfaceCard>
+          {/* Asistan CTA — deferred (D18) */}
+          {featureFlags.assistant && (
+            <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
+                <Sparkles className="size-5" />
+              </span>
+              <h3 className="mt-3 font-display text-lg font-semibold text-foreground">Asistan</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Arayıştan portföy bulun, portföyü arayışlarla eşleştirin ve bölge uzmanı önerileri
+                alın.
+              </p>
+              <Button
+                asChild
+                className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
+                <Link to="/dashboard/assistant">
+                  <Sparkles className="size-4" /> Asistan ile Eşleştir
+                </Link>
+              </Button>
+            </SurfaceCard>
+          )}
 
           {/* Activity */}
           <InfoPanel title="Son Aktiviteler">
