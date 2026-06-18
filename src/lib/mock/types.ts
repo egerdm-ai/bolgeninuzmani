@@ -75,13 +75,7 @@ export type PortfolioType =
   | "office"
   | "restaurant";
 
-export type PortfolioCategory =
-  | "konut"
-  | "ticari"
-  | "arsa"
-  | "turizm"
-  | "isletme"
-  | "ozel_varlik";
+export type PortfolioCategory = "konut" | "ticari" | "arsa" | "turizm" | "isletme" | "ozel_varlik";
 
 export type PortfolioStatus = "draft" | "active" | "passive" | "sold_or_rented";
 export type Purpose = "satilik" | "kiralik";
@@ -135,12 +129,7 @@ export type Portfolio = {
   mapY: number;
 };
 
-export type DetailRequestStatus =
-  | "new"
-  | "read"
-  | "answered"
-  | "approved"
-  | "rejected";
+export type DetailRequestStatus = "new" | "read" | "answered" | "approved" | "rejected";
 
 export type DetailRequest = {
   id: string;
@@ -162,12 +151,7 @@ export type SavedSearch = {
   createdAt: string;
 };
 
-export type ActivityType =
-  | "view"
-  | "request"
-  | "save"
-  | "publish"
-  | "approve";
+export type ActivityType = "view" | "request" | "save" | "publish" | "approve";
 
 export type Activity = {
   id: string;
@@ -258,12 +242,7 @@ export const notificationFrequencyLabels: Record<NotificationFrequency, string> 
   off: "Kapalı",
 };
 
-export type NotificationKind =
-  | "match"
-  | "region"
-  | "portfolio"
-  | "request"
-  | "search";
+export type NotificationKind = "match" | "region" | "portfolio" | "request" | "search";
 
 /** Typed navigation target for a notification (route + params/search). */
 export type NotificationLink =

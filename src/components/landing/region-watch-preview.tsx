@@ -33,7 +33,11 @@ export function RegionWatchPreview() {
         {regions.map((r) => (
           <GlassCard key={r.name} className="overflow-hidden">
             <div className="relative h-20">
-              <img src={mapDark} alt={`${r.name} haritası`} className="size-full object-cover opacity-80" />
+              <img
+                src={mapDark}
+                alt={`${r.name} haritası`}
+                className="size-full object-cover opacity-80"
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
               <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 text-sm font-semibold text-foreground">
                 <MapPin className="size-3.5 text-gold" /> {r.name}
@@ -56,7 +60,10 @@ export function RegionWatchPreview() {
                 ["Bölge Uzmanı", r.experts],
                 ["Talep Yoğunluğu", r.demand],
               ].map(([k, v]) => (
-                <div key={k as string} className="rounded-lg border border-border/60 bg-surface-2/40 px-2.5 py-1.5">
+                <div
+                  key={k as string}
+                  className="rounded-lg border border-border/60 bg-surface-2/40 px-2.5 py-1.5"
+                >
                   <p className="text-[10px] text-muted-foreground">{k}</p>
                   <p className="mt-0.5 font-display text-base font-semibold text-foreground">{v}</p>
                 </div>

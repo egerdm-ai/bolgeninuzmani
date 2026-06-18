@@ -25,9 +25,15 @@ export function RegionExpertCard({
   return (
     <div className="rounded-2xl border border-border bg-gradient-surface p-4 shadow-elegant transition-colors hover:border-border-strong">
       <div className="flex items-center gap-3">
-        <BrokerAvatar name={professional.fullName} src={professional.avatarUrl || undefined} size="lg" />
+        <BrokerAvatar
+          name={professional.fullName}
+          src={professional.avatarUrl || undefined}
+          size="lg"
+        />
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-foreground">{professional.fullName}</h3>
+          <h3 className="truncate text-sm font-semibold text-foreground">
+            {professional.fullName}
+          </h3>
           <p className="truncate text-xs text-muted-foreground">{professional.title}</p>
           <p className="truncate text-xs text-gold">{professional.companyName}</p>
         </div>
@@ -53,7 +59,12 @@ export function RegionExpertCard({
             Profili Gör
           </Link>
         </Button>
-        <FollowButton id={professional.id} name={professional.fullName} size="sm" className="flex-1" />
+        <FollowButton
+          id={professional.id}
+          name={professional.fullName}
+          size="sm"
+          className="flex-1"
+        />
       </div>
     </div>
   );

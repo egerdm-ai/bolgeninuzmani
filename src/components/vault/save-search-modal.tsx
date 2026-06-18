@@ -52,13 +52,18 @@ export function SaveSearchModal({
         <DialogHeader>
           <DialogTitle className="font-display text-xl">Arayışlarım'a Kaydet</DialogTitle>
           <DialogDescription>
-            Bu aramayı müşteriniz için Arayışlarım'a kaydedin; uygun yeni portföyler eklendiğinde bildirim alın.
+            Bu aramayı müşteriniz için Arayışlarım'a kaydedin; uygun yeni portföyler eklendiğinde
+            bildirim alın.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-1">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Arayış adı</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="örn. Bodrum Deniz Manzaralı Villa" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="örn. Bodrum Deniz Manzaralı Villa"
+            />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Müşteri notu</Label>

@@ -71,7 +71,9 @@ function AIImportHub() {
                 onClick={() => setSource(s.key)}
                 className={cn(
                   "flex flex-col items-center gap-2 rounded-xl border p-3 transition-colors",
-                  source === s.key ? "border-gold/50 bg-gold/10 text-gold" : "border-border bg-surface-2 text-secondary-foreground hover:border-border-strong",
+                  source === s.key
+                    ? "border-gold/50 bg-gold/10 text-gold"
+                    : "border-border bg-surface-2 text-secondary-foreground hover:border-border-strong",
                 )}
               >
                 <s.icon className="size-5" />
@@ -83,20 +85,38 @@ function AIImportHub() {
           <SurfaceCard className="space-y-4">
             {source === "whatsapp" || source === "manual" ? (
               <>
-                <h3 className="text-sm font-semibold text-foreground">{source === "whatsapp" ? "WhatsApp mesajını yapıştırın" : "Metni yazın veya yapıştırın"}</h3>
-                <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={10} className="resize-none text-sm" />
+                <h3 className="text-sm font-semibold text-foreground">
+                  {source === "whatsapp"
+                    ? "WhatsApp mesajını yapıştırın"
+                    : "Metni yazın veya yapıştırın"}
+                </h3>
+                <Textarea
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={10}
+                  className="resize-none text-sm"
+                />
               </>
             ) : (
               <>
-                <h3 className="text-sm font-semibold text-foreground">{source === "pdf" ? "PDF / Katalog Yükle" : "Fotoğraf Yükle"}</h3>
+                <h3 className="text-sm font-semibold text-foreground">
+                  {source === "pdf" ? "PDF / Katalog Yükle" : "Fotoğraf Yükle"}
+                </h3>
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-12 text-center">
                   <UploadCloud className="size-8 text-gold" />
-                  <p className="mt-2 text-sm font-medium text-foreground">Dosyaları sürükleyin veya seçin</p>
-                  <p className="text-xs text-muted-foreground">{source === "pdf" ? "PDF · maks. 25MB" : "JPG, PNG · maks. 20 görsel"}</p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    Dosyaları sürükleyin veya seçin
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {source === "pdf" ? "PDF · maks. 25MB" : "JPG, PNG · maks. 20 görsel"}
+                  </p>
                 </div>
               </>
             )}
-            <Button onClick={() => setExtracted(true)} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Button
+              onClick={() => setExtracted(true)}
+              className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
               <Sparkles className="size-4" /> AI ile Taslak Oluştur
             </Button>
           </SurfaceCard>
@@ -106,25 +126,44 @@ function AIImportHub() {
         <div className="space-y-4">
           {!extracted ? (
             <SurfaceCard className="flex h-full min-h-[400px] flex-col items-center justify-center text-center">
-              <span className="flex size-14 items-center justify-center rounded-2xl bg-gold/10 text-gold"><Sparkles className="size-7" /></span>
-              <h3 className="mt-4 font-display text-xl font-semibold text-foreground">AI Taslak Önizleme</h3>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">İçeriğinizi yapıştırın ve "AI ile Taslak Oluştur" butonuna basın. Çıkarılan alanlar burada görünecek.</p>
+              <span className="flex size-14 items-center justify-center rounded-2xl bg-gold/10 text-gold">
+                <Sparkles className="size-7" />
+              </span>
+              <h3 className="mt-4 font-display text-xl font-semibold text-foreground">
+                AI Taslak Önizleme
+              </h3>
+              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                İçeriğinizi yapıştırın ve "AI ile Taslak Oluştur" butonuna basın. Çıkarılan alanlar
+                burada görünecek.
+              </p>
             </SurfaceCard>
           ) : (
             <>
               <SurfaceCard className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="flex size-8 items-center justify-center rounded-lg bg-success/15 text-success"><Check className="size-4" /></span>
+                  <span className="flex size-8 items-center justify-center rounded-lg bg-success/15 text-success">
+                    <Check className="size-4" />
+                  </span>
                   <h3 className="text-sm font-semibold text-foreground">Çıkarılan Alanlar</h3>
                 </div>
                 <ul className="space-y-2">
                   {extractedFields.map((f) => (
-                    <li key={f.label} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2 px-3 py-2">
+                    <li
+                      key={f.label}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface-2 px-3 py-2"
+                    >
                       <div className="min-w-0">
                         <p className="text-xs text-muted-foreground">{f.label}</p>
                         <p className="truncate text-sm font-medium text-foreground">{f.value}</p>
                       </div>
-                      <span className={cn("shrink-0 rounded-md px-2 py-0.5 text-xs font-medium", f.confidence >= 90 ? "bg-success/15 text-success" : "bg-warning/15 text-warning")}>
+                      <span
+                        className={cn(
+                          "shrink-0 rounded-md px-2 py-0.5 text-xs font-medium",
+                          f.confidence >= 90
+                            ? "bg-success/15 text-success"
+                            : "bg-warning/15 text-warning",
+                        )}
+                      >
                         %{f.confidence}
                       </span>
                     </li>
@@ -137,18 +176,30 @@ function AIImportHub() {
                   <AlertTriangle className="size-4 text-warning" />
                   <h3 className="text-sm font-semibold text-foreground">Eksik Alanlar</h3>
                 </div>
-                <p className="text-xs text-muted-foreground">Aşağıdaki alanları taslakta tamamlamanız önerilir:</p>
+                <p className="text-xs text-muted-foreground">
+                  Aşağıdaki alanları taslakta tamamlamanız önerilir:
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {missingFields.map((m) => (
-                    <span key={m} className="rounded-md bg-warning/10 px-2 py-0.5 text-xs text-warning ring-1 ring-inset ring-warning/25">{m}</span>
+                    <span
+                      key={m}
+                      className="rounded-md bg-warning/10 px-2 py-0.5 text-xs text-warning ring-1 ring-inset ring-warning/25"
+                    >
+                      {m}
+                    </span>
                   ))}
                 </div>
               </SurfaceCard>
 
-              <Button onClick={() => navigate({ to: "/dashboard/portfolios/new" })} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Button
+                onClick={() => navigate({ to: "/dashboard/portfolios/new" })}
+                className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
                 Portföy Taslağına Dönüştür <ArrowRight className="size-4" />
               </Button>
-              <p className="text-center text-xs text-muted-foreground">AI yalnızca taslak oluşturur · Yayınlamadan önce siz onaylarsınız</p>
+              <p className="text-center text-xs text-muted-foreground">
+                AI yalnızca taslak oluşturur · Yayınlamadan önce siz onaylarsınız
+              </p>
             </>
           )}
         </div>

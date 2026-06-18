@@ -43,8 +43,13 @@ function MyPortfolios() {
         actions={
           <>
             <AIButton />
-            <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-              <Link to="/dashboard/portfolios/new"><Plus className="size-4" /> Portföy Oluştur</Link>
+            <Button
+              asChild
+              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/dashboard/portfolios/new">
+                <Plus className="size-4" /> Portföy Oluştur
+              </Link>
             </Button>
           </>
         }
@@ -65,7 +70,9 @@ function MyPortfolios() {
               onClick={() => setTab(t.key)}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                tab === t.key ? "bg-gradient-gold text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                tab === t.key
+                  ? "bg-gradient-gold text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t.label}
@@ -81,7 +88,8 @@ function MyPortfolios() {
             toast.info(sortByViews ? "Varsayılan sıralama" : "Görüntülenmeye göre sıralandı");
           }}
         >
-          <ArrowDownWideNarrow className="size-4" /> {sortByViews ? "En çok görüntülenen" : "Sırala"}
+          <ArrowDownWideNarrow className="size-4" />{" "}
+          {sortByViews ? "En çok görüntülenen" : "Sırala"}
         </Button>
       </div>
 
@@ -98,7 +106,9 @@ function MyPortfolios() {
         {filtered.length > 0 ? (
           filtered.map((p) => <PortfolioListRow key={p.id} portfolio={p} />)
         ) : (
-          <div className="px-4 py-12 text-center text-sm text-muted-foreground">Bu durumda portföy bulunmuyor.</div>
+          <div className="px-4 py-12 text-center text-sm text-muted-foreground">
+            Bu durumda portföy bulunmuyor.
+          </div>
         )}
       </div>
     </PageContainer>

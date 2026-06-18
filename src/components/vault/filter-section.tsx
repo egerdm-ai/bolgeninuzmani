@@ -44,7 +44,9 @@ export function FilterSection({
             </span>
           )}
         </span>
-        <ChevronDown className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+        <ChevronDown
+          className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-180")}
+        />
       </button>
       {open && <div className="space-y-3 border-t border-border px-3.5 py-3">{children}</div>}
     </div>
@@ -76,7 +78,10 @@ export function FilterField({
   if (field.type === "multiselect") {
     const selected = Array.isArray(value) ? value : [];
     const toggle = (v: string) =>
-      onChange(field.key, selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
+      onChange(
+        field.key,
+        selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v],
+      );
     return (
       <div className="space-y-1.5">
         <Label className="text-xs text-muted-foreground">{field.label}</Label>
@@ -134,7 +139,14 @@ export function FilterField({
         inputMode={field.type === "number" ? "numeric" : undefined}
         value={(value as string | number | undefined) ?? ""}
         onChange={(e) =>
-          onChange(field.key, field.type === "number" ? (e.target.value === "" ? undefined : Number(e.target.value)) : e.target.value)
+          onChange(
+            field.key,
+            field.type === "number"
+              ? e.target.value === ""
+                ? undefined
+                : Number(e.target.value)
+              : e.target.value,
+          )
         }
       />
     </div>

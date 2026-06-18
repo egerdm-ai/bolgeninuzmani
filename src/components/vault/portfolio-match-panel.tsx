@@ -24,7 +24,8 @@ export function PortfolioMatchPanel({
       <div className="p-4">
         <p className="text-sm text-secondary-foreground">
           {mode === "owner" ? "Bu portföy " : "Bu portföy ağda "}
-          <span className="font-semibold text-gold">{searches.length} aktif arayışla</span> eşleşiyor.
+          <span className="font-semibold text-gold">{searches.length} aktif arayışla</span>{" "}
+          eşleşiyor.
         </p>
         <ul className="mt-3 space-y-2">
           {searches.slice(0, 3).map((s) => (
@@ -41,7 +42,11 @@ export function PortfolioMatchPanel({
             </li>
           ))}
         </ul>
-        <Button asChild variant="outline" className="mt-3 w-full gap-1.5 border-gold/30 text-gold hover:bg-gold/10">
+        <Button
+          asChild
+          variant="outline"
+          className="mt-3 w-full gap-1.5 border-gold/30 text-gold hover:bg-gold/10"
+        >
           <Link to="/dashboard/searches">
             Eşleşmeleri Gör <ArrowRight className="size-4" />
           </Link>

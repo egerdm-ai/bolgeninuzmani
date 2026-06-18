@@ -1,4 +1,10 @@
-import type { Currency, PortfolioStatus, PortfolioType, PortfolioCategory, DetailRequestStatus } from "@/lib/mock/types";
+import type {
+  Currency,
+  PortfolioStatus,
+  PortfolioType,
+  PortfolioCategory,
+  DetailRequestStatus,
+} from "@/lib/mock/types";
 
 const currencySymbols: Record<Currency, string> = {
   TRY: "₺",
@@ -58,7 +64,10 @@ export const requestStatusLabels: Record<DetailRequestStatus, string> = {
   rejected: "Reddedildi",
 };
 
-export const requestStatusTones: Record<DetailRequestStatus, "success" | "warning" | "muted" | "info" | "danger"> = {
+export const requestStatusTones: Record<
+  DetailRequestStatus,
+  "success" | "warning" | "muted" | "info" | "danger"
+> = {
   new: "warning",
   read: "info",
   answered: "info",

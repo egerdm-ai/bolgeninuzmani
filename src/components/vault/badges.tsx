@@ -65,7 +65,11 @@ export function LockedBadge({ label = "Kilitli" }: { label?: string }) {
   );
 }
 
-export function VisibilityBadge({ visibility }: { visibility: "verified_members" | "invite_only" }) {
+export function VisibilityBadge({
+  visibility,
+}: {
+  visibility: "verified_members" | "invite_only";
+}) {
   return (
     <StatusBadge
       tone={visibility === "invite_only" ? "gold" : "info"}
@@ -99,7 +103,8 @@ export function MembershipBadge({
 }) {
   const text = label ?? (tier === "standard" ? null : tier);
   if (!text) return null;
-  const muted = text.toLocaleLowerCase("tr") === "private beta" || text.toLocaleLowerCase("tr") === "pro";
+  const muted =
+    text.toLocaleLowerCase("tr") === "private beta" || text.toLocaleLowerCase("tr") === "pro";
   return (
     <span
       className={cn(

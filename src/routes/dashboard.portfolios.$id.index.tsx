@@ -13,24 +13,40 @@ export const Route = createFileRoute("/dashboard/portfolios/$id/")({
     return { portfolio };
   },
   component: OwnerPortfolioDetail,
-  notFoundComponent: () => <div className="p-10 text-center text-muted-foreground">Portföy bulunamadı.</div>,
-  errorComponent: ({ error }) => <div className="p-10 text-center text-muted-foreground">{error.message}</div>,
+  notFoundComponent: () => (
+    <div className="p-10 text-center text-muted-foreground">Portföy bulunamadı.</div>
+  ),
+  errorComponent: ({ error }) => (
+    <div className="p-10 text-center text-muted-foreground">{error.message}</div>
+  ),
 });
 
 function OwnerPortfolioDetail() {
   const { portfolio } = Route.useLoaderData();
-  const similar = portfolios.filter((p) => p.id !== portfolio.id && p.category === portfolio.category).slice(0, 3);
+  const similar = portfolios
+    .filter((p) => p.id !== portfolio.id && p.category === portfolio.category)
+    .slice(0, 3);
 
   return (
     <PageContainer className="space-y-6">
       <PageHeader
         title="Portföy Detayı"
-        breadcrumbs={[{ label: "Portföylerim", to: "/dashboard/portfolios" }, { label: portfolio.title }]}
+        breadcrumbs={[
+          { label: "Portföylerim", to: "/dashboard/portfolios" },
+          { label: portfolio.title },
+        ]}
         actions={
           <>
-            <Button variant="outline" className="gap-1.5"><Pencil className="size-4" /> Düzenle</Button>
-            <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
-              <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }}><Share2 className="size-4" /> Share Studio</Link>
+            <Button variant="outline" className="gap-1.5">
+              <Pencil className="size-4" /> Düzenle
+            </Button>
+            <Button
+              asChild
+              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }}>
+                <Share2 className="size-4" /> Share Studio
+              </Link>
             </Button>
           </>
         }

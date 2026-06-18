@@ -4,14 +4,7 @@ import apartment1 from "@/assets/apartment-1.jpg";
 import interior1 from "@/assets/interior-1.jpg";
 import land1 from "@/assets/land-1.jpg";
 import hotel1 from "@/assets/hotel-1.jpg";
-import type {
-  Activity,
-  DetailRequest,
-  Portfolio,
-  Professional,
-  SavedSearch,
-  User,
-} from "./types";
+import type { Activity, DetailRequest, Portfolio, Professional, SavedSearch, User } from "./types";
 
 export const propertyImages = {
   villa1,
@@ -27,7 +20,8 @@ export const currentUser: User = {
   id: "b_001", // aligned with professionals[0] so `myPortfolios` resolves correctly
   fullName: "Taylan Hersek",
   username: "taylan-hersek",
-  avatarUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&crop=faces&w=320&h=320&q=80",
+  avatarUrl:
+    "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&crop=faces&w=320&h=320&q=80",
   title: "Private Real Estate Advisor",
   companyName: "Bodrum Luxury Team",
   location: "Bodrum, Muğla",
@@ -71,9 +65,24 @@ const professionalsData: Professional[] = [
       { region: "Gümüşlük", portfolioCount: 3, primaryTypes: ["Villa", "Arsa"], x: 28, y: 60 },
     ],
     activity: [
-      { id: "ta1", type: "publish", text: "Yeni portföy ekledi: Türkbükü Denize Sıfır Villa", time: "3 saat önce" },
-      { id: "ta2", type: "update", text: "Yalıkavak bölgesinde portföy güncelledi", time: "1 gün önce" },
-      { id: "ta3", type: "request", text: "Bir arayışla eşleşti: Bodrum 5+1 deniz manzaralı villa", time: "2 gün önce" },
+      {
+        id: "ta1",
+        type: "publish",
+        text: "Yeni portföy ekledi: Türkbükü Denize Sıfır Villa",
+        time: "3 saat önce",
+      },
+      {
+        id: "ta2",
+        type: "update",
+        text: "Yalıkavak bölgesinde portföy güncelledi",
+        time: "1 gün önce",
+      },
+      {
+        id: "ta3",
+        type: "request",
+        text: "Bir arayışla eşleşti: Bodrum 5+1 deniz manzaralı villa",
+        time: "2 gün önce",
+      },
     ],
   },
   {
@@ -82,7 +91,7 @@ const professionalsData: Professional[] = [
     username: "ege-erdem",
     avatarUrl: AV("photo-1506794778202-cad84cf45f1d"),
     title: "Proptech & AI Portfolio Lead",
-    companyName: "VAULT Network",
+    companyName: "Bölgenin Uzmanı",
     membershipTier: "pro",
     membershipBadge: "Private Beta",
     expertBadge: "Network Uzmanı",
@@ -92,7 +101,7 @@ const professionalsData: Professional[] = [
     portfolioCount: 6,
     responseTimeLabel: "~30 dk",
     approvalRate: 95,
-    bio: "Proptech ve yapay zekâ destekli portföy ağları üzerine çalışan danışman. VAULT ağında profesyonellerin portföylerini dijitalleştirmesine ve doğru alıcıyla eşleşmesine yardımcı oluyor.",
+    bio: "Proptech ve yapay zekâ destekli portföy ağları üzerine çalışan danışman. Bölgenin Uzmanı ağında profesyonellerin portföylerini dijitalleştirmesine ve doğru alıcıyla eşleşmesine yardımcı oluyor.",
     coverImage: apartment1,
     followerCount: 642,
     views30d: 3110,
@@ -100,12 +109,28 @@ const professionalsData: Professional[] = [
     regionListCount: 2,
     matchCount: 96,
     regionExpertise: [
-      { region: "İstanbul", portfolioCount: 3, primaryTypes: ["Ticari", "Özel Varlık"], x: 46, y: 44 },
+      {
+        region: "İstanbul",
+        portfolioCount: 3,
+        primaryTypes: ["Ticari", "Özel Varlık"],
+        x: 46,
+        y: 44,
+      },
       { region: "Bodrum", portfolioCount: 2, primaryTypes: ["Villa"], x: 56, y: 56 },
     ],
     activity: [
-      { id: "ea1", type: "publish", text: "Yeni portföy ekledi: Maslak Plus Ofis Katı", time: "5 saat önce" },
-      { id: "ea2", type: "update", text: "AI portföy eşleştirme profilini güncelledi", time: "3 gün önce" },
+      {
+        id: "ea1",
+        type: "publish",
+        text: "Yeni portföy ekledi: Maslak Plus Ofis Katı",
+        time: "5 saat önce",
+      },
+      {
+        id: "ea2",
+        type: "update",
+        text: "AI portföy eşleştirme profilini güncelledi",
+        time: "3 gün önce",
+      },
     ],
   },
   {
@@ -137,9 +162,24 @@ const professionalsData: Professional[] = [
       { region: "Boğaz Hattı", portfolioCount: 5, primaryTypes: ["Yalı"], x: 36, y: 60 },
     ],
     activity: [
-      { id: "sa1", type: "photo", text: "Bebek yalı dairesine yeni fotoğraflar ekledi", time: "2 saat önce" },
-      { id: "sa2", type: "publish", text: "Yeni portföy ekledi: Bebek Boğaz Manzaralı Yalı Dairesi", time: "1 gün önce" },
-      { id: "sa3", type: "update", text: "Etiler bölgesinde portföy güncelledi", time: "4 gün önce" },
+      {
+        id: "sa1",
+        type: "photo",
+        text: "Bebek yalı dairesine yeni fotoğraflar ekledi",
+        time: "2 saat önce",
+      },
+      {
+        id: "sa2",
+        type: "publish",
+        text: "Yeni portföy ekledi: Bebek Boğaz Manzaralı Yalı Dairesi",
+        time: "1 gün önce",
+      },
+      {
+        id: "sa3",
+        type: "update",
+        text: "Etiler bölgesinde portföy güncelledi",
+        time: "4 gün önce",
+      },
     ],
   },
   {
@@ -171,8 +211,18 @@ const professionalsData: Professional[] = [
       { region: "Göktürk", portfolioCount: 3, primaryTypes: ["Arsa", "Ticari"], x: 52, y: 64 },
     ],
     activity: [
-      { id: "ma1", type: "publish", text: "Yeni portföy ekledi: Riva Geniş Arsalı Villa", time: "6 saat önce" },
-      { id: "ma2", type: "update", text: "Zekeriyaköy bölgesinde portföy güncelledi", time: "2 gün önce" },
+      {
+        id: "ma1",
+        type: "publish",
+        text: "Yeni portföy ekledi: Riva Geniş Arsalı Villa",
+        time: "6 saat önce",
+      },
+      {
+        id: "ma2",
+        type: "update",
+        text: "Zekeriyaköy bölgesinde portföy güncelledi",
+        time: "2 gün önce",
+      },
     ],
   },
   {
@@ -204,8 +254,18 @@ const professionalsData: Professional[] = [
       { region: "Urla", portfolioCount: 3, primaryTypes: ["Arsa"], x: 48, y: 64 },
     ],
     activity: [
-      { id: "da1", type: "publish", text: "Yeni portföy ekledi: Çeşme Boyalık Deniz Manzaralı Villa", time: "8 saat önce" },
-      { id: "da2", type: "photo", text: "Alaçatı arsa portföyüne yeni görseller ekledi", time: "3 gün önce" },
+      {
+        id: "da1",
+        type: "publish",
+        text: "Yeni portföy ekledi: Çeşme Boyalık Deniz Manzaralı Villa",
+        time: "8 saat önce",
+      },
+      {
+        id: "da2",
+        type: "photo",
+        text: "Alaçatı arsa portföyüne yeni görseller ekledi",
+        time: "3 gün önce",
+      },
     ],
   },
   {
@@ -237,8 +297,18 @@ const professionalsData: Professional[] = [
       { region: "Şişli", portfolioCount: 3, primaryTypes: ["Ticari", "Otel"], x: 34, y: 56 },
     ],
     activity: [
-      { id: "ba1", type: "publish", text: "Yeni portföy ekledi: Levent Premium Ofis Katı", time: "1 gün önce" },
-      { id: "ba2", type: "update", text: "Şişli bölgesinde ticari portföy güncelledi", time: "5 gün önce" },
+      {
+        id: "ba1",
+        type: "publish",
+        text: "Yeni portföy ekledi: Levent Premium Ofis Katı",
+        time: "1 gün önce",
+      },
+      {
+        id: "ba2",
+        type: "update",
+        text: "Şişli bölgesinde ticari portföy güncelledi",
+        time: "5 gün önce",
+      },
     ],
   },
 ];
@@ -488,9 +558,7 @@ export const portfolios: Portfolio[] = [
     tags: ["villa", "doğa"],
     coverImage: interior1,
     images: [interior1, villa1, villa2],
-    documents: [
-      { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
-    ],
+    documents: [{ id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true }],
     owner: p[0],
     visibility: "verified_members",
     requestRequired: true,
@@ -678,9 +746,7 @@ export const portfolios: Portfolio[] = [
     tags: ["villa", "lüks"],
     coverImage: interior1,
     images: [interior1, villa2, villa1],
-    documents: [
-      { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
-    ],
+    documents: [{ id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true }],
     owner: p[2],
     visibility: "verified_members",
     requestRequired: true,
@@ -718,9 +784,7 @@ export const portfolios: Portfolio[] = [
     tags: ["villa", "yazlık", "alaçatı"],
     coverImage: villa2,
     images: [villa2, interior1, land1],
-    documents: [
-      { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
-    ],
+    documents: [{ id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true }],
     owner: p[4],
     visibility: "verified_members",
     requestRequired: true,
@@ -796,9 +860,7 @@ export const portfolios: Portfolio[] = [
     tags: ["villa", "doğa"],
     coverImage: villa1,
     images: [villa1, interior1, villa2],
-    documents: [
-      { id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true },
-    ],
+    documents: [{ id: "d1", name: "Portföy Sunumu.pdf", type: "pdf", isLocked: true }],
     owner: p[3],
     visibility: "verified_members",
     requestRequired: true,
@@ -824,9 +886,7 @@ export function getPortfoliosByProfessional(
   opts: { activeOnly?: boolean } = {},
 ) {
   return portfolios.filter(
-    (x) =>
-      x.owner.id === professionalId &&
-      (opts.activeOnly ? x.status === "active" : true),
+    (x) => x.owner.id === professionalId && (opts.activeOnly ? x.status === "active" : true),
   );
 }
 
@@ -924,10 +984,30 @@ export const savedSearches: SavedSearch[] = [
 ];
 
 export const activities: Activity[] = [
-  { id: "a1", type: "request", text: "Selin Aras, Yalıkavak Villa için detay talebi gönderdi", time: "2 saat önce" },
-  { id: "a2", type: "view", text: "Türkbükü Villa portföyünüz 48 kez görüntülendi", time: "4 saat önce" },
-  { id: "a3", type: "save", text: "Murat Demir, Yalıkavak Villa portföyünüzü kaydetti", time: "6 saat önce" },
-  { id: "a4", type: "approve", text: "Çeşme Villa için erişim talebini onayladınız", time: "1 gün önce" },
+  {
+    id: "a1",
+    type: "request",
+    text: "Selin Aras, Yalıkavak Villa için detay talebi gönderdi",
+    time: "2 saat önce",
+  },
+  {
+    id: "a2",
+    type: "view",
+    text: "Türkbükü Villa portföyünüz 48 kez görüntülendi",
+    time: "4 saat önce",
+  },
+  {
+    id: "a3",
+    type: "save",
+    text: "Murat Demir, Yalıkavak Villa portföyünüzü kaydetti",
+    time: "6 saat önce",
+  },
+  {
+    id: "a4",
+    type: "approve",
+    text: "Çeşme Villa için erişim talebini onayladınız",
+    time: "1 gün önce",
+  },
   { id: "a5", type: "publish", text: "Bebek Daire portföyü yayına alındı", time: "2 gün önce" },
 ];
 

@@ -36,7 +36,10 @@ export function LockedInfoPanel({ onRequest }: { onRequest?: () => void }) {
           </li>
         ))}
       </ul>
-      <Button onClick={onRequest} className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+      <Button
+        onClick={onRequest}
+        className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+      >
         <Send className="size-4" /> Detay Talebi Gönder
       </Button>
     </SurfaceCard>

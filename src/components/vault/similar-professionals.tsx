@@ -15,7 +15,9 @@ export function SimilarProfessionals({ professionals }: { professionals: Profess
   return (
     <section>
       <div className="mb-4">
-        <h2 className="font-display text-xl font-semibold text-foreground">Benzer Profesyoneller</h2>
+        <h2 className="font-display text-xl font-semibold text-foreground">
+          Benzer Profesyoneller
+        </h2>
         <p className="text-sm text-muted-foreground">
           Aynı bölge ve portföy tipinde çalışan, ağda öne çıkan profesyoneller.
         </p>

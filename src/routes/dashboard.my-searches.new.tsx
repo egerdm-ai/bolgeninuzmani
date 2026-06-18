@@ -19,7 +19,12 @@ import { useDetailRequest } from "@/lib/detail-request-store";
 import { useMySearches } from "@/lib/my-searches-store";
 import { cn } from "@/lib/utils";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
-import type { MatchResult, NotificationFrequency, PortfolioType, Professional } from "@/lib/mock/types";
+import type {
+  MatchResult,
+  NotificationFrequency,
+  PortfolioType,
+  Professional,
+} from "@/lib/mock/types";
 import {
   categories,
   categoryByKey,
@@ -80,7 +85,8 @@ function NewSearch() {
   const [filterOpen, setFilterOpen] = useState(false);
 
   const category = (filters.category as CategoryKey) ?? "konut";
-  const setFilter = (key: string, value: FilterValue) => setFilters((p) => ({ ...p, [key]: value }));
+  const setFilter = (key: string, value: FilterValue) =>
+    setFilters((p) => ({ ...p, [key]: value }));
 
   const labelFor = (v: string) => luxuryFeatures.find((f) => f.value === v)?.label ?? v;
 
@@ -141,7 +147,8 @@ function NewSearch() {
   const detailFields = useMemo(() => {
     if (category === "konut") return residentialFields.filter((f) => f.important);
     if (category === "arsa") return landFields.filter((f) => f.important);
-    if (category === "ticari" || category === "endustriyel") return commercialFields.filter((f) => f.important);
+    if (category === "ticari" || category === "endustriyel")
+      return commercialFields.filter((f) => f.important);
     return [];
   }, [category]);
 
@@ -149,8 +156,11 @@ function NewSearch() {
     <PageContainer className="space-y-6">
       <PageHeader
         title="Yeni Arayış Oluştur"
-        subtitle="Müşterinizin ihtiyacını tarif edin; VAULT uygun portföyleri ve bölge uzmanlarını eşleştirsin."
-        breadcrumbs={[{ label: "Arayışlarım", to: "/dashboard/my-searches" }, { label: "Yeni Arayış" }]}
+        subtitle="Müşterinizin ihtiyacını tarif edin; Bölgenin Uzmanı uygun portföyleri ve bölge uzmanlarını eşleştirsin."
+        breadcrumbs={[
+          { label: "Arayışlarım", to: "/dashboard/my-searches" },
+          { label: "Yeni Arayış" },
+        ]}
       />
 
       <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
@@ -169,13 +179,21 @@ function NewSearch() {
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="örn. Bebek'te havuzlu, müstakil, 5+1 villa arıyorum. 8M USD üstüne çıkamam."
               />
-              <Button onClick={runAi} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Button
+                onClick={runAi}
+                className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
                 <Wand2 className="size-4" /> AI ile Filtrelere Çevir
               </Button>
               {aiSummary.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {aiSummary.map((s) => (
-                    <span key={s} className="rounded-md bg-gold/10 px-2 py-0.5 text-[11px] font-medium text-gold ring-1 ring-inset ring-gold/25">{s}</span>
+                    <span
+                      key={s}
+                      className="rounded-md bg-gold/10 px-2 py-0.5 text-[11px] font-medium text-gold ring-1 ring-inset ring-gold/25"
+                    >
+                      {s}
+                    </span>
                   ))}
                 </div>
               )}
@@ -185,15 +203,30 @@ function NewSearch() {
           <InfoPanel title="Arayış Bilgileri">
             <div className="space-y-3">
               <Field label="Arayış adı">
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="örn. Bodrum Deniz Manzaralı Villa" />
+                <Input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="örn. Bodrum Deniz Manzaralı Villa"
+                />
               </Field>
               <Field label="Müşteri notu">
-                <Input value={clientNote} onChange={(e) => setClientNote(e.target.value)} placeholder="Müşteri etiketi / takma ad" />
+                <Input
+                  value={clientNote}
+                  onChange={(e) => setClientNote(e.target.value)}
+                  placeholder="Müşteri etiketi / takma ad"
+                />
               </Field>
 
               <div className="flex items-center justify-between pt-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detaylı Filtreler</p>
-                <Button variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={() => setFilterOpen(true)}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Detaylı Filtreler
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 text-xs"
+                  onClick={() => setFilterOpen(true)}
+                >
                   <Sparkles className="size-3.5 text-gold" /> Tüm Filtreler
                 </Button>
               </div>
@@ -202,11 +235,19 @@ function NewSearch() {
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Şehir</Label>
-                    <Input className="h-9" value={(filters.city as string) ?? ""} onChange={(e) => setFilter("city", e.target.value)} />
+                    <Input
+                      className="h-9"
+                      value={(filters.city as string) ?? ""}
+                      onChange={(e) => setFilter("city", e.target.value)}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Bölge</Label>
-                    <Input className="h-9" value={(filters.region as string) ?? ""} onChange={(e) => setFilter("region", e.target.value)} />
+                    <Input
+                      className="h-9"
+                      value={(filters.region as string) ?? ""}
+                      onChange={(e) => setFilter("region", e.target.value)}
+                    />
                   </div>
                 </div>
               </FilterSection>
@@ -217,10 +258,15 @@ function NewSearch() {
                     {categories.map((c) => (
                       <button
                         key={c.value}
-                        onClick={() => { setFilter("category", c.value); setFilter("subcategory", undefined); }}
+                        onClick={() => {
+                          setFilter("category", c.value);
+                          setFilter("subcategory", undefined);
+                        }}
                         className={cn(
                           "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
-                          category === c.value ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
+                          category === c.value
+                            ? "border-gold/40 bg-gold/10 text-gold"
+                            : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
                         )}
                       >
                         {c.label}
@@ -234,7 +280,9 @@ function NewSearch() {
                         onClick={() => setFilter("subcategory", s.value)}
                         className={cn(
                           "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
-                          filters.subcategory === s.value ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
+                          filters.subcategory === s.value
+                            ? "border-gold/40 bg-gold/10 text-gold"
+                            : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
                         )}
                       >
                         {s.label}
@@ -248,11 +296,31 @@ function NewSearch() {
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Bütçe min (₺)</Label>
-                    <Input className="h-9" type="number" value={(filters.priceMin as number) ?? ""} onChange={(e) => setFilter("priceMin", e.target.value === "" ? undefined : Number(e.target.value))} />
+                    <Input
+                      className="h-9"
+                      type="number"
+                      value={(filters.priceMin as number) ?? ""}
+                      onChange={(e) =>
+                        setFilter(
+                          "priceMin",
+                          e.target.value === "" ? undefined : Number(e.target.value),
+                        )
+                      }
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Bütçe max (₺)</Label>
-                    <Input className="h-9" type="number" value={(filters.priceMax as number) ?? ""} onChange={(e) => setFilter("priceMax", e.target.value === "" ? undefined : Number(e.target.value))} />
+                    <Input
+                      className="h-9"
+                      type="number"
+                      value={(filters.priceMax as number) ?? ""}
+                      onChange={(e) =>
+                        setFilter(
+                          "priceMax",
+                          e.target.value === "" ? undefined : Number(e.target.value),
+                        )
+                      }
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Para Birimi</Label>
@@ -261,7 +329,11 @@ function NewSearch() {
                       value={(filters.currency as string) ?? "TRY"}
                       onChange={(e) => setFilter("currency", e.target.value)}
                     >
-                      {currencies.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      {currencies.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1.5">
@@ -272,12 +344,26 @@ function NewSearch() {
                       onChange={(e) => setFilter("rooms", e.target.value)}
                     >
                       <option value="">Farketmez</option>
-                      {roomCounts.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
+                      {roomCounts.map((r) => (
+                        <option key={r.value} value={r.value}>
+                          {r.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs text-muted-foreground">Min m²</Label>
-                    <Input className="h-9" type="number" value={(filters.grossM2 as number) ?? ""} onChange={(e) => setFilter("grossM2", e.target.value === "" ? undefined : Number(e.target.value))} />
+                    <Input
+                      className="h-9"
+                      type="number"
+                      value={(filters.grossM2 as number) ?? ""}
+                      onChange={(e) =>
+                        setFilter(
+                          "grossM2",
+                          e.target.value === "" ? undefined : Number(e.target.value),
+                        )
+                      }
+                    />
                   </div>
                 </div>
               </FilterSection>
@@ -289,9 +375,30 @@ function NewSearch() {
               )}
 
               <FilterSection label="Özellikler" defaultOpen>
-                <FeatureGroup title="Olmazsa olmaz" tone="must" selected={mustHave} onToggle={(v) => setMustHave((p) => p.includes(v) ? p.filter((x) => x !== v) : [...p, v])} />
-                <FeatureGroup title="Olursa iyi olur" tone="nice" selected={niceToHave} onToggle={(v) => setNiceToHave((p) => p.includes(v) ? p.filter((x) => x !== v) : [...p, v])} />
-                <FeatureGroup title="İstenmeyen" tone="excluded" selected={excluded} onToggle={(v) => setExcluded((p) => p.includes(v) ? p.filter((x) => x !== v) : [...p, v])} />
+                <FeatureGroup
+                  title="Olmazsa olmaz"
+                  tone="must"
+                  selected={mustHave}
+                  onToggle={(v) =>
+                    setMustHave((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]))
+                  }
+                />
+                <FeatureGroup
+                  title="Olursa iyi olur"
+                  tone="nice"
+                  selected={niceToHave}
+                  onToggle={(v) =>
+                    setNiceToHave((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]))
+                  }
+                />
+                <FeatureGroup
+                  title="İstenmeyen"
+                  tone="excluded"
+                  selected={excluded}
+                  onToggle={(v) =>
+                    setExcluded((p) => (p.includes(v) ? p.filter((x) => x !== v) : [...p, v]))
+                  }
+                />
               </FilterSection>
 
               <Field label="Bildirim sıklığı">
@@ -302,7 +409,9 @@ function NewSearch() {
                       onClick={() => setNotify(f)}
                       className={cn(
                         "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-                        notify === f ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                        notify === f
+                          ? "border-gold/40 bg-gold/10 text-gold"
+                          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
                       )}
                     >
                       {notificationFrequencyLabels[f]}
@@ -312,11 +421,24 @@ function NewSearch() {
               </Field>
               <Field label="Görünürlük">
                 <div className="grid grid-cols-2 gap-2">
-                  <VisBtn active={visibility === "private"} onClick={() => setVisibility("private")} icon={Lock} label="Sadece Ben" />
-                  <VisBtn active={visibility === "network"} onClick={() => setVisibility("network")} icon={Globe} label="Network'e Kısıtlı Açık" />
+                  <VisBtn
+                    active={visibility === "private"}
+                    onClick={() => setVisibility("private")}
+                    icon={Lock}
+                    label="Sadece Ben"
+                  />
+                  <VisBtn
+                    active={visibility === "network"}
+                    onClick={() => setVisibility("network")}
+                    icon={Globe}
+                    label="Network'e Kısıtlı Açık"
+                  />
                 </div>
               </Field>
-              <Button onClick={findMatches} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Button
+                onClick={findMatches}
+                className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
                 <Sparkles className="size-4" /> Eşleşmeleri Bul ve Kaydet
               </Button>
             </div>
@@ -334,7 +456,9 @@ function NewSearch() {
                 Şu an {previewMatches.length} portföy eşleşiyor
               </h3>
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun. Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın; arayış Arayışlarım'a kaydedilir.
+                Doğal dil ile yazın, AI ile filtrelere çevirin veya kriterleri elle doldurun.
+                Ardından “Eşleşmeleri Bul ve Kaydet” butonuna basın; arayış Arayışlarım'a
+                kaydedilir.
               </p>
             </div>
           ) : (
@@ -343,37 +467,63 @@ function NewSearch() {
                 <div className="flex items-start gap-2">
                   <Sparkles className="mt-0.5 size-5 shrink-0 text-gold" />
                   <div>
-                    <p className="text-sm font-semibold text-foreground">VAULT Asistan Özeti</p>
+                    <p className="text-sm font-semibold text-foreground">Asistan Özeti</p>
                     <p className="mt-1 text-sm text-secondary-foreground">
-                      Bu arayış için <span className="font-semibold text-gold">{matches.length} uygun portföy</span> ve{" "}
-                      <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span> bulundu. Yeni
-                      eşleşmelerde <span className="font-semibold text-gold">{notificationFrequencyLabels[notify].toLocaleLowerCase("tr-TR")}</span> bildirim alacaksınız.
+                      Bu arayış için{" "}
+                      <span className="font-semibold text-gold">
+                        {matches.length} uygun portföy
+                      </span>{" "}
+                      ve{" "}
+                      <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span>{" "}
+                      bulundu. Yeni eşleşmelerde{" "}
+                      <span className="font-semibold text-gold">
+                        {notificationFrequencyLabels[notify].toLocaleLowerCase("tr-TR")}
+                      </span>{" "}
+                      bildirim alacaksınız.
                     </p>
                   </div>
                 </div>
               </SurfaceCard>
 
               <div>
-                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Eşleşen Portföyler</h2>
+                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+                  Eşleşen Portföyler
+                </h2>
                 <div className="space-y-4">
                   {matches.map((m) => (
-                    <MatchExplanationCard key={m.portfolio.id} match={m} saved={isSaved(m.portfolio.id)} onSave={toggleSave} onRequestDetail={openRequest} />
+                    <MatchExplanationCard
+                      key={m.portfolio.id}
+                      match={m}
+                      saved={isSaved(m.portfolio.id)}
+                      onSave={toggleSave}
+                      onRequestDetail={openRequest}
+                    />
                   ))}
                 </div>
               </div>
 
               {experts.length > 0 && (
                 <div>
-                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Önerilen Bölge Uzmanları</h2>
+                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+                    Önerilen Bölge Uzmanları
+                  </h2>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {experts.map((e) => (
-                      <RegionExpertCard key={e.id} professional={e} regionName={(filters.region as string) ?? ""} />
+                      <RegionExpertCard
+                        key={e.id}
+                        professional={e}
+                        regionName={(filters.region as string) ?? ""}
+                      />
                     ))}
                   </div>
                 </div>
               )}
 
-              <Button onClick={() => navigate({ to: "/dashboard/my-searches" })} variant="outline" className="w-full">
+              <Button
+                onClick={() => navigate({ to: "/dashboard/my-searches" })}
+                variant="outline"
+                className="w-full"
+              >
                 Arayışlarım'a dön
               </Button>
             </>
@@ -419,7 +569,9 @@ function FeatureGroup({
             onClick={() => onToggle(f.value)}
             className={cn(
               "rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
-              selected.includes(f.value) ? toneStyle : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
+              selected.includes(f.value)
+                ? toneStyle
+                : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
             )}
           >
             {f.label}
@@ -439,13 +591,25 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function VisBtn({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon: typeof Lock; label: string }) {
+function VisBtn({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof Lock;
+  label: string;
+}) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-        active ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+        active
+          ? "border-gold/40 bg-gold/10 text-gold"
+          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
       )}
     >
       <Icon className="size-3.5" /> {label}

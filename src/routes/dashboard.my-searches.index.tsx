@@ -71,7 +71,10 @@ function MySearches() {
         title="Arayışlarım"
         subtitle="Müşterileriniz için kaydettiğiniz arayışları takip edin; yeni portföyler eşleştiğinde bildirim alın."
         actions={
-          <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Button
+            asChild
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
             <Link to="/dashboard/my-searches/new">
               <Plus className="size-4" /> Yeni Arayış Oluştur
             </Link>
@@ -118,7 +121,9 @@ function MySearches() {
 
       {/* Sort */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sırala</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Sırala
+        </span>
         {sorts.map((s) => (
           <button
             key={s.key}
@@ -141,7 +146,10 @@ function MySearches() {
           title="Henüz arayış yok"
           description="Müşteriniz için bir arayış oluşturun; uygun portföyler eşleştiğinde bildirim alın."
           action={
-            <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Button
+              asChild
+              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
               <Link to="/dashboard/my-searches/new">
                 <Plus className="size-4" /> Yeni Arayış Oluştur
               </Link>

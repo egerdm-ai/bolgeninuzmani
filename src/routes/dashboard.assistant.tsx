@@ -19,10 +19,7 @@ import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
 import { ProfessionalCard } from "@/components/vault/professional-card";
 import { SurfaceCard } from "@/components/vault/cards";
-import {
-  getMatchesForSearch,
-  getExpertsForSearch,
-} from "@/lib/mock/matching";
+import { getMatchesForSearch, getExpertsForSearch } from "@/lib/mock/matching";
 import { useSaved } from "@/lib/saved-store";
 import { useDetailRequest } from "@/lib/detail-request-store";
 import { cn } from "@/lib/utils";
@@ -37,7 +34,11 @@ const navCards = [
   { label: "Yeni Arayış Oluştur", icon: Plus, to: "/dashboard/my-searches/new" as const },
   { label: "Arayışlarımı Yönet", icon: BookmarkPlus, to: "/dashboard/my-searches" as const },
   { label: "Network Arayışlarını Keşfet", icon: Compass, to: "/dashboard/searches" as const },
-  { label: "Portföyümle Arayış Eşleştir", icon: GitCompareArrows, to: "/dashboard/matches" as const },
+  {
+    label: "Portföyümle Arayış Eşleştir",
+    icon: GitCompareArrows,
+    to: "/dashboard/matches" as const,
+  },
   { label: "Bölge Uzmanı Bul", icon: Users, to: "/dashboard/professionals" as const },
 ];
 
@@ -96,8 +97,10 @@ function Assistant() {
               <Sparkles className="size-5" />
             </span>
             <div>
-              <h1 className="font-display text-lg font-semibold text-foreground">VAULT Asistan</h1>
-              <p className="text-xs text-muted-foreground">Eşleştirme, değerleme ve paylaşım için akıllı asistan</p>
+              <h1 className="font-display text-lg font-semibold text-foreground">Asistan</h1>
+              <p className="text-xs text-muted-foreground">
+                Eşleştirme, değerleme ve paylaşım için akıllı asistan
+              </p>
             </div>
           </div>
 
@@ -108,8 +111,12 @@ function Assistant() {
                   <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gold/10 text-gold">
                     <Sparkles className="size-7" />
                   </span>
-                  <h2 className="mt-4 font-display text-2xl font-semibold text-foreground">Nasıl yardımcı olabilirim?</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Bir işlem seçin veya doğal dille yazın.</p>
+                  <h2 className="mt-4 font-display text-2xl font-semibold text-foreground">
+                    Nasıl yardımcı olabilirim?
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Bir işlem seçin veya doğal dille yazın.
+                  </p>
                 </div>
 
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -155,7 +162,9 @@ function Assistant() {
                   <div
                     className={cn(
                       "max-w-[80%] rounded-2xl px-4 py-2.5 text-sm",
-                      m.role === "user" ? "bg-gold/15 text-foreground" : "bg-surface-2 text-secondary-foreground",
+                      m.role === "user"
+                        ? "bg-gold/15 text-foreground"
+                        : "bg-surface-2 text-secondary-foreground",
                     )}
                   >
                     {m.text}
@@ -195,7 +204,9 @@ function Assistant() {
           ) : (
             <div className="space-y-6">
               <div>
-                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Eşleşen Portföyler</h2>
+                <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+                  Eşleşen Portföyler
+                </h2>
                 <div className="space-y-4">
                   {matches.slice(0, 4).map((m) => (
                     <MatchExplanationCard
@@ -211,7 +222,9 @@ function Assistant() {
 
               {experts.length > 0 && (
                 <div>
-                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Bölge Uzmanları</h2>
+                  <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+                    Bölge Uzmanları
+                  </h2>
                   <div className="grid gap-3 sm:grid-cols-2">
                     {experts.slice(0, 2).map((b) => (
                       <ProfessionalCard key={b.id} professional={b} compact />
@@ -226,8 +239,12 @@ function Assistant() {
                     <BookmarkPlus className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-foreground">Bu aramayı arayış olarak kaydet</p>
-                    <p className="text-xs text-muted-foreground">Yeni eşleşen portföylerde bildirim alın.</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      Bu aramayı arayış olarak kaydet
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Yeni eşleşen portföylerde bildirim alın.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-3 py-2">

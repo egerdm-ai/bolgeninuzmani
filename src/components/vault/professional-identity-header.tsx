@@ -81,12 +81,8 @@ export function ProfessionalIdentityHeader({
   const identity = (
     <div className="min-w-0">
       <div className="flex items-center gap-1.5">
-        {nameSlot ?? (
-          <span className={cn("truncate text-foreground", v.name)}>{name}</span>
-        )}
-        {verified && (
-          <ShieldCheck className="size-4 shrink-0 text-gold" aria-label="Doğrulanmış" />
-        )}
+        {nameSlot ?? <span className={cn("truncate text-foreground", v.name)}>{name}</span>}
+        {verified && <ShieldCheck className="size-4 shrink-0 text-gold" aria-label="Doğrulanmış" />}
       </div>
       {(title || company) && (
         <p className={cn("mt-0.5 truncate text-muted-foreground", v.role)}>
@@ -145,9 +141,7 @@ export function ProfessionalIdentityHeader({
               <div className={v.gap}>{identity}</div>
               {badges && <div className="mt-3 flex flex-wrap items-center gap-1.5">{badges}</div>}
             </div>
-            {actions && (
-              <div className="flex flex-wrap items-center gap-2 pt-1">{actions}</div>
-            )}
+            {actions && <div className="flex flex-wrap items-center gap-2 pt-1">{actions}</div>}
           </div>
         ) : (
           <>

@@ -15,7 +15,11 @@ export const appNotifications: AppNotification[] = [
     body: "Bodrum deniz manzaralı villa arayışınızla yüksek uyumlu yeni bir portföy eklendi.",
     time: "12 dk önce",
     read: false,
-    link: { to: "/dashboard/my-searches/$id", params: { id: "bs_001" }, search: { tab: "matches" } },
+    link: {
+      to: "/dashboard/my-searches/$id",
+      params: { id: "bs_001" },
+      search: { tab: "matches" },
+    },
   },
   {
     id: "n_002",
@@ -60,6 +64,10 @@ export const appNotifications: AppNotification[] = [
     body: "Fiyat kriterlerinize uygun 2 portföy güncellendi.",
     time: "2 gün önce",
     read: true,
-    link: { to: "/dashboard/my-searches/$id", params: { id: "bs_002" }, search: { tab: "matches" } },
+    link: {
+      to: "/dashboard/my-searches/$id",
+      params: { id: "bs_002" },
+      search: { tab: "matches" },
+    },
   },
 ];

@@ -1,10 +1,4 @@
-import type {
-  BuyerSearch,
-  MatchResult,
-  Portfolio,
-  Professional,
-  Region,
-} from "./types";
+import type { BuyerSearch, MatchResult, Portfolio, Professional, Region } from "./types";
 import { portfolios, professionals, currentUser, myPortfolios } from "./data";
 import { portfolioTypeLabels } from "@/lib/format";
 
@@ -532,13 +526,9 @@ export function getBuyerSearchesByProfessional(pro: {
     if (owned.length) return owned;
   }
   const regions = new Set(pro.expertiseRegions.map((r) => r.toLocaleLowerCase("tr")));
-  const matched = networkSearches.filter((b) =>
-    regions.has(b.region.toLocaleLowerCase("tr")),
-  );
+  const matched = networkSearches.filter((b) => regions.has(b.region.toLocaleLowerCase("tr")));
   return matched.length ? matched : networkSearches.slice(0, 2);
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Matching engine (mock, UI-only, fully explainable).
@@ -609,7 +599,10 @@ function scorePortfolio(p: Portfolio, q: MatchInput): MatchResult | null {
   // Features (must-have weighted) (15)
   const feats = p.features.map((f) => f.toLocaleLowerCase("tr-TR"));
   const matchedFeatures = q.mustHave.filter((f) =>
-    feats.some((pf) => pf.includes(f.toLocaleLowerCase("tr-TR")) || f.toLocaleLowerCase("tr-TR").includes(pf)),
+    feats.some(
+      (pf) =>
+        pf.includes(f.toLocaleLowerCase("tr-TR")) || f.toLocaleLowerCase("tr-TR").includes(pf),
+    ),
   );
   if (q.mustHave.length > 0) {
     score += Math.round((matchedFeatures.length / q.mustHave.length) * 15);

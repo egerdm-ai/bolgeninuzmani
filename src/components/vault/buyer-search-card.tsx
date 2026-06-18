@@ -13,11 +13,7 @@ import {
   Clock,
   User,
 } from "lucide-react";
-import type {
-  BuyerSearch,
-  BuyerSearchStatus,
-  NotificationFrequency,
-} from "@/lib/mock/types";
+import type { BuyerSearch, BuyerSearchStatus, NotificationFrequency } from "@/lib/mock/types";
 import { notificationFrequencyLabels } from "@/lib/mock/types";
 import { StatusBadge, FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
@@ -124,13 +120,21 @@ export function BuyerSearchCard({ search }: { search: BuyerSearch }) {
 
       {/* Actions */}
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button asChild size="sm" className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+        <Button
+          asChild
+          size="sm"
+          className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+        >
           <Link to="/dashboard/my-searches/$id" params={{ id: search.id }}>
             Eşleşmeleri Gör <ArrowRight className="size-4" />
           </Link>
         </Button>
         <Button asChild size="sm" variant="outline" className="gap-1.5">
-          <Link to="/dashboard/my-searches/$id" params={{ id: search.id }} search={{ mode: "edit" }}>
+          <Link
+            to="/dashboard/my-searches/$id"
+            params={{ id: search.id }}
+            search={{ mode: "edit" }}
+          >
             <Pencil className="size-3.5" /> Düzenle
           </Link>
         </Button>

@@ -11,10 +11,11 @@ function mockPhone(seed: string): string {
 }
 
 function mockEmail(pro: Professional): string {
-  const domain = (pro.companyName ?? "vault")
-    .toLocaleLowerCase("tr")
-    .replace(/[^a-z0-9]+/g, "")
-    .slice(0, 18) || "vault";
+  const domain =
+    (pro.companyName ?? "vault")
+      .toLocaleLowerCase("tr")
+      .replace(/[^a-z0-9]+/g, "")
+      .slice(0, 18) || "vault";
   return `${pro.username.replace(/-/g, ".")}@${domain}.com`;
 }
 

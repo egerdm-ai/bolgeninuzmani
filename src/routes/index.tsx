@@ -169,10 +169,17 @@ function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" className="hidden text-secondary-foreground sm:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            className="hidden text-secondary-foreground sm:inline-flex"
+          >
             <Link to="/dashboard">Giriş Yap</Link>
           </Button>
-          <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Button
+            asChild
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
             <a href={`#${APPLY_ID}`} onClick={scrollToApply}>
               Üyelik Başvurusu Yap <ArrowRight className="size-4" />
             </a>
@@ -348,9 +355,24 @@ function ProblemSection() {
 /* ------------------------------------------------------------------ */
 
 const mockListings = [
-  { img: propertyImages.villa1, title: "Yalıkavak Deniz Manzaralı Villa", meta: "Villa · 520 m² · Deniz manzarası", price: "₺92M" },
-  { img: propertyImages.hotel1, title: "Bodrum Butik Otel", meta: "Otel · 24 oda · İşletmeli", price: "₺240M" },
-  { img: propertyImages.land1, title: "Çeşme Turizm İmarlı Arsa", meta: "Arsa · 6.400 m² · Turizm imarlı", price: "₺115M" },
+  {
+    img: propertyImages.villa1,
+    title: "Yalıkavak Deniz Manzaralı Villa",
+    meta: "Villa · 520 m² · Deniz manzarası",
+    price: "₺92M",
+  },
+  {
+    img: propertyImages.hotel1,
+    title: "Bodrum Butik Otel",
+    meta: "Otel · 24 oda · İşletmeli",
+    price: "₺240M",
+  },
+  {
+    img: propertyImages.land1,
+    title: "Çeşme Turizm İmarlı Arsa",
+    meta: "Arsa · 6.400 m² · Turizm imarlı",
+    price: "₺115M",
+  },
 ];
 
 const mockFilters = ["Konut", "Villa / Yalı", "Arsa", "Ticari", "Fabrika", "Otel"];
@@ -395,7 +417,9 @@ function ProductMockupSection() {
                 >
                   <span
                     className={`flex size-4 items-center justify-center rounded border ${
-                      i === 1 ? "border-gold bg-gold text-primary-foreground" : "border-border-strong"
+                      i === 1
+                        ? "border-gold bg-gold text-primary-foreground"
+                        : "border-border-strong"
                     }`}
                   >
                     {i === 1 && <Check className="size-3" />}
@@ -482,7 +506,10 @@ const steps = [
 
 function HowItWorks() {
   return (
-    <section id="nasil-calisir" className="relative z-10 border-y border-border/60 bg-surface/30 scroll-mt-20">
+    <section
+      id="nasil-calisir"
+      className="relative z-10 border-y border-border/60 bg-surface/30 scroll-mt-20"
+    >
       <div className="mx-auto max-w-[1320px] px-6 py-20">
         <SectionHeader eyebrow="Süreç" title="Nasıl Çalışır?" className="mx-auto text-center" />
         <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-5">
@@ -584,7 +611,10 @@ const searchFeatures = [
 
 function SearchNetworkSection() {
   return (
-    <section id="arayis" className="relative z-10 border-y border-border/60 bg-surface/30 scroll-mt-20">
+    <section
+      id="arayis"
+      className="relative z-10 border-y border-border/60 bg-surface/30 scroll-mt-20"
+    >
       <div className="mx-auto max-w-[1320px] px-6 py-20">
         <SectionHeader
           eyebrow="Arayış Ağı"
@@ -596,7 +626,9 @@ function SearchNetworkSection() {
           <div className="rounded-2xl border border-border-strong bg-surface/80 p-6 shadow-elegant">
             <div className="flex items-center gap-2 border-b border-border/60 pb-4">
               <Eye className="size-4 text-gold" />
-              <span className="text-sm font-medium text-foreground">Benim gördüğüm müşteri arayışı</span>
+              <span className="text-sm font-medium text-foreground">
+                Benim gördüğüm müşteri arayışı
+              </span>
             </div>
             <div className="mt-4 flex items-center gap-3 rounded-xl border border-border/60 bg-background/50 p-3">
               <span className="flex size-10 items-center justify-center rounded-full bg-gold/15 font-display text-base font-semibold text-gold">
@@ -707,14 +739,27 @@ function AssistantSection() {
             </p>
             <div className="w-fit max-w-[96%] space-y-3 rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3.5">
               <p className="text-sm text-muted-foreground">
-                Bu arayışla eşleşen{" "}
-                <span className="font-medium text-foreground">2 portföyü</span> listeledim.
+                Bu arayışla eşleşen <span className="font-medium text-foreground">2 portföyü</span>{" "}
+                listeledim.
               </p>
               {[
-                { img: propertyImages.apartment1, name: "Tuzla Sanayi Fabrika", meta: "6.200 m² kapalı · Vinçli", score: 95 },
-                { img: propertyImages.land1, name: "Gebze Lojistik Depo", meta: "8.000 m² · Otoyola yakın", score: 87 },
+                {
+                  img: propertyImages.apartment1,
+                  name: "Tuzla Sanayi Fabrika",
+                  meta: "6.200 m² kapalı · Vinçli",
+                  score: 95,
+                },
+                {
+                  img: propertyImages.land1,
+                  name: "Gebze Lojistik Depo",
+                  meta: "8.000 m² · Otoyola yakın",
+                  score: 87,
+                },
               ].map((m) => (
-                <div key={m.name} className="rounded-xl border border-border/60 bg-background/50 p-2.5">
+                <div
+                  key={m.name}
+                  className="rounded-xl border border-border/60 bg-background/50 p-2.5"
+                >
                   <div className="flex items-center gap-3">
                     <img src={m.img} alt={m.name} className="size-12 rounded-lg object-cover" />
                     <div className="min-w-0 flex-1">
@@ -745,7 +790,9 @@ function AssistantSection() {
           </div>
           <div className="border-t border-border/60 p-3">
             <div className="flex items-center gap-2 rounded-xl border border-border-strong bg-background/60 px-3 py-2">
-              <span className="flex-1 text-sm text-muted-foreground">Doğal dille bir talep yazın…</span>
+              <span className="flex-1 text-sm text-muted-foreground">
+                Doğal dille bir talep yazın…
+              </span>
               <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground">
                 <Send className="size-3.5" />
               </span>
@@ -881,7 +928,10 @@ const trustCards = [
 
 function TrustSection() {
   return (
-    <section id="ozellikler" className="relative z-10 mx-auto max-w-[1320px] px-6 py-20 scroll-mt-20">
+    <section
+      id="ozellikler"
+      className="relative z-10 mx-auto max-w-[1320px] px-6 py-20 scroll-mt-20"
+    >
       <SectionHeader
         eyebrow="Güven & Gizlilik"
         title="Güven, Gizlilik ve Kontrollü Erişim"

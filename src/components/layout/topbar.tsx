@@ -1,5 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, Bell, Plus, Menu, ChevronDown, UserRound, Settings, LogOut, CheckCheck } from "lucide-react";
+import {
+  Search,
+  Bell,
+  Plus,
+  Menu,
+  ChevronDown,
+  UserRound,
+  Settings,
+  LogOut,
+  CheckCheck,
+} from "lucide-react";
 import { currentUser } from "@/lib/mock/data";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
@@ -45,7 +55,10 @@ export function Topbar({
 
       <div className="ml-auto flex items-center gap-2">
         <AIButton size="default" className="hidden md:inline-flex" />
-        <Button asChild className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+        <Button
+          asChild
+          className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+        >
           <Link to="/dashboard/portfolios/new">
             <Plus className="size-4" />
             <span className="hidden sm:inline">Portföy Oluştur</span>
@@ -87,7 +100,12 @@ export function Topbar({
                 >
                   <span className="flex w-full items-center gap-2">
                     {!n.read && <span className="size-1.5 shrink-0 rounded-full bg-gold" />}
-                    <span className={cn("text-xs font-semibold", n.read ? "text-secondary-foreground" : "text-foreground")}>
+                    <span
+                      className={cn(
+                        "text-xs font-semibold",
+                        n.read ? "text-secondary-foreground" : "text-foreground",
+                      )}
+                    >
                       {n.title}
                     </span>
                   </span>
@@ -118,10 +136,22 @@ export function Topbar({
               <div className="text-xs font-normal text-muted-foreground">{currentUser.title}</div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild><Link to="/dashboard/profile"><UserRound className="size-4" /> Profilim</Link></DropdownMenuItem>
-            <DropdownMenuItem asChild><Link to="/dashboard/settings"><Settings className="size-4" /> Ayarlar</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/profile">
+                <UserRound className="size-4" /> Profilim
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/dashboard/settings">
+                <Settings className="size-4" /> Ayarlar
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild><Link to="/"><LogOut className="size-4" /> Çıkış Yap</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/">
+                <LogOut className="size-4" /> Çıkış Yap
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

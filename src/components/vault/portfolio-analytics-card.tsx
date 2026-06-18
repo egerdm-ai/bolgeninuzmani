@@ -29,7 +29,9 @@ export function PortfolioAnalyticsCard({ portfolio }: { portfolio: Portfolio }) 
             <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <it.icon className="size-3 text-gold" /> {it.label}
             </div>
-            <div className="mt-1 font-display text-xl font-semibold text-foreground">{it.value}</div>
+            <div className="mt-1 font-display text-xl font-semibold text-foreground">
+              {it.value}
+            </div>
           </div>
         ))}
       </div>

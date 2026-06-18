@@ -30,7 +30,15 @@ function featureChips(p: Portfolio): string[] {
   return chips;
 }
 
-function Stat({ icon: Icon, value, label }: { icon: typeof BedDouble; value: string; label: string }) {
+function Stat({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof BedDouble;
+  value: string;
+  label: string;
+}) {
   return (
     <span className="inline-flex items-center gap-1 text-xs text-secondary-foreground">
       <Icon className="size-3.5 text-gold/70" />
@@ -130,7 +138,11 @@ export function ProfessionalPortfolioListItem({
 
         {/* Actions */}
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <Button asChild size="sm" className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Button
+            asChild
+            size="sm"
+            className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
             <Link to="/dashboard/portfolios/$id" params={{ id: portfolio.id }}>
               Portföyü Gör <ArrowRight className="size-3.5" />
             </Link>
@@ -153,7 +165,11 @@ export function ProfessionalPortfolioListItem({
             {saved ? "Kaydedildi" : "Kaydet"}
           </Button>
           <Button asChild variant="ghost" size="icon" className="size-8">
-            <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }} aria-label="Paylaş">
+            <Link
+              to="/dashboard/portfolios/$id/share"
+              params={{ id: portfolio.id }}
+              aria-label="Paylaş"
+            >
               <Share2 className="size-3.5" />
             </Link>
           </Button>

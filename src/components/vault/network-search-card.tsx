@@ -62,13 +62,21 @@ export function NetworkSearchCard({ search }: { search: BuyerSearch }) {
         params={{ id: search.owner.id }}
         className="mt-3 flex items-center gap-2.5 rounded-xl border border-border bg-surface-2 p-2 transition-colors hover:border-gold/40"
       >
-        <BrokerAvatar name={search.owner.fullName} src={search.owner.avatarUrl || undefined} size="sm" />
+        <BrokerAvatar
+          name={search.owner.fullName}
+          src={search.owner.avatarUrl || undefined}
+          size="sm"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
-            <span className="truncate text-sm font-medium text-foreground">{search.owner.fullName}</span>
+            <span className="truncate text-sm font-medium text-foreground">
+              {search.owner.fullName}
+            </span>
             <ShieldCheck className="size-3.5 shrink-0 text-gold" />
           </div>
-          <span className="truncate text-[11px] text-muted-foreground">{search.owner.companyName}</span>
+          <span className="truncate text-[11px] text-muted-foreground">
+            {search.owner.companyName}
+          </span>
         </div>
       </Link>
 
@@ -96,19 +104,29 @@ export function NetworkSearchCard({ search }: { search: BuyerSearch }) {
           <FolderLock className="size-4 shrink-0 text-gold" />
           <p className="text-xs font-medium text-secondary-foreground">
             Portföylerinizden{" "}
-            <span className="font-semibold text-gold">{myMatches.length} tanesi</span> bu arayışla eşleşebilir
+            <span className="font-semibold text-gold">{myMatches.length} tanesi</span> bu arayışla
+            eşleşebilir
           </p>
         </div>
       )}
 
       {/* Actions */}
       <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3">
-        <Button asChild size="sm" className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+        <Button
+          asChild
+          size="sm"
+          className="col-span-2 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+        >
           <Link to="/dashboard/searches/$id" params={{ id: search.id }}>
             Arayışı Gör <ArrowRight className="size-4" />
           </Link>
         </Button>
-        <Button asChild size="sm" variant="outline" className="gap-1.5 border-gold/30 text-gold hover:bg-gold/10">
+        <Button
+          asChild
+          size="sm"
+          variant="outline"
+          className="gap-1.5 border-gold/30 text-gold hover:bg-gold/10"
+        >
           <Link to="/dashboard/matches" search={{ searchId: search.id, source: "network" }}>
             <GitCompareArrows className="size-3.5" /> Portföyümle Eşleştir
           </Link>

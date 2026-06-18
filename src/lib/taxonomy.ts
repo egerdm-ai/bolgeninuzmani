@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// VAULT Property Taxonomy — single source of truth
+// Bölgenin Uzmanı Property Taxonomy — single source of truth
 // Used by: /dashboard/search (filters), /dashboard/portfolios/new (dynamic
 // step 3 fields), /dashboard/searches/new (buyer search filters) and AI matching.
 //
@@ -163,60 +163,99 @@ const yesNo: Option[] = [
 // ---------------------------------------------------------------------------
 
 export const residentialFields: FieldDef[] = [
-  { key: "buildingAge", label: "Bina Yaşı", type: "select", important: true, options: [
-    { value: "0", label: "0 (Sıfır)" },
-    { value: "1-5", label: "1-5" },
-    { value: "6-10", label: "6-10" },
-    { value: "11-20", label: "11-20" },
-    { value: "21+", label: "21+" },
-  ] },
+  {
+    key: "buildingAge",
+    label: "Bina Yaşı",
+    type: "select",
+    important: true,
+    options: [
+      { value: "0", label: "0 (Sıfır)" },
+      { value: "1-5", label: "1-5" },
+      { value: "6-10", label: "6-10" },
+      { value: "11-20", label: "11-20" },
+      { value: "21+", label: "21+" },
+    ],
+  },
   { key: "floor", label: "Bulunduğu Kat", type: "text" },
   { key: "totalFloors", label: "Toplam Kat", type: "number" },
-  { key: "heating", label: "Isıtma", type: "select", important: true, options: [
-    { value: "floor", label: "Yerden Isıtma" },
-    { value: "central", label: "Merkezi" },
-    { value: "combi", label: "Kombi" },
-    { value: "ac", label: "Klima" },
-    { value: "none", label: "Yok" },
-  ] },
-  { key: "kitchenType", label: "Mutfak", type: "select", options: [
-    { value: "open", label: "Açık (Amerikan)" },
-    { value: "closed", label: "Kapalı" },
-    { value: "island", label: "Ada Mutfak" },
-  ] },
+  {
+    key: "heating",
+    label: "Isıtma",
+    type: "select",
+    important: true,
+    options: [
+      { value: "floor", label: "Yerden Isıtma" },
+      { value: "central", label: "Merkezi" },
+      { value: "combi", label: "Kombi" },
+      { value: "ac", label: "Klima" },
+      { value: "none", label: "Yok" },
+    ],
+  },
+  {
+    key: "kitchenType",
+    label: "Mutfak",
+    type: "select",
+    options: [
+      { value: "open", label: "Açık (Amerikan)" },
+      { value: "closed", label: "Kapalı" },
+      { value: "island", label: "Ada Mutfak" },
+    ],
+  },
   { key: "balcony", label: "Balkon", type: "boolean" },
   { key: "elevator", label: "Asansör", type: "boolean" },
-  { key: "parkingType", label: "Otopark", type: "select", options: [
-    { value: "closed", label: "Kapalı Garaj" },
-    { value: "open", label: "Açık Otopark" },
-    { value: "both", label: "Açık + Kapalı" },
-    { value: "none", label: "Yok" },
-  ] },
+  {
+    key: "parkingType",
+    label: "Otopark",
+    type: "select",
+    options: [
+      { value: "closed", label: "Kapalı Garaj" },
+      { value: "open", label: "Açık Otopark" },
+      { value: "both", label: "Açık + Kapalı" },
+      { value: "none", label: "Yok" },
+    ],
+  },
   { key: "furnished", label: "Eşyalı", type: "boolean" },
-  { key: "usageStatus", label: "Kullanım Durumu", type: "select", options: [
-    { value: "empty", label: "Boş" },
-    { value: "owner", label: "Mülk Sahibi" },
-    { value: "tenant", label: "Kiracılı" },
-  ] },
+  {
+    key: "usageStatus",
+    label: "Kullanım Durumu",
+    type: "select",
+    options: [
+      { value: "empty", label: "Boş" },
+      { value: "owner", label: "Mülk Sahibi" },
+      { value: "tenant", label: "Kiracılı" },
+    ],
+  },
   { key: "inSite", label: "Site İçinde", type: "boolean" },
   { key: "creditEligible", label: "Krediye Uygun", type: "boolean" },
-  { key: "deedStatus", label: "Tapu Durumu", type: "select", important: true, options: [
-    { value: "kat_mulkiyeti", label: "Kat Mülkiyeti" },
-    { value: "kat_irtifaki", label: "Kat İrtifakı" },
-    { value: "mustakil", label: "Müstakil Tapu" },
-    { value: "hisseli", label: "Hisseli Tapu" },
-  ] },
+  {
+    key: "deedStatus",
+    label: "Tapu Durumu",
+    type: "select",
+    important: true,
+    options: [
+      { value: "kat_mulkiyeti", label: "Kat Mülkiyeti" },
+      { value: "kat_irtifaki", label: "Kat İrtifakı" },
+      { value: "mustakil", label: "Müstakil Tapu" },
+      { value: "hisseli", label: "Hisseli Tapu" },
+    ],
+  },
 ];
 
 export const landFields: FieldDef[] = [
-  { key: "zoningStatus", label: "İmar Durumu", type: "select", important: true, options: [
-    { value: "konut", label: "Konut İmarlı" },
-    { value: "ticari", label: "Ticari İmarlı" },
-    { value: "turizm", label: "Turizm İmarlı" },
-    { value: "tarla", label: "Tarla" },
-    { value: "sanayi", label: "Sanayi" },
-    { value: "imarsiz", label: "İmarsız" },
-  ] },
+  {
+    key: "zoningStatus",
+    label: "İmar Durumu",
+    type: "select",
+    important: true,
+    options: [
+      { value: "konut", label: "Konut İmarlı" },
+      { value: "ticari", label: "Ticari İmarlı" },
+      { value: "turizm", label: "Turizm İmarlı" },
+      { value: "tarla", label: "Tarla" },
+      { value: "sanayi", label: "Sanayi" },
+      { value: "imarsiz", label: "İmarsız" },
+    ],
+  },
   { key: "landM2", label: "Alan", type: "number", unit: "m²", important: true },
   { key: "m2Price", label: "m² Birim Fiyat", type: "number", unit: "₺/m²" },
   { key: "adaNo", label: "Ada No", type: "text" },
@@ -239,13 +278,19 @@ export const landFields: FieldDef[] = [
 ];
 
 export const commercialFields: FieldDef[] = [
-  { key: "commercialType", label: "Ticari Tip", type: "select", important: true, options: [
-    { value: "ofis", label: "Ofis" },
-    { value: "magaza", label: "Mağaza" },
-    { value: "depo", label: "Depo" },
-    { value: "plaza", label: "Plaza Katı" },
-    { value: "fabrika", label: "Fabrika" },
-  ] },
+  {
+    key: "commercialType",
+    label: "Ticari Tip",
+    type: "select",
+    important: true,
+    options: [
+      { value: "ofis", label: "Ofis" },
+      { value: "magaza", label: "Mağaza" },
+      { value: "depo", label: "Depo" },
+      { value: "plaza", label: "Plaza Katı" },
+      { value: "fabrika", label: "Fabrika" },
+    ],
+  },
   { key: "indoorM2", label: "Kapalı Alan", type: "number", unit: "m²", important: true },
   { key: "outdoorM2", label: "Açık Alan", type: "number", unit: "m²" },
   { key: "ceilingHeight", label: "Tavan Yüksekliği", type: "number", unit: "m" },
@@ -255,15 +300,26 @@ export const commercialFields: FieldDef[] = [
   { key: "storage", label: "Depo Alanı", type: "boolean" },
   { key: "generator", label: "Jeneratör", type: "boolean" },
   { key: "fireSystem", label: "Yangın Sistemi", type: "boolean" },
-  { key: "licenseStatus", label: "Ruhsat Durumu", type: "select", important: true, options: [
-    { value: "isyeri", label: "İş Yeri Ruhsatı Var" },
-    { value: "yapi", label: "Yapı Ruhsatı" },
-    { value: "yok", label: "Ruhsat Yok" },
-  ] },
-  { key: "tenantStatus", label: "Kiracı Durumu", type: "select", options: [
-    { value: "empty", label: "Boş" },
-    { value: "tenant", label: "Kiracılı" },
-  ] },
+  {
+    key: "licenseStatus",
+    label: "Ruhsat Durumu",
+    type: "select",
+    important: true,
+    options: [
+      { value: "isyeri", label: "İş Yeri Ruhsatı Var" },
+      { value: "yapi", label: "Yapı Ruhsatı" },
+      { value: "yok", label: "Ruhsat Yok" },
+    ],
+  },
+  {
+    key: "tenantStatus",
+    label: "Kiracı Durumu",
+    type: "select",
+    options: [
+      { value: "empty", label: "Boş" },
+      { value: "tenant", label: "Kiracılı" },
+    ],
+  },
   { key: "transferFee", label: "Devren Bedeli", type: "number", unit: "₺" },
   { key: "monthlyRent", label: "Kira Getirisi", type: "number", unit: "₺" },
   { key: "turnover", label: "Ciro Bilgisi", type: "number", unit: "₺/ay" },
@@ -273,28 +329,44 @@ export const commercialFields: FieldDef[] = [
 
 export const tourismFields: FieldDef[] = [
   { key: "roomCount", label: "Oda Sayısı", type: "number", important: true },
-  { key: "starRating", label: "Yıldız", type: "select", options: [
-    { value: "3", label: "3 Yıldız" },
-    { value: "4", label: "4 Yıldız" },
-    { value: "5", label: "5 Yıldız" },
-    { value: "butik", label: "Butik" },
-  ] },
+  {
+    key: "starRating",
+    label: "Yıldız",
+    type: "select",
+    options: [
+      { value: "3", label: "3 Yıldız" },
+      { value: "4", label: "4 Yıldız" },
+      { value: "5", label: "5 Yıldız" },
+      { value: "butik", label: "Butik" },
+    ],
+  },
   { key: "bedCapacity", label: "Yatak Kapasitesi", type: "number", important: true },
   { key: "restaurant", label: "Restoran", type: "boolean" },
   { key: "spaWellness", label: "SPA / Wellness", type: "boolean" },
   { key: "pool", label: "Havuz", type: "boolean" },
   { key: "beach", label: "Plaj / Sahil", type: "boolean" },
-  { key: "tourismLicense", label: "Turizm Belgesi", type: "select", important: true, options: [
-    { value: "isletme", label: "İşletme Belgeli" },
-    { value: "yatirim", label: "Yatırım Belgeli" },
-    { value: "belediye", label: "Belediye Belgeli" },
-  ] },
+  {
+    key: "tourismLicense",
+    label: "Turizm Belgesi",
+    type: "select",
+    important: true,
+    options: [
+      { value: "isletme", label: "İşletme Belgeli" },
+      { value: "yatirim", label: "Yatırım Belgeli" },
+      { value: "belediye", label: "Belediye Belgeli" },
+    ],
+  },
   { key: "occupancy", label: "Doluluk Oranı", type: "number", unit: "%" },
-  { key: "season", label: "Sezon", type: "select", options: [
-    { value: "12", label: "12 Ay" },
-    { value: "summer", label: "Yazlık" },
-    { value: "winter", label: "Kışlık" },
-  ] },
+  {
+    key: "season",
+    label: "Sezon",
+    type: "select",
+    options: [
+      { value: "12", label: "12 Ay" },
+      { value: "summer", label: "Yazlık" },
+      { value: "winter", label: "Kışlık" },
+    ],
+  },
 ];
 
 export const industrialFields: FieldDef[] = [
@@ -341,12 +413,21 @@ export const detailGroupRegistry: Record<string, FieldGroup> = {
   luxury: {
     id: "luxury",
     label: "Luxury Özellikler",
-    fields: [{ key: "luxuryFeatures", label: "Luxury Özellikler", type: "multiselect", options: luxuryFeatures }],
+    fields: [
+      {
+        key: "luxuryFeatures",
+        label: "Luxury Özellikler",
+        type: "multiselect",
+        options: luxuryFeatures,
+      },
+    ],
   },
 };
 
 export function getDetailGroupsForCategory(category: CategoryKey): FieldGroup[] {
-  return (categoryByKey[category]?.detailGroups ?? []).map((id) => detailGroupRegistry[id]).filter(Boolean);
+  return (categoryByKey[category]?.detailGroups ?? [])
+    .map((id) => detailGroupRegistry[id])
+    .filter(Boolean);
 }
 
 // ---------------------------------------------------------------------------
@@ -472,21 +553,31 @@ export const areaRangeFields: { key: string; label: string }[] = [
 // ---------------------------------------------------------------------------
 
 export const konutDetailFields: FieldDef[] = [
-  { key: "buildingAge", label: "Bina yaşı", type: "select", options: [
-    { value: "0", label: "0 (Sıfır)" },
-    { value: "1-5", label: "1-5" },
-    { value: "6-10", label: "6-10" },
-    { value: "11-20", label: "11-20" },
-    { value: "21+", label: "21+" },
-  ] },
+  {
+    key: "buildingAge",
+    label: "Bina yaşı",
+    type: "select",
+    options: [
+      { value: "0", label: "0 (Sıfır)" },
+      { value: "1-5", label: "1-5" },
+      { value: "6-10", label: "6-10" },
+      { value: "11-20", label: "11-20" },
+      { value: "21+", label: "21+" },
+    ],
+  },
   { key: "floor", label: "Kat", type: "text" },
   { key: "totalFloors", label: "Kat sayısı", type: "number" },
-  { key: "heating", label: "Isıtma tipi", type: "select", options: [
-    { value: "floor", label: "Yerden Isıtma" },
-    { value: "central", label: "Merkezi" },
-    { value: "combi", label: "Kombi" },
-    { value: "ac", label: "Klima" },
-  ] },
+  {
+    key: "heating",
+    label: "Isıtma tipi",
+    type: "select",
+    options: [
+      { value: "floor", label: "Yerden Isıtma" },
+      { value: "central", label: "Merkezi" },
+      { value: "combi", label: "Kombi" },
+      { value: "ac", label: "Klima" },
+    ],
+  },
   { key: "furnished", label: "Eşyalı", type: "boolean" },
   { key: "inSite", label: "Site içinde", type: "boolean" },
   { key: "balcony", label: "Balkon", type: "boolean" },
@@ -630,14 +721,19 @@ export function computeCompleteness(
   const isFilled = (v: FilterValue) =>
     v !== undefined && v !== "" && v !== null && (!Array.isArray(v) || v.length > 0);
 
-  const requiredItems = [...coreRequired, ...importantFields.map((f) => ({ key: f.key, label: f.label }))];
+  const requiredItems = [
+    ...coreRequired,
+    ...importantFields.map((f) => ({ key: f.key, label: f.label })),
+  ];
   const requiredDone = requiredItems.filter((f) => isFilled(values[f.key])).length;
   const requiredTotal = requiredItems.length;
 
   const optionalDone = optionalFields.filter((f) => isFilled(values[f.key])).length;
   const optionalTotal = optionalFields.length || 1;
 
-  const missingImportant = requiredItems.filter((f) => !isFilled(values[f.key])).map((f) => f.label);
+  const missingImportant = requiredItems
+    .filter((f) => !isFilled(values[f.key]))
+    .map((f) => f.label);
 
   // weight: required 75%, optional 25%
   const reqRatio = requiredTotal ? requiredDone / requiredTotal : 1;
@@ -645,7 +741,15 @@ export function computeCompleteness(
   const score = Math.round((reqRatio * 0.75 + optRatio * 0.25) * 100);
   const level: "low" | "medium" | "high" = score >= 80 ? "high" : score >= 55 ? "medium" : "low";
 
-  return { score, level, requiredDone, requiredTotal, optionalDone, optionalTotal, missingImportant };
+  return {
+    score,
+    level,
+    requiredDone,
+    requiredTotal,
+    optionalDone,
+    optionalTotal,
+    missingImportant,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -701,7 +805,8 @@ export function parsePromptToFilters(prompt: string): ParsedPrompt {
     filters.category = "konut";
     filters.subcategory = "villa";
     summary.push("Tip: Villa");
-    if (lower.includes("müstakil") || lower.includes("mustakil")) summary.push("Olmazsa olmaz: Müstakil");
+    if (lower.includes("müstakil") || lower.includes("mustakil"))
+      summary.push("Olmazsa olmaz: Müstakil");
   } else {
     for (const t of typeMap) {
       if (t.kw.some((k) => lower.includes(k))) {

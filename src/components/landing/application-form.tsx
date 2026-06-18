@@ -15,7 +15,7 @@ export function ApplicationForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO[backend]: send form payload to server function / Lovable Cloud.
+    // TODO[backend]: POST to Supabase `applications` table (server function).
     setSubmitted(true);
   }
 

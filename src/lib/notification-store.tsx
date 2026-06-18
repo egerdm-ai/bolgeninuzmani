@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { appNotifications } from "./mock/notifications";
 import type { AppNotification } from "./mock/types";
@@ -21,13 +14,10 @@ const NotificationContext = createContext<NotificationContextValue | null>(null)
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   // TODO[backend]: subscribe to `notifications` realtime channel for auth.uid().
-  const [notifications, setNotifications] =
-    useState<AppNotification[]>(appNotifications);
+  const [notifications, setNotifications] = useState<AppNotification[]>(appNotifications);
 
   const markRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
   const markAllRead = useCallback(() => {
@@ -45,16 +35,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     [notifications, markRead, markAllRead],
   );
 
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }
 
 export function useNotifications() {
   const ctx = useContext(NotificationContext);
-  if (!ctx)
-    throw new Error("useNotifications must be used within NotificationProvider");
+  if (!ctx) throw new Error("useNotifications must be used within NotificationProvider");
   return ctx;
 }

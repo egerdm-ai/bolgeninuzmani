@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 type FollowContextValue = {
@@ -38,8 +31,7 @@ export function FollowProvider({ children }: { children: ReactNode }) {
       following,
       isFollowing: (id: string) => following.includes(id),
       toggleFollow,
-      followerCount: (id: string, base: number) =>
-        base + (following.includes(id) ? 1 : 0),
+      followerCount: (id: string, base: number) => base + (following.includes(id) ? 1 : 0),
     }),
     [following, toggleFollow],
   );

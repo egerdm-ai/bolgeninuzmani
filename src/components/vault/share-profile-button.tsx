@@ -2,11 +2,7 @@ import { useState } from "react";
 import { Share2, Copy, Check, MessageCircle, Mail, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export function ShareProfileButton({
@@ -20,8 +16,7 @@ export function ShareProfileButton({
 }) {
   const [copied, setCopied] = useState(false);
   const path = `/v/${username}`;
-  const fullLink =
-    typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
+  const fullLink = typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
 
   const copy = () => {
     try {

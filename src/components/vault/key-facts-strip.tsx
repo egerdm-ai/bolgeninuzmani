@@ -12,10 +12,22 @@ export function KeyFactsStrip({
 }) {
   const facts = [
     portfolio.rooms && { icon: BedDouble, label: "Oda", value: portfolio.rooms },
-    portfolio.grossM2 && { icon: Maximize, label: "Kapalı Alan", value: `${formatNumber(portfolio.grossM2)} m²` },
+    portfolio.grossM2 && {
+      icon: Maximize,
+      label: "Kapalı Alan",
+      value: `${formatNumber(portfolio.grossM2)} m²`,
+    },
     portfolio.bathrooms && { icon: Bath, label: "Banyo", value: String(portfolio.bathrooms) },
-    portfolio.landM2 && { icon: Trees, label: "Arsa Alanı", value: `${formatNumber(portfolio.landM2)} m²` },
-    portfolio.parkingCapacity && { icon: Car, label: "Otopark", value: String(portfolio.parkingCapacity) },
+    portfolio.landM2 && {
+      icon: Trees,
+      label: "Arsa Alanı",
+      value: `${formatNumber(portfolio.landM2)} m²`,
+    },
+    portfolio.parkingCapacity && {
+      icon: Car,
+      label: "Otopark",
+      value: String(portfolio.parkingCapacity),
+    },
   ].filter(Boolean) as { icon: typeof BedDouble; label: string; value: string }[];
 
   return (

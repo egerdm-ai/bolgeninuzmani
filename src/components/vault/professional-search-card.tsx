@@ -102,7 +102,11 @@ export function ProfessionalSearchCard({
             Arayışı Gör <ArrowRight className="size-3.5" />
           </Link>
         </Button>
-        <Button asChild size="sm" className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90">
+        <Button
+          asChild
+          size="sm"
+          className="h-8 gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+        >
           <Link to="/dashboard/matches">
             <Layers className="size-3.5" /> Portföyümle Eşleştir
           </Link>
@@ -117,21 +121,15 @@ export function ProfessionalSearchCard({
   );
 }
 
-function Meta({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-}) {
+function Meta({ icon: Icon, label, value }: { icon: typeof MapPin; label: string; value: string }) {
   return (
     <div className="rounded-lg bg-surface-2 px-2.5 py-1.5">
       <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">
         <Icon className="size-3 text-gold" /> {label}
       </span>
-      <span className={cn("mt-0.5 block truncate text-xs font-medium text-foreground")}>{value}</span>
+      <span className={cn("mt-0.5 block truncate text-xs font-medium text-foreground")}>
+        {value}
+      </span>
     </div>
   );
 }

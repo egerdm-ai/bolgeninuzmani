@@ -24,10 +24,7 @@ import { InfoPanel, SurfaceCard, KpiCard, EmptyStateCard } from "@/components/va
 import { StatusBadge, FeatureChip, RegionExpertBadge } from "@/components/vault/badges";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { urgencyLabels, urgencyTones } from "@/components/vault/network-search-card";
-import {
-  getNetworkSearchById,
-  getMyMatchesForBuyerSearch,
-} from "@/lib/mock/matching";
+import { getNetworkSearchById, getMyMatchesForBuyerSearch } from "@/lib/mock/matching";
 import { formatPrice, portfolioTypeLabels } from "@/lib/format";
 import { useMySearches } from "@/lib/my-searches-store";
 import { useSaved } from "@/lib/saved-store";
@@ -77,13 +74,13 @@ function NetworkSearchDetail() {
       <PageHeader
         title={search.title}
         subtitle={search.notes}
-        breadcrumbs={[
-          { label: "Arayışlar", to: "/dashboard/searches" },
-          { label: search.title },
-        ]}
+        breadcrumbs={[{ label: "Arayışlar", to: "/dashboard/searches" }, { label: search.title }]}
         actions={
           <div className="flex items-center gap-2">
-            <StatusBadge tone={urgencyTones[search.urgency]} label={urgencyLabels[search.urgency]} />
+            <StatusBadge
+              tone={urgencyTones[search.urgency]}
+              label={urgencyLabels[search.urgency]}
+            />
             <Button
               variant="outline"
               size="sm"
@@ -110,19 +107,20 @@ function NetworkSearchDetail() {
             <div className="flex items-start gap-2">
               <Sparkles className="mt-0.5 size-5 shrink-0 text-gold" />
               <div>
-                <p className="text-sm font-semibold text-foreground">VAULT Asistan Önerisi</p>
+                <p className="text-sm font-semibold text-foreground">Asistan Önerisi</p>
                 <p className="mt-1 text-sm text-secondary-foreground">
                   {matches.length > 0 ? (
                     <>
                       Bu arayış portföylerinizden{" "}
-                      <span className="font-semibold text-gold">{matches.length} tanesiyle</span> eşleşiyor.
-                      Portföyünüzü <span className="font-semibold text-gold">{owner.fullName}</span> isimli profesyonele
-                      önerebilirsiniz.
+                      <span className="font-semibold text-gold">{matches.length} tanesiyle</span>{" "}
+                      eşleşiyor. Portföyünüzü{" "}
+                      <span className="font-semibold text-gold">{owner.fullName}</span> isimli
+                      profesyonele önerebilirsiniz.
                     </>
                   ) : (
                     <>
-                      Doğrudan eşleşen portföyünüz yok. Bu bölgedeki uzmanları veya benzer portföyleri
-                      inceleyebilirsiniz.
+                      Doğrudan eşleşen portföyünüz yok. Bu bölgedeki uzmanları veya benzer
+                      portföyleri inceleyebilirsiniz.
                     </>
                   )}
                 </p>
@@ -165,7 +163,9 @@ function NetworkSearchDetail() {
 
           {/* Created by */}
           <div>
-            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Arayışı Oluşturan</h2>
+            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+              Arayışı Oluşturan
+            </h2>
             <SurfaceCard className="p-4">
               <div className="flex items-start gap-3">
                 <BrokerAvatar name={owner.fullName} src={owner.avatarUrl || undefined} size="lg" />
@@ -323,7 +323,9 @@ function MyPortfolioMatchCard({
               <div className={cn("font-display text-2xl font-bold leading-none", scoreTone(score))}>
                 %{score}
               </div>
-              <div className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">Uyum</div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+                Uyum
+              </div>
             </div>
           </div>
         </div>
@@ -331,7 +333,9 @@ function MyPortfolioMatchCard({
 
       <div className="grid gap-px bg-border sm:grid-cols-2">
         <div className="bg-surface px-4 py-3">
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-success">Neden Uyumlu?</p>
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-success">
+            Neden Uyumlu?
+          </p>
           <ul className="space-y-1">
             {matched.slice(0, 5).map((m, i) => (
               <li key={i} className="flex items-center gap-1.5 text-xs text-secondary-foreground">
@@ -341,7 +345,9 @@ function MyPortfolioMatchCard({
           </ul>
         </div>
         <div className="bg-surface px-4 py-3">
-          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-warning">Eksik kriterler</p>
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-warning">
+            Eksik kriterler
+          </p>
           <ul className="space-y-1">
             {missing.slice(0, 4).map((m, i) => (
               <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -356,7 +362,7 @@ function MyPortfolioMatchCard({
         <p className="flex items-start gap-1.5 text-xs text-secondary-foreground">
           <Sparkles className="mt-0.5 size-3.5 shrink-0 text-gold" />
           <span>
-            <span className="font-semibold text-gold">VAULT Asistan: </span>
+            <span className="font-semibold text-gold">Asistan: </span>
             {explanation}
           </span>
         </p>
@@ -392,15 +398,7 @@ function MyPortfolioMatchCard({
   );
 }
 
-function Row({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-}) {
+function Row({ icon: Icon, label, value }: { icon: typeof MapPin; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <dt className="flex items-center gap-1.5 text-muted-foreground">

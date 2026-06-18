@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * VAULT — dark luxury real estate SaaS design system.
+ * Bölgenin Uzmanı — dark luxury real estate SaaS design system.
  * Dark-first. Gold accents. Layered charcoal surfaces.
  * All colors use oklch.
  */
@@ -43,7 +43,7 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
-  /* VAULT semantic extras */
+  /* Bölgenin Uzmanı semantic extras */
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
@@ -70,7 +70,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* VAULT is dark-only; light :root mirrors dark so the app looks correct
+/* Bölgenin Uzmanı is dark-only; light :root mirrors dark so the app looks correct
  * even before the .dark class applies. */
 :root {
   --radius: 0.75rem;
@@ -91,7 +91,7 @@
   --primary-foreground: oklch(0.16 0.02 255);
 
   --gold: oklch(0.759 0.129 84.1);
-  --gold-light: oklch(0.854 0.124 86.0);
+  --gold-light: oklch(0.854 0.124 86);
   --gold-dark: oklch(0.544 0.101 79.1);
 
   --secondary: oklch(0.228 0.023 254.3);
@@ -99,12 +99,12 @@
   --muted: oklch(0.202 0.021 254.9);
   --muted-foreground: oklch(0.596 0.006 145.5);
   --accent: oklch(0.228 0.023 254.3);
-  --accent-foreground: oklch(0.854 0.124 86.0);
+  --accent-foreground: oklch(0.854 0.124 86);
 
   --destructive: oklch(0.637 0.208 25.3);
   --destructive-foreground: oklch(0.961 0.011 89.7);
   --success: oklch(0.722 0.163 154.3);
-  --warning: oklch(0.820 0.141 78.8);
+  --warning: oklch(0.82 0.141 78.8);
   --info: oklch(0.623 0.188 259.8);
 
   --border: oklch(1 0 0 / 8%);
@@ -115,7 +115,7 @@
   --chart-1: oklch(0.759 0.129 84.1);
   --chart-2: oklch(0.722 0.163 154.3);
   --chart-3: oklch(0.623 0.188 259.8);
-  --chart-4: oklch(0.854 0.124 86.0);
+  --chart-4: oklch(0.854 0.124 86);
   --chart-5: oklch(0.637 0.208 25.3);
 
   --sidebar: oklch(0.155 0.014 251);
@@ -123,11 +123,16 @@
   --sidebar-primary: oklch(0.759 0.129 84.1);
   --sidebar-primary-foreground: oklch(0.16 0.02 255);
   --sidebar-accent: oklch(0.228 0.023 254.3);
-  --sidebar-accent-foreground: oklch(0.854 0.124 86.0);
+  --sidebar-accent-foreground: oklch(0.854 0.124 86);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.759 0.129 84.1);
 
-  --gradient-gold: linear-gradient(135deg, oklch(0.854 0.124 86.0), oklch(0.759 0.129 84.1) 55%, oklch(0.544 0.101 79.1));
+  --gradient-gold: linear-gradient(
+    135deg,
+    oklch(0.854 0.124 86),
+    oklch(0.759 0.129 84.1) 55%,
+    oklch(0.544 0.101 79.1)
+  );
   --gradient-surface: linear-gradient(160deg, oklch(0.202 0.021 254.9), oklch(0.155 0.014 251));
   --shadow-elegant: 0 18px 50px -20px oklch(0 0 0 / 0.65);
   --shadow-gold: 0 10px 36px -12px oklch(0.759 0.129 84.1 / 0.35);
@@ -147,7 +152,7 @@
   --muted: oklch(0.202 0.021 254.9);
   --muted-foreground: oklch(0.596 0.006 145.5);
   --accent: oklch(0.228 0.023 254.3);
-  --accent-foreground: oklch(0.854 0.124 86.0);
+  --accent-foreground: oklch(0.854 0.124 86);
   --destructive: oklch(0.637 0.208 25.3);
   --destructive-foreground: oklch(0.961 0.011 89.7);
   --border: oklch(1 0 0 / 8%);

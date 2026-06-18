@@ -31,7 +31,9 @@ export function PdfCtaCard({
             onClick={() => setView("teaser")}
             className={cn(
               "rounded-md py-1.5 text-xs font-medium transition-colors",
-              view === "teaser" ? "bg-gold/15 text-gold" : "text-muted-foreground hover:text-foreground",
+              view === "teaser"
+                ? "bg-gold/15 text-gold"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             Teaser PDF
@@ -40,7 +42,9 @@ export function PdfCtaCard({
             onClick={() => setView("full")}
             className={cn(
               "flex items-center justify-center gap-1 rounded-md py-1.5 text-xs font-medium transition-colors",
-              view === "full" ? "bg-gold/15 text-gold" : "text-muted-foreground hover:text-foreground",
+              view === "full"
+                ? "bg-gold/15 text-gold"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {!fullUnlocked && <Lock className="size-3" />} Full PDF
@@ -50,10 +54,13 @@ export function PdfCtaCard({
         {view === "teaser" ? (
           <>
             <p className="text-xs text-muted-foreground">
-              Yaklaşık konum, temel bilgiler ve görsellerin yer aldığı paylaşıma uygun teaser sürümü.
+              Yaklaşık konum, temel bilgiler ve görsellerin yer aldığı paylaşıma uygun teaser
+              sürümü.
             </p>
             <Button
-              onClick={() => toast.success("Teaser PDF indiriliyor", { description: portfolio.title })}
+              onClick={() =>
+                toast.success("Teaser PDF indiriliyor", { description: portfolio.title })
+              }
               className="mt-3 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             >
               <Download className="size-4" /> Teaser PDF İndir
@@ -65,7 +72,9 @@ export function PdfCtaCard({
               Tam adres, tapu durumu, belgeler ve iletişim bilgilerini içeren tam sürüm.
             </p>
             <Button
-              onClick={() => toast.success("Full PDF indiriliyor", { description: portfolio.title })}
+              onClick={() =>
+                toast.success("Full PDF indiriliyor", { description: portfolio.title })
+              }
               className="mt-3 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             >
               <Download className="size-4" /> Full PDF İndir

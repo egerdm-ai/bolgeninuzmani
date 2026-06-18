@@ -17,10 +17,7 @@ import { Button } from "@/components/ui/button";
 import { MatchExplanationCard } from "@/components/vault/match-explanation-card";
 import { NetworkSearchCard } from "@/components/vault/network-search-card";
 import { ProfessionalCard } from "@/components/vault/professional-card";
-import {
-  urgencyLabels,
-  urgencyTones,
-} from "@/components/vault/network-search-card";
+import { urgencyLabels, urgencyTones } from "@/components/vault/network-search-card";
 import {
   networkSearches,
   getNetworkSearchById,
@@ -93,7 +90,9 @@ function Matches() {
         <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gold">Network Arayışı ile Eşleştirme</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gold">
+                Network Arayışı ile Eşleştirme
+              </p>
               <Link
                 to="/dashboard/searches/$id"
                 params={{ id: focused.id }}
@@ -105,11 +104,15 @@ function Matches() {
                 {focused.owner.fullName} · {focused.region} · {portfolioTypeLabels[focused.type]}
               </p>
             </div>
-            <StatusBadge tone={urgencyTones[focused.urgency]} label={urgencyLabels[focused.urgency]} />
+            <StatusBadge
+              tone={urgencyTones[focused.urgency]}
+              label={urgencyLabels[focused.urgency]}
+            />
           </div>
           <p className="mt-3 text-sm text-secondary-foreground">
-            Portföylerinizden <span className="font-semibold text-gold">{focusedMatches.length} tanesi</span> bu arayışla
-            eşleşiyor.
+            Portföylerinizden{" "}
+            <span className="font-semibold text-gold">{focusedMatches.length} tanesi</span> bu
+            arayışla eşleşiyor.
           </p>
           {focusedMatches.length > 0 && (
             <div className="mt-4 space-y-4">
@@ -195,7 +198,10 @@ function Matches() {
                       {portfolio.title}
                     </Link>
                     <p className="text-xs text-muted-foreground">
-                      <span className="font-semibold text-gold">{searches.length} ağ arayışıyla</span> eşleşiyor
+                      <span className="font-semibold text-gold">
+                        {searches.length} ağ arayışıyla
+                      </span>{" "}
+                      eşleşiyor
                     </p>
                   </div>
                 </div>
@@ -210,13 +216,17 @@ function Matches() {
                         >
                           {s.title}
                         </Link>
-                        <StatusBadge tone={urgencyTones[s.urgency]} label={urgencyLabels[s.urgency]} />
+                        <StatusBadge
+                          tone={urgencyTones[s.urgency]}
+                          label={urgencyLabels[s.urgency]}
+                        />
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
                         {s.owner.fullName} · {portfolioTypeLabels[s.type]}
                       </p>
                       <p className="mt-2 text-sm font-medium text-secondary-foreground">
-                        {formatPrice(s.budgetMin, s.currency)} – {formatPrice(s.budgetMax, s.currency)}
+                        {formatPrice(s.budgetMin, s.currency)} –{" "}
+                        {formatPrice(s.budgetMax, s.currency)}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {s.mustHave.slice(0, 3).map((f) => (
@@ -249,7 +259,8 @@ function Matches() {
         <TabsContent value="experts" className="space-y-4">
           <InfoPanel title="Neden bu uzmanlar?">
             <p className="text-sm text-secondary-foreground">
-              Arayışlarınızın yoğunlaştığı bölgelerde aktif portföyü ve yüksek onay oranı olan profesyoneller önerildi.
+              Arayışlarınızın yoğunlaştığı bölgelerde aktif portföyü ve yüksek onay oranı olan
+              profesyoneller önerildi.
             </p>
           </InfoPanel>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -278,7 +289,9 @@ function Matches() {
                   <p className="mt-0.5 text-sm text-secondary-foreground">
                     {s.owner.fullName} · {s.region} — portföylerinizden {mine.length} tanesi uyumlu
                   </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{s.lastMatchAt ?? s.createdAt}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {s.lastMatchAt ?? s.createdAt}
+                  </p>
                 </div>
                 <ArrowRight className="mt-1 size-4 shrink-0 text-gold" />
               </Link>

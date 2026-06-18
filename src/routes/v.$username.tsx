@@ -12,19 +12,26 @@ export const Route = createFileRoute("/v/$username")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.professional.fullName ?? "Profesyonel"} — VAULT` },
+      { title: `${loaderData?.professional.fullName ?? "Profesyonel"} — Bölgenin Uzmanı` },
       { name: "description", content: loaderData?.professional.bio ?? "" },
-      { property: "og:title", content: loaderData?.professional.fullName ?? "VAULT Profesyonel" },
+      {
+        property: "og:title",
+        content: loaderData?.professional.fullName ?? "Bölgenin Uzmanı Profesyonel",
+      },
       { property: "og:description", content: loaderData?.professional.bio ?? "" },
       { property: "og:image", content: loaderData?.professional.coverImage ?? "" },
     ],
   }),
   component: PublicProfessionalPage,
   notFoundComponent: () => (
-    <div className="flex min-h-screen items-center justify-center text-muted-foreground">Profesyonel bulunamadı.</div>
+    <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+      Profesyonel bulunamadı.
+    </div>
   ),
   errorComponent: ({ error }) => (
-    <div className="flex min-h-screen items-center justify-center text-muted-foreground">{error.message}</div>
+    <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+      {error.message}
+    </div>
   ),
 });
 
@@ -36,12 +43,22 @@ function PublicProfessionalPage() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-4 lg:px-7">
           <Link to="/" className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground"><ShieldCheck className="size-5" /></span>
-            <span className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-foreground">Vault</span>
+            <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground">
+              <ShieldCheck className="size-5" />
+            </span>
+            <span className="font-display text-base font-bold uppercase leading-tight text-foreground sm:text-2xl sm:tracking-[0.2em]">
+              Bölgenin Uzmanı
+            </span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground"><Link to="/dashboard/professionals"><ArrowLeft className="size-4" /> Profesyoneller</Link></Button>
-            <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90"><Link to="/dashboard">Üye Girişi</Link></Button>
+            <Button asChild variant="ghost" size="sm" className="gap-1.5 text-muted-foreground">
+              <Link to="/dashboard/professionals">
+                <ArrowLeft className="size-4" /> Profesyoneller
+              </Link>
+            </Button>
+            <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Link to="/dashboard">Üye Girişi</Link>
+            </Button>
           </div>
         </div>
       </header>

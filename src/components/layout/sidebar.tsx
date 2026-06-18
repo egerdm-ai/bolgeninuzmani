@@ -46,7 +46,7 @@ const workNav = [
   { label: "Arayışlarım", to: "/dashboard/my-searches", icon: Target },
   { label: "Eşleşmeler", to: "/dashboard/matches", icon: GitCompareArrows },
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
-  { label: "VAULT Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
+  { label: "Asistan", to: "/dashboard/assistant", icon: Sparkles, accent: true },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
 ] as const;
 
@@ -55,13 +55,7 @@ const accountNav = [
   { label: "Ayarlar", to: "/dashboard/settings", icon: Settings },
 ] as const;
 
-export function Sidebar({
-  collapsed,
-  onToggle,
-}: {
-  collapsed: boolean;
-  onToggle: () => void;
-}) {
+export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const isActive = (to: string, exact?: boolean) =>
@@ -83,8 +77,11 @@ export function Sidebar({
           <ShieldCheck className="size-5" />
         </span>
         {!collapsed && (
-          <Link to="/dashboard" className="font-display text-2xl font-bold uppercase tracking-[0.2em] text-foreground">
-            Vault
+          <Link
+            to="/dashboard"
+            className="font-display text-sm font-bold uppercase tracking-tight whitespace-nowrap text-foreground"
+          >
+            Bölgenin Uzmanı
           </Link>
         )}
         <button
@@ -98,9 +95,18 @@ export function Sidebar({
 
       <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
         <div className="space-y-1">
-          {!collapsed && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Menü</p>}
+          {!collapsed && (
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Menü
+            </p>
+          )}
           {primaryNav.map((item) => (
-            <NavLink key={item.to} item={item} active={isActive(item.to, "exact" in item && item.exact)} collapsed={collapsed} />
+            <NavLink
+              key={item.to}
+              item={item}
+              active={isActive(item.to, "exact" in item && item.exact)}
+              collapsed={collapsed}
+            />
           ))}
 
           {/* Keşfet group */}
@@ -114,17 +120,27 @@ export function Sidebar({
                 onClick={() => setDiscoverOpen((o) => !o)}
                 className={cn(
                   "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                  discoverActive ? "text-gold" : "text-sidebar-foreground hover:bg-surface-3 hover:text-foreground",
+                  discoverActive
+                    ? "text-gold"
+                    : "text-sidebar-foreground hover:bg-surface-3 hover:text-foreground",
                 )}
               >
                 <Compass className="size-[18px] shrink-0" />
                 <span className="flex-1 truncate text-left">Keşfet</span>
-                <ChevronDown className={cn("size-4 transition-transform", discoverOpen && "rotate-180")} />
+                <ChevronDown
+                  className={cn("size-4 transition-transform", discoverOpen && "rotate-180")}
+                />
               </button>
               {discoverOpen && (
                 <div className="ml-3 mt-1 space-y-1 border-l border-border pl-2">
                   {discoverChildren.map((item) => (
-                    <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} sub />
+                    <NavLink
+                      key={item.to}
+                      item={item}
+                      active={isActive(item.to)}
+                      collapsed={collapsed}
+                      sub
+                    />
                   ))}
                 </div>
               )}
@@ -136,7 +152,11 @@ export function Sidebar({
           ))}
         </div>
         <div className="space-y-1">
-          {!collapsed && <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Hesap</p>}
+          {!collapsed && (
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Hesap
+            </p>
+          )}
           {accountNav.map((item) => (
             <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
           ))}
@@ -149,7 +169,7 @@ export function Sidebar({
           <div className="rounded-xl border border-gold/30 bg-gold/5 p-3">
             <div className="flex items-center gap-2">
               <Crown className="size-4 text-gold" />
-              <span className="text-sm font-semibold text-foreground">VAULT PRO</span>
+              <span className="text-sm font-semibold text-foreground">Bölgenin Uzmanı PRO</span>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
               Sınırsız portföy, öncelikli görünürlük ve gelişmiş AI araçları.
@@ -170,10 +190,14 @@ export function Sidebar({
           {!collapsed && (
             <div className="min-w-0">
               <div className="flex items-center gap-1">
-                <span className="truncate text-xs font-semibold text-foreground">{currentUser.fullName}</span>
+                <span className="truncate text-xs font-semibold text-foreground">
+                  {currentUser.fullName}
+                </span>
                 <MembershipBadge tier={currentUser.membershipTier} />
               </div>
-              <span className="truncate text-[11px] text-muted-foreground">{currentUser.companyName}</span>
+              <span className="truncate text-[11px] text-muted-foreground">
+                {currentUser.companyName}
+              </span>
             </div>
           )}
         </Link>
@@ -206,8 +230,16 @@ function NavLink({
         collapsed && "justify-center px-0",
       )}
     >
-      {active && !sub && <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold" />}
-      <item.icon className={cn("size-[18px] shrink-0", sub && "size-4", item.accent && !active && "text-gold")} />
+      {active && !sub && (
+        <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-gold" />
+      )}
+      <item.icon
+        className={cn(
+          "size-[18px] shrink-0",
+          sub && "size-4",
+          item.accent && !active && "text-gold",
+        )}
+      />
       {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
       {!collapsed && item.count ? (
         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-[11px] font-bold text-primary-foreground">

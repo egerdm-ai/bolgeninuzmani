@@ -42,7 +42,6 @@ function RegionDetail() {
   const { isWatching, toggleWatch, frequencyFor, setFrequency } = useRegionWatch();
   const region = getRegionBySlug(slug);
 
-
   if (!region) {
     return (
       <PageContainer>
@@ -67,7 +66,6 @@ function RegionDetail() {
   const watching = isWatching(region.slug);
   const freq = frequencyFor(region.slug) ?? "instant";
   const freqOptions: NotificationFrequency[] = ["instant", "daily", "weekly", "off"];
-
 
   return (
     <PageContainer className="space-y-7">
@@ -120,20 +118,31 @@ function RegionDetail() {
         <KpiCard label="Aktif Portföy" value={String(region.activePortfolios)} icon={FolderLock} />
         <KpiCard label="Aktif Profesyonel" value={String(region.expertCount)} icon={Users} />
         <KpiCard label="Açık Arayış" value={String(region.buyerSearchCount)} icon={Search} />
-        <KpiCard label="Talep Yoğunluğu" value={demandLabels[region.demandLevel]} icon={TrendingUp} />
+        <KpiCard
+          label="Talep Yoğunluğu"
+          value={demandLabels[region.demandLevel]}
+          icon={TrendingUp}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-7">
           {/* Active portfolios */}
           <div>
-            <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Aktif Portföyler</h2>
+            <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+              Aktif Portföyler
+            </h2>
             {portfolios.length === 0 ? (
               <EmptyStateCard icon={FolderLock} title="Bu bölgede aktif portföy yok" />
             ) : (
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {portfolios.map((p) => (
-                  <PortfolioCard key={p.id} portfolio={p} saved={isSaved(p.id)} onToggleSave={toggleSave} />
+                  <PortfolioCard
+                    key={p.id}
+                    portfolio={p}
+                    saved={isSaved(p.id)}
+                    onToggleSave={toggleSave}
+                  />
                 ))}
               </div>
             )}
@@ -142,7 +151,9 @@ function RegionDetail() {
           {/* Buyer searches */}
           {searches.length > 0 && (
             <div>
-              <h2 className="mb-3 font-display text-xl font-semibold text-foreground">Bu Bölgedeki Arayışlar</h2>
+              <h2 className="mb-3 font-display text-xl font-semibold text-foreground">
+                Bu Bölgedeki Arayışlar
+              </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {searches.map((s) => (
                   <NetworkSearchCard key={s.id} search={s} />
@@ -170,7 +181,9 @@ function RegionDetail() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Talep</span>
-                <span className="font-semibold text-foreground">{demandLabels[region.demandLevel]}</span>
+                <span className="font-semibold text-foreground">
+                  {demandLabels[region.demandLevel]}
+                </span>
               </div>
             </div>
           </SurfaceCard>

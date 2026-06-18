@@ -38,13 +38,15 @@ export function ProfessionalLinksSection({ professional }: { professional: Profe
       /* mock-only: clipboard may be unavailable */
     }
     setCopied(true);
-    toast.success("Public VAULT profil bağlantısı kopyalandı", { description: publicPath });
+    toast.success("Public Bölgenin Uzmanı profil bağlantısı kopyalandı", {
+      description: publicPath,
+    });
     setTimeout(() => setCopied(false), 2000);
   };
 
   const links: LinkDef[] = [
     {
-      label: "Public VAULT Profili",
+      label: "Public Bölgenin Uzmanı Profili",
       description: publicPath,
       icon: ShieldCheck,
       copyValue: publicPath,
@@ -113,7 +115,9 @@ export function ProfessionalLinksSection({ professional }: { professional: Profe
                 <span className="block text-sm font-medium text-foreground group-hover:text-gold">
                   {l.label}
                 </span>
-                <span className="block truncate text-xs text-muted-foreground">{l.description}</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {l.description}
+                </span>
               </span>
               {isCopy ? (
                 copied ? (

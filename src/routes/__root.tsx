@@ -7,10 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SavedProvider } from "../lib/saved-store";
 import { FollowProvider } from "../lib/follow-store";
 import { DetailRequestProvider } from "../lib/detail-request-store";
@@ -44,9 +43,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -84,18 +80,27 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Emsalsiz — Özel Lüks Gayrimenkul Ağı" },
-      { name: "description", content: "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Emsalsiz — Özel Lüks Gayrimenkul Ağı" },
-      { property: "og:description", content: "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu." },
+      { title: "Bölgenin Uzmanı — Özel Lüks Gayrimenkul Ağı" },
+      {
+        name: "description",
+        content:
+          "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu.",
+      },
+      { name: "author", content: "Bölgenin Uzmanı" },
+      { property: "og:title", content: "Bölgenin Uzmanı — Özel Lüks Gayrimenkul Ağı" },
+      {
+        property: "og:description",
+        content:
+          "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Emsalsiz — Özel Lüks Gayrimenkul Ağı" },
-      { name: "twitter:description", content: "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9c2643c-2afc-4a40-858d-0965b45d6761/id-preview-e87a29d0--96cda841-05b6-402c-aae0-7a42a19666e5.lovable.app-1781540824573.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c9c2643c-2afc-4a40-858d-0965b45d6761/id-preview-e87a29d0--96cda841-05b6-402c-aae0-7a42a19666e5.lovable.app-1781540824573.png" },
+      { name: "twitter:title", content: "Bölgenin Uzmanı — Özel Lüks Gayrimenkul Ağı" },
+      {
+        name: "twitter:description",
+        content:
+          "Doğrulanmış gayrimenkul profesyonelleri için özel, harita öncelikli lüks portföy platformu.",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

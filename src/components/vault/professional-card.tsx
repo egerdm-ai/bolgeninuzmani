@@ -37,7 +37,10 @@ export function ProfessionalCard({
         avatarSrc={professional.avatarUrl || undefined}
         coverSrc={professional.coverImage}
         coverBadge={
-          <MembershipBadge tier={professional.membershipTier} label={professional.membershipBadge} />
+          <MembershipBadge
+            tier={professional.membershipTier}
+            label={professional.membershipBadge}
+          />
         }
         nameSlot={
           <Link
@@ -78,7 +81,9 @@ export function ProfessionalCard({
           <div className="flex items-center gap-2 rounded-lg bg-surface-2 px-3 py-2">
             <FolderLock className="size-4 text-gold" />
             <div>
-              <div className="text-sm font-semibold text-foreground">{professional.activePortfolios}</div>
+              <div className="text-sm font-semibold text-foreground">
+                {professional.activePortfolios}
+              </div>
               <div className="text-[11px] text-muted-foreground">Aktif Portföy</div>
             </div>
           </div>
@@ -96,7 +101,9 @@ export function ProfessionalCard({
         {/* Region list membership */}
         <p className="mt-2.5 flex items-center gap-1.5 text-xs text-muted-foreground">
           <Layers className="size-3.5 text-gold" />
-          <span className="font-semibold text-secondary-foreground">{professional.regionListCount}</span>{" "}
+          <span className="font-semibold text-secondary-foreground">
+            {professional.regionListCount}
+          </span>{" "}
           bölge listesinde yer alıyor
         </p>
 
@@ -130,8 +137,17 @@ export function ProfessionalCard({
                 Profili Gör
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="border-gold/30 text-gold hover:bg-gold/10">
-              <Link to="/dashboard/professionals/$id" params={{ id: professional.id }} hash="portfoy-vitrini">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-gold/30 text-gold hover:bg-gold/10"
+            >
+              <Link
+                to="/dashboard/professionals/$id"
+                params={{ id: professional.id }}
+                hash="portfoy-vitrini"
+              >
                 Portföylerini Gör
               </Link>
             </Button>

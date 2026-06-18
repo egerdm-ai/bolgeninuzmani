@@ -39,45 +39,99 @@ function Profile() {
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-2xl font-semibold text-foreground">{currentUser.fullName}</h2>
+              <h2 className="font-display text-2xl font-semibold text-foreground">
+                {currentUser.fullName}
+              </h2>
               <ShieldCheck className="size-5 text-gold" />
               <MembershipBadge tier={currentUser.membershipTier} />
             </div>
-            <p className="text-sm text-muted-foreground">{currentUser.title} · {currentUser.companyName}</p>
-            <p className="flex items-center gap-1 text-xs text-gold"><MapPin className="size-3.5" /> {currentUser.location}</p>
+            <p className="text-sm text-muted-foreground">
+              {currentUser.title} · {currentUser.companyName}
+            </p>
+            <p className="flex items-center gap-1 text-xs text-gold">
+              <MapPin className="size-3.5" /> {currentUser.location}
+            </p>
           </div>
           <Button variant="outline">Profili Önizle</Button>
         </div>
       </SurfaceCard>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        <KpiCard label="Aktif Portföy" value={formatNumber(dashboardKpis.activePortfolios)} icon={FolderLock} />
-        <KpiCard label="Toplam Görüntülenme" value={formatNumber(dashboardKpis.totalViews)} icon={Eye} />
-        <KpiCard label="Detay Talepleri" value={formatNumber(dashboardKpis.detailRequests)} icon={Send} />
+        <KpiCard
+          label="Aktif Portföy"
+          value={formatNumber(dashboardKpis.activePortfolios)}
+          icon={FolderLock}
+        />
+        <KpiCard
+          label="Toplam Görüntülenme"
+          value={formatNumber(dashboardKpis.totalViews)}
+          icon={Eye}
+        />
+        <KpiCard
+          label="Detay Talepleri"
+          value={formatNumber(dashboardKpis.detailRequests)}
+          icon={Send}
+        />
       </div>
 
       {/* Edit form */}
       <div className="grid gap-6 lg:grid-cols-2">
         <SurfaceCard className="space-y-4">
           <h3 className="text-sm font-semibold text-foreground">Profil Bilgileri</h3>
-          <div className="space-y-1.5"><Label>Ad Soyad</Label><Input defaultValue={currentUser.fullName} /></div>
-          <div className="space-y-1.5"><Label>Ünvan</Label><Input defaultValue={currentUser.title} /></div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5"><Label>Şirket</Label><Input defaultValue={currentUser.companyName} /></div>
-            <div className="space-y-1.5"><Label>Konum</Label><Input defaultValue={currentUser.location} /></div>
+          <div className="space-y-1.5">
+            <Label>Ad Soyad</Label>
+            <Input defaultValue={currentUser.fullName} />
           </div>
-          <div className="space-y-1.5"><Label>Hakkında</Label><Textarea rows={4} defaultValue="Bodrum ve Ege bölgesinde lüks gayrimenkul danışmanlığı." /></div>
-          <Button onClick={() => toast.success("Profil güncellendi")} className="bg-gradient-gold text-primary-foreground hover:opacity-90">Kaydet</Button>
+          <div className="space-y-1.5">
+            <Label>Ünvan</Label>
+            <Input defaultValue={currentUser.title} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label>Şirket</Label>
+              <Input defaultValue={currentUser.companyName} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Konum</Label>
+              <Input defaultValue={currentUser.location} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Hakkında</Label>
+            <Textarea
+              rows={4}
+              defaultValue="Bodrum ve Ege bölgesinde lüks gayrimenkul danışmanlığı."
+            />
+          </div>
+          <Button
+            onClick={() => toast.success("Profil güncellendi")}
+            className="bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            Kaydet
+          </Button>
         </SurfaceCard>
 
         <SurfaceCard className="space-y-4">
           <h3 className="text-sm font-semibold text-foreground">Uzmanlık Alanları</h3>
-          <div className="space-y-1.5"><Label>Uzmanlık Bölgeleri</Label><Input defaultValue="Bodrum, Yalıkavak, Türkbükü" /></div>
-          <div className="space-y-1.5"><Label>Uzmanlık Tipleri</Label><Input defaultValue="Villa, Arsa, Turizm" /></div>
-          <div className="space-y-1.5"><Label>Web Sitesi</Label><Input placeholder="https://" /></div>
+          <div className="space-y-1.5">
+            <Label>Uzmanlık Bölgeleri</Label>
+            <Input defaultValue="Bodrum, Yalıkavak, Türkbükü" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Uzmanlık Tipleri</Label>
+            <Input defaultValue="Villa, Arsa, Turizm" />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Web Sitesi</Label>
+            <Input placeholder="https://" />
+          </div>
           <div className="rounded-xl border border-gold/30 bg-gold/[0.05] p-4">
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground"><ShieldCheck className="size-4 text-gold" /> Doğrulanmış Profesyonel</p>
-            <p className="mt-1 text-xs text-muted-foreground">Kimliğiniz ve şirket bilgileriniz VAULT tarafından doğrulandı.</p>
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+              <ShieldCheck className="size-4 text-gold" /> Doğrulanmış Profesyonel
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Kimliğiniz ve şirket bilgileriniz Bölgenin Uzmanı tarafından doğrulandı.
+            </p>
           </div>
         </SurfaceCard>
       </div>
@@ -85,7 +139,14 @@ function Profile() {
       <section className="space-y-3">
         <h2 className="font-display text-xl font-semibold text-foreground">Yayındaki Portföyler</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {active.map((p) => <PortfolioCard key={p.id} portfolio={p} saved={isSaved(p.id)} onToggleSave={toggleSave} />)}
+          {active.map((p) => (
+            <PortfolioCard
+              key={p.id}
+              portfolio={p}
+              saved={isSaved(p.id)}
+              onToggleSave={toggleSave}
+            />
+          ))}
         </div>
       </section>
     </PageContainer>

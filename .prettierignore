@@ -6,3 +6,10 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+
+# Format only code (src/). Keep docs, markdown, harness config, and DB migrations
+# out of prettier so `format` produces focused diffs.
+docs/
+*.md
+.claude/
+supabase/

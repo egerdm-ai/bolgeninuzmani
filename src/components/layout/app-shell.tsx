@@ -35,6 +35,14 @@ export function AppShell({
   );
 }
 
-export function PageContainer({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-[1400px] p-4 lg:p-7 ${className ?? ""}`}>{children}</div>;
+export function PageContainer({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`mx-auto w-full max-w-[1400px] p-4 lg:p-7 ${className ?? ""}`}>{children}</div>
+  );
 }

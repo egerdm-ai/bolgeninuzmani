@@ -50,7 +50,8 @@ export function ProfessionalProfilePreview() {
             Taylan Hersek
           </h3>
           <p className="mt-0.5 truncate text-[12px] text-muted-foreground">
-            Private Real Estate Advisor · <span className="font-medium text-gold">Hersek Estate</span>
+            Private Real Estate Advisor ·{" "}
+            <span className="font-medium text-gold">Hersek Estate</span>
           </p>
         </div>
 
@@ -63,7 +64,6 @@ export function ProfessionalProfilePreview() {
             <MapPin className="size-2.5 text-gold" /> Yalıkavak
           </span>
         </div>
-
 
         {/* stats */}
         <div className="mt-4 grid grid-cols-3 gap-2">

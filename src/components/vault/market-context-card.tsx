@@ -9,7 +9,13 @@ const demandStyles = {
   low: "bg-muted text-muted-foreground ring-border",
 } as const;
 
-export function MarketContextCard({ portfolio, className }: { portfolio: Portfolio; className?: string }) {
+export function MarketContextCard({
+  portfolio,
+  className,
+}: {
+  portfolio: Portfolio;
+  className?: string;
+}) {
   const m = getMarketContext(portfolio);
   const rows = [
     { icon: MapPin, label: "Bölge", value: m.region },
@@ -17,7 +23,12 @@ export function MarketContextCard({ portfolio, className }: { portfolio: Portfol
     { icon: Clock, label: "Son güncelleme", value: m.lastUpdated },
   ];
   return (
-    <div className={cn("rounded-2xl border border-border bg-gradient-surface p-0 shadow-elegant", className)}>
+    <div
+      className={cn(
+        "rounded-2xl border border-border bg-gradient-surface p-0 shadow-elegant",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-1.5">
           <TrendingUp className="size-4 text-gold" />
@@ -40,7 +51,12 @@ export function MarketContextCard({ portfolio, className }: { portfolio: Portfol
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Activity className="size-3.5 text-gold" /> Talep yoğunluğu
           </span>
-          <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset", demandStyles[m.demandLevel])}>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset",
+              demandStyles[m.demandLevel],
+            )}
+          >
             {m.demandLabel}
           </span>
         </div>

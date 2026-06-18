@@ -1,5 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, FolderLock, Search, Users, TrendingUp, ArrowRight, Bell, BellOff } from "lucide-react";
+import {
+  MapPin,
+  FolderLock,
+  Search,
+  Users,
+  TrendingUp,
+  ArrowRight,
+  Bell,
+  BellOff,
+} from "lucide-react";
 import type { Region } from "@/lib/mock/types";
 import { FeatureChip } from "./badges";
 import { Button } from "@/components/ui/button";
@@ -37,7 +46,9 @@ export function RegionCard({ region }: { region: Region }) {
             <MapPin className="size-3 text-gold" /> {region.city}
           </p>
         </div>
-        <span className={`absolute right-3 top-3 flex items-center gap-1 text-[11px] font-medium ${d.cls}`}>
+        <span
+          className={`absolute right-3 top-3 flex items-center gap-1 text-[11px] font-medium ${d.cls}`}
+        >
           <TrendingUp className="size-3" /> {d.label}
         </span>
       </div>
@@ -63,7 +74,10 @@ export function RegionCard({ region }: { region: Region }) {
         </div>
 
         <div className="mt-4 flex gap-2">
-          <Button asChild className="flex-1 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Button
+            asChild
+            className="flex-1 gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
             <Link to="/dashboard/regions/$slug" params={{ slug: region.slug }}>
               Bölgeyi Gör <ArrowRight className="size-4" />
             </Link>

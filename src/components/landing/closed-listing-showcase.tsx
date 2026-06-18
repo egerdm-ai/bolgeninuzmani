@@ -92,17 +92,19 @@ export function ClosedListingShowcase() {
 
         {/* teaser description */}
         <p className="text-[12px] leading-relaxed text-muted-foreground">
-          Yalıkavak koyuna hâkim, infinity havuzlu ve özel iskeleye yürüme mesafesinde, çağdaş mimariye
-          sahip denize sıfır villa. Teaser bilgiler ağ içinde açıktır.
+          Yalıkavak koyuna hâkim, infinity havuzlu ve özel iskeleye yürüme mesafesinde, çağdaş
+          mimariye sahip denize sıfır villa. Teaser bilgiler ağ içinde açıktır.
         </p>
 
         {/* gallery + locked media */}
         <div className="grid grid-cols-4 gap-1.5">
-          {[propertyImages.villa1, propertyImages.interior1, propertyImages.villa2].map((img, i) => (
-            <div key={i} className="aspect-square overflow-hidden rounded-lg">
-              <img src={img} alt="Galeri" className="size-full object-cover" />
-            </div>
-          ))}
+          {[propertyImages.villa1, propertyImages.interior1, propertyImages.villa2].map(
+            (img, i) => (
+              <div key={i} className="aspect-square overflow-hidden rounded-lg">
+                <img src={img} alt="Galeri" className="size-full object-cover" />
+              </div>
+            ),
+          )}
           <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-gold/25 bg-background/60">
             <div className="text-center text-gold">
               <ImageIcon className="mx-auto size-4" />

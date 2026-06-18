@@ -1,11 +1,6 @@
 import { cn } from "@/lib/utils";
 
-export type ProfileTab =
-  | "portfolios"
-  | "searches"
-  | "about"
-  | "regions"
-  | "similar";
+export type ProfileTab = "portfolios" | "searches" | "about" | "regions" | "similar";
 
 export const profileTabs: { id: ProfileTab; label: string }[] = [
   { id: "portfolios", label: "Portföyleri" },

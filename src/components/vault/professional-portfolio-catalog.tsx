@@ -39,7 +39,11 @@ const typeFeatureChips: { id: string; label: string; test: (p: Portfolio) => boo
   { id: "villa", label: "Villa", test: (p) => p.type === "villa" },
   { id: "yali", label: "Yalı", test: (p) => featureMatch(p, "yalı") || /yalı/i.test(p.title) },
   { id: "arsa", label: "Arsa", test: (p) => p.type === "land" },
-  { id: "ticari", label: "Ticari", test: (p) => p.type === "commercial" || p.category === "ticari" },
+  {
+    id: "ticari",
+    label: "Ticari",
+    test: (p) => p.type === "commercial" || p.category === "ticari",
+  },
   { id: "deniz", label: "Deniz Manzaralı", test: (p) => featureMatch(p, "deniz") },
   { id: "havuz", label: "Havuzlu", test: (p) => featureMatch(p, "havuz") },
 ];
@@ -140,7 +144,9 @@ export function ProfessionalPortfolioCatalog({
                   onClick={() => setView("list")}
                   className={cn(
                     "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm",
-                    view === "list" ? "bg-gradient-gold text-primary-foreground" : "text-muted-foreground",
+                    view === "list"
+                      ? "bg-gradient-gold text-primary-foreground"
+                      : "text-muted-foreground",
                   )}
                 >
                   <List className="size-4" /> Liste
@@ -149,7 +155,9 @@ export function ProfessionalPortfolioCatalog({
                   onClick={() => setView("grid")}
                   className={cn(
                     "flex items-center gap-1 rounded-md px-2.5 py-1.5 text-sm",
-                    view === "grid" ? "bg-gradient-gold text-primary-foreground" : "text-muted-foreground",
+                    view === "grid"
+                      ? "bg-gradient-gold text-primary-foreground"
+                      : "text-muted-foreground",
                   )}
                 >
                   <LayoutGrid className="size-4" /> Grid
@@ -197,7 +205,8 @@ export function ProfessionalPortfolioCatalog({
       {/* Active region pill + count */}
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{filtered.length}</span> portföy gösteriliyor
+          <span className="font-semibold text-foreground">{filtered.length}</span> portföy
+          gösteriliyor
         </p>
         {regionFilter && (
           <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
@@ -208,7 +217,12 @@ export function ProfessionalPortfolioCatalog({
           </span>
         )}
         {filtersActive && (
-          <Button variant="ghost" size="sm" className="ml-auto gap-1.5 text-muted-foreground" onClick={clearAll}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto gap-1.5 text-muted-foreground"
+            onClick={clearAll}
+          >
             <RotateCcw className="size-3.5" /> Filtreleri Sıfırla
           </Button>
         )}
@@ -216,7 +230,9 @@ export function ProfessionalPortfolioCatalog({
 
       {filtered.length === 0 ? (
         <div className="mt-3 rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-12 text-center">
-          <p className="text-sm text-muted-foreground">Seçilen filtrelere uygun portföy bulunamadı.</p>
+          <p className="text-sm text-muted-foreground">
+            Seçilen filtrelere uygun portföy bulunamadı.
+          </p>
           <Button variant="outline" size="sm" className="mt-3 gap-1.5" onClick={clearAll}>
             <RotateCcw className="size-3.5" /> Filtreleri Sıfırla
           </Button>

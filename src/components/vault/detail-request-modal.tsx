@@ -99,8 +99,13 @@ export function DetailRequestModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>İptal</Button>
-          <Button onClick={submit} className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            İptal
+          </Button>
+          <Button
+            onClick={submit}
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
             <Send className="size-4" /> Talebi Gönder
           </Button>
         </DialogFooter>

@@ -45,7 +45,9 @@ export function ProfessionalMiniCard({
         />
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <h3 className="truncate text-sm font-semibold text-foreground">{professional.fullName}</h3>
+            <h3 className="truncate text-sm font-semibold text-foreground">
+              {professional.fullName}
+            </h3>
             <ShieldCheck className="size-3.5 shrink-0 text-gold" />
             <MembershipBadge tier={professional.membershipTier} label={pro?.membershipBadge} />
           </div>
@@ -67,7 +69,12 @@ export function ProfessionalMiniCard({
             Profili Gör
           </Link>
         </Button>
-        <FollowButton id={professional.id} name={professional.fullName} size="sm" className="flex-1" />
+        <FollowButton
+          id={professional.id}
+          name={professional.fullName}
+          size="sm"
+          className="flex-1"
+        />
       </div>
     </div>
   );

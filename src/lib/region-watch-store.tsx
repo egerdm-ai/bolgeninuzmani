@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import type { NotificationFrequency, RegionWatch } from "./mock/types";
 
@@ -39,37 +32,26 @@ export function RegionWatchProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const setFrequency = useCallback(
-    (slug: string, frequency: NotificationFrequency) => {
-      setWatches((prev) =>
-        prev.map((w) => (w.slug === slug ? { ...w, frequency } : w)),
-      );
-    },
-    [],
-  );
+  const setFrequency = useCallback((slug: string, frequency: NotificationFrequency) => {
+    setWatches((prev) => prev.map((w) => (w.slug === slug ? { ...w, frequency } : w)));
+  }, []);
 
   const value = useMemo(
     () => ({
       watches,
       isWatching: (slug: string) => watches.some((w) => w.slug === slug),
-      frequencyFor: (slug: string) =>
-        watches.find((w) => w.slug === slug)?.frequency ?? null,
+      frequencyFor: (slug: string) => watches.find((w) => w.slug === slug)?.frequency ?? null,
       toggleWatch,
       setFrequency,
     }),
     [watches, toggleWatch, setFrequency],
   );
 
-  return (
-    <RegionWatchContext.Provider value={value}>
-      {children}
-    </RegionWatchContext.Provider>
-  );
+  return <RegionWatchContext.Provider value={value}>{children}</RegionWatchContext.Provider>;
 }
 
 export function useRegionWatch() {
   const ctx = useContext(RegionWatchContext);
-  if (!ctx)
-    throw new Error("useRegionWatch must be used within RegionWatchProvider");
+  if (!ctx) throw new Error("useRegionWatch must be used within RegionWatchProvider");
   return ctx;
 }

@@ -96,7 +96,7 @@ export function MatchExplanationCard({
         <p className="flex items-start gap-1.5 text-xs text-secondary-foreground">
           <Sparkles className="mt-0.5 size-3.5 shrink-0 text-gold" />
           <span>
-            <span className="font-semibold text-gold">VAULT Asistan: </span>
+            <span className="font-semibold text-gold">Asistan: </span>
             {explanation}
           </span>
         </p>

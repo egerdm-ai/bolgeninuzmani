@@ -20,10 +20,7 @@ import { FollowButton } from "./follow-button";
 import { ShareProfileButton } from "./share-profile-button";
 import { SurfaceCard } from "./cards";
 import { DetailRequestModal } from "./detail-request-modal";
-import {
-  ProfessionalProfileTabs,
-  type ProfileTab,
-} from "./professional-profile-tabs";
+import { ProfessionalProfileTabs, type ProfileTab } from "./professional-profile-tabs";
 import { ProfessionalPortfolioCatalog } from "./professional-portfolio-catalog";
 import { ProfessionalSearchCard } from "./professional-search-card";
 import { ProfessionalAboutSection } from "./professional-about-section";
@@ -40,10 +37,7 @@ export function ProfessionalProfile({ professional }: { professional: Profession
     () => getPortfoliosByProfessional(professional.id, { activeOnly: true }),
     [professional.id],
   );
-  const searches = useMemo(
-    () => getBuyerSearchesByProfessional(professional),
-    [professional],
-  );
+  const searches = useMemo(() => getBuyerSearchesByProfessional(professional), [professional]);
 
   const similar = useMemo(
     () =>
@@ -63,7 +57,9 @@ export function ProfessionalProfile({ professional }: { professional: Profession
   const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
 
   const scrollToContent = () =>
-    document.getElementById("profile-content")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("profile-content")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const showPortfolios = () => {
     setActiveTab("portfolios");
@@ -76,14 +72,19 @@ export function ProfessionalProfile({ professional }: { professional: Profession
     scrollToContent();
   };
 
-
-
-
   const stats = [
-    { label: "Aktif Portföy", value: formatNumber(professional.activePortfolios), icon: FolderLock },
+    {
+      label: "Aktif Portföy",
+      value: formatNumber(professional.activePortfolios),
+      icon: FolderLock,
+    },
     { label: "Aktif Arayış", value: formatNumber(searches.length), icon: SearchIcon },
     { label: "Takipçi", value: formatNumber(followers), icon: Users },
-    { label: "Uzmanlık Bölgesi", value: String(professional.expertiseRegions.length), icon: Compass },
+    {
+      label: "Uzmanlık Bölgesi",
+      value: String(professional.expertiseRegions.length),
+      icon: Compass,
+    },
     { label: "Eşleşme Sayısı", value: formatNumber(professional.matchCount), icon: Sparkles },
   ];
 
@@ -113,7 +114,10 @@ export function ProfessionalProfile({ professional }: { professional: Profession
               <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/30">
                 <ShieldCheck className="size-3.5" /> Doğrulanmış Profesyonel
               </span>
-              <MembershipBadge tier={professional.membershipTier} label={professional.membershipBadge} />
+              <MembershipBadge
+                tier={professional.membershipTier}
+                label={professional.membershipBadge}
+              />
               <RegionExpertBadge region={professional.expertBadge} />
             </>
           }
@@ -140,7 +144,6 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           ))}
         </div>
       </SurfaceCard>
-
 
       {/* B. Tabs + content + sidebar */}
       <div id="profile-content" className="scroll-mt-20 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -210,7 +213,6 @@ export function ProfessionalProfile({ professional }: { professional: Profession
         <aside className="space-y-5 lg:sticky lg:top-32 lg:self-start">
           <ContactCard professional={professional} />
 
-
           {/* Region summary */}
           <SurfaceCard>
             <div className="flex items-center gap-2">
@@ -218,7 +220,9 @@ export function ProfessionalProfile({ professional }: { professional: Profession
               <h3 className="text-sm font-semibold text-foreground">Bölge Özeti</h3>
             </div>
             <p className="mt-2 text-sm text-secondary-foreground">
-              <span className="font-semibold text-gold">{professional.regionListCount} bölge listesinde</span>{" "}
+              <span className="font-semibold text-gold">
+                {professional.regionListCount} bölge listesinde
+              </span>{" "}
               yer alıyor
             </p>
             <div className="mt-3 space-y-1.5">
@@ -231,7 +235,9 @@ export function ProfessionalProfile({ professional }: { professional: Profession
                   <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
                     <MapPin className="size-3.5 text-gold" /> {r.region}
                   </span>
-                  <span className="text-xs font-semibold text-foreground">{r.portfolioCount} portföy</span>
+                  <span className="text-xs font-semibold text-foreground">
+                    {r.portfolioCount} portföy
+                  </span>
                 </button>
               ))}
             </div>
@@ -241,9 +247,21 @@ export function ProfessionalProfile({ professional }: { professional: Profession
           <SurfaceCard>
             <h3 className="text-sm font-semibold text-foreground">Mini Analitik</h3>
             <div className="mt-3 space-y-2">
-              <AnalyticsRow icon={Eye} label="Son 30 Gün Görüntülenme" value={formatNumber(professional.views30d)} />
-              <AnalyticsRow icon={Sparkles} label="Eşleşme Sayısı" value={formatNumber(professional.matchCount)} />
-              <AnalyticsRow icon={FolderLock} label="Aktif Portföy" value={formatNumber(professional.activePortfolios)} />
+              <AnalyticsRow
+                icon={Eye}
+                label="Son 30 Gün Görüntülenme"
+                value={formatNumber(professional.views30d)}
+              />
+              <AnalyticsRow
+                icon={Sparkles}
+                label="Eşleşme Sayısı"
+                value={formatNumber(professional.matchCount)}
+              />
+              <AnalyticsRow
+                icon={FolderLock}
+                label="Aktif Portföy"
+                value={formatNumber(professional.activePortfolios)}
+              />
             </div>
           </SurfaceCard>
         </aside>

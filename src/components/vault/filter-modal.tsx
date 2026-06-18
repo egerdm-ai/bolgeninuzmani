@@ -13,10 +13,7 @@ import {
   Car,
   type LucideIcon,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,7 +131,8 @@ function Counter({
           disabled={value <= 0}
           className={cn(
             "flex size-8 items-center justify-center rounded-full border border-border-strong text-foreground transition-colors hover:border-gold/50 hover:text-gold",
-            value <= 0 && "cursor-not-allowed opacity-35 hover:border-border-strong hover:text-foreground",
+            value <= 0 &&
+              "cursor-not-allowed opacity-35 hover:border-border-strong hover:text-foreground",
           )}
           aria-label={`${label} azalt`}
         >
@@ -149,7 +147,8 @@ function Counter({
           disabled={value >= max}
           className={cn(
             "flex size-8 items-center justify-center rounded-full border border-border-strong text-foreground transition-colors hover:border-gold/50 hover:text-gold",
-            value >= max && "cursor-not-allowed opacity-35 hover:border-border-strong hover:text-foreground",
+            value >= max &&
+              "cursor-not-allowed opacity-35 hover:border-border-strong hover:text-foreground",
           )}
           aria-label={`${label} arttır`}
         >
@@ -231,7 +230,8 @@ function BoolGrid({
 
 function compactPrice(n: number, currency: string) {
   const sym = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₺";
-  if (n >= 1_000_000) return `${sym}${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
+  if (n >= 1_000_000)
+    return `${sym}${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
   if (n >= 1000) return `${sym}${Math.round(n / 1000)}K`;
   return `${sym}${n}`;
 }
@@ -313,7 +313,9 @@ function PriceRange({
             inputMode="numeric"
             placeholder={compactPrice(bounds.min, currency)}
             value={(filters.priceMin as number) ?? ""}
-            onChange={(e) => setFilter("priceMin", e.target.value === "" ? undefined : Number(e.target.value))}
+            onChange={(e) =>
+              setFilter("priceMin", e.target.value === "" ? undefined : Number(e.target.value))
+            }
           />
         </div>
         <div className="space-y-1.5">
@@ -323,7 +325,9 @@ function PriceRange({
             inputMode="numeric"
             placeholder={compactPrice(bounds.max, currency)}
             value={(filters.priceMax as number) ?? ""}
-            onChange={(e) => setFilter("priceMax", e.target.value === "" ? undefined : Number(e.target.value))}
+            onChange={(e) =>
+              setFilter("priceMax", e.target.value === "" ? undefined : Number(e.target.value))
+            }
           />
         </div>
       </div>
@@ -378,7 +382,7 @@ export function FilterModal({
         {/* Scrollable body */}
         <div className="min-h-0 flex-1 overflow-y-auto px-6">
           {/* Önerilenler */}
-          <SectionShell title="Önerilenler" hint="VAULT'un öne çıkardığı hızlı filtreler">
+          <SectionShell title="Önerilenler" hint="Bölgenin Uzmanı'un öne çıkardığı hızlı filtreler">
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
               {recommendedFilters.map((r) => {
                 const Icon = recommendedIcons[r.icon] ?? Sparkles;
@@ -395,7 +399,9 @@ export function FilterModal({
                         : "border-border bg-surface-2 text-secondary-foreground hover:border-border-strong hover:text-foreground",
                     )}
                   >
-                    <Icon className={cn("size-5", active ? "text-gold" : "text-muted-foreground")} />
+                    <Icon
+                      className={cn("size-5", active ? "text-gold" : "text-muted-foreground")}
+                    />
                     <span className="text-sm font-semibold leading-tight">{r.label}</span>
                     {r.hint && <span className="text-[11px] text-muted-foreground">{r.hint}</span>}
                   </button>
@@ -438,7 +444,9 @@ export function FilterModal({
                     inputMode="numeric"
                     placeholder="min"
                     value={(filters[f.key] as number) ?? ""}
-                    onChange={(e) => setFilter(f.key, e.target.value === "" ? undefined : Number(e.target.value))}
+                    onChange={(e) =>
+                      setFilter(f.key, e.target.value === "" ? undefined : Number(e.target.value))
+                    }
                   />
                 </div>
               ))}
@@ -461,7 +469,10 @@ export function FilterModal({
           </SectionShell>
 
           {/* Lokasyon */}
-          <SectionShell title="Lokasyon" hint="Tam adres yalnızca detay talebi onaylanınca gösterilir">
+          <SectionShell
+            title="Lokasyon"
+            hint="Tam adres yalnızca detay talebi onaylanınca gösterilir"
+          >
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Şehir</Label>
@@ -558,7 +569,11 @@ export function FilterModal({
 
         {/* Sticky footer */}
         <div className="flex shrink-0 items-center justify-between gap-3 border-t border-border bg-surface/95 px-6 py-4 backdrop-blur">
-          <Button variant="ghost" className="text-sm underline-offset-4 hover:underline" onClick={onClear}>
+          <Button
+            variant="ghost"
+            className="text-sm underline-offset-4 hover:underline"
+            onClick={onClear}
+          >
             Tümünü Temizle
           </Button>
           <Button

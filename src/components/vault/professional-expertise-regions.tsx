@@ -28,7 +28,9 @@ export function ProfessionalExpertiseRegions({
         <h2 className="font-display text-xl font-semibold text-foreground">Uzmanlık Bölgeleri</h2>
         <p className="text-sm text-muted-foreground">
           Bu profesyonel{" "}
-          <span className="font-medium text-gold">{professional.regionListCount} bölge listesinde</span>{" "}
+          <span className="font-medium text-gold">
+            {professional.regionListCount} bölge listesinde
+          </span>{" "}
           yer alıyor. Bir bölgeye tıklayarak portföyleri filtreleyin.
         </p>
       </div>

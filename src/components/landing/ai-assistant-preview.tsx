@@ -1,4 +1,15 @@
-import { Bot, Send, Lock, MapPin, Sparkles, Search, Bookmark, FileText, UserCheck, Check } from "lucide-react";
+import {
+  Bot,
+  Send,
+  Lock,
+  MapPin,
+  Sparkles,
+  Search,
+  Bookmark,
+  FileText,
+  UserCheck,
+  Check,
+} from "lucide-react";
 import { propertyImages } from "@/lib/mock/data";
 import { GlassCard } from "./primitives";
 
@@ -32,7 +43,7 @@ const matches = [
 ];
 
 /**
- * AIAssistantPreview — polished product-demo chat for "VAULT Asistan".
+ * AIAssistantPreview — polished product-demo chat for "Asistan".
  * User asks in natural Turkish; assistant returns scored portfolio matches
  * with reasoning lines, an expert suggestion and next-step actions.
  */
@@ -44,7 +55,7 @@ export function AIAssistantPreview() {
           <span className="flex size-7 items-center justify-center rounded-lg bg-gold/15 text-gold">
             <Bot className="size-4" />
           </span>
-          <span className="text-sm font-medium text-foreground">VAULT Asistan</span>
+          <span className="text-sm font-medium text-foreground">Asistan</span>
           <span className="ml-auto inline-flex items-center gap-1 text-[11px] text-success">
             <span className="size-1.5 rounded-full bg-success" /> Çevrimiçi
           </span>
@@ -59,8 +70,9 @@ export function AIAssistantPreview() {
           {/* assistant */}
           <div className="w-fit max-w-[96%] space-y-3 rounded-2xl rounded-bl-md bg-surface-2 px-4 py-3.5">
             <p className="text-sm text-muted-foreground">
-              Bu arayışla en güçlü eşleşen <span className="font-medium text-foreground">2 portföyü</span>{" "}
-              listeledim ve bölgenin aktif uzmanını ekledim.
+              Bu arayışla en güçlü eşleşen{" "}
+              <span className="font-medium text-foreground">2 portföyü</span> listeledim ve bölgenin
+              aktif uzmanını ekledim.
             </p>
 
             {/* portfolio matches */}
@@ -99,7 +111,11 @@ export function AIAssistantPreview() {
 
             {/* expert suggestion */}
             <div className="flex items-center gap-3 rounded-xl border border-gold/25 bg-gold/5 p-2.5">
-              <img src={EXPERT_AVATAR} alt="Taylan Hersek" className="size-9 rounded-full object-cover ring-2 ring-gold/30" />
+              <img
+                src={EXPERT_AVATAR}
+                alt="Taylan Hersek"
+                className="size-9 rounded-full object-cover ring-2 ring-gold/30"
+              />
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] text-muted-foreground">Bu bölgede aktif uzman</p>
                 <p className="inline-flex items-center gap-1 text-[12px] font-semibold text-foreground">
@@ -131,7 +147,9 @@ export function AIAssistantPreview() {
 
         <div className="border-t border-border/60 p-3">
           <div className="flex items-center gap-2 rounded-xl border border-border-strong bg-background/60 px-3 py-2">
-            <span className="flex-1 text-sm text-muted-foreground">Doğal dille bir talep yazın…</span>
+            <span className="flex-1 text-sm text-muted-foreground">
+              Doğal dille bir talep yazın…
+            </span>
             <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground">
               <Send className="size-3.5" />
             </span>

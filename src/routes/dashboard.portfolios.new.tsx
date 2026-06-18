@@ -61,7 +61,12 @@ const steps = [
   { label: "Önizleme", icon: Eye },
 ];
 
-const galleryImages = [propertyImages.villa1, propertyImages.interior1, propertyImages.villa2, propertyImages.apartment1];
+const galleryImages = [
+  propertyImages.villa1,
+  propertyImages.interior1,
+  propertyImages.villa2,
+  propertyImages.apartment1,
+];
 
 type Values = Record<string, FilterValue>;
 
@@ -105,11 +110,18 @@ function NewPortfolioWizard() {
     <PageContainer className="space-y-6">
       <PageHeader
         title="Yeni Portföy Ekle"
-        breadcrumbs={[{ label: "Portföylerim", to: "/dashboard/portfolios" }, { label: "Yeni Portföy Ekle" }]}
+        breadcrumbs={[
+          { label: "Portföylerim", to: "/dashboard/portfolios" },
+          { label: "Yeni Portföy Ekle" },
+        ]}
         actions={
           <>
             <AIButton />
-            <Button variant="outline" className="gap-1.5" onClick={() => toast.success("Taslak kaydedildi")}>
+            <Button
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => toast.success("Taslak kaydedildi")}
+            >
               <Save className="size-4" /> Taslak Kaydet
             </Button>
           </>
@@ -124,7 +136,11 @@ function NewPortfolioWizard() {
             onClick={() => setStep(i)}
             className={cn(
               "flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors",
-              i === step ? "bg-gradient-gold text-primary-foreground" : i < step ? "text-gold" : "text-muted-foreground hover:text-foreground",
+              i === step
+                ? "bg-gradient-gold text-primary-foreground"
+                : i < step
+                  ? "text-gold"
+                  : "text-muted-foreground hover:text-foreground",
             )}
           >
             <span
@@ -143,25 +159,48 @@ function NewPortfolioWizard() {
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         {/* Step content */}
         <SurfaceCard className="p-6">
-          <h2 className="font-display text-xl font-semibold text-foreground">{steps[step].label}</h2>
+          <h2 className="font-display text-xl font-semibold text-foreground">
+            {steps[step].label}
+          </h2>
 
           {/* Step 1 — Temel Bilgiler */}
           {step === 0 && (
             <div className="mt-5 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Kategori">
-                  <Select value={category} onValueChange={(v) => { set("category", v); set("subcategory", undefined); }}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={category}
+                    onValueChange={(v) => {
+                      set("category", v);
+                      set("subcategory", undefined);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {categories.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                      {categories.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Alt Kategori">
-                  <Select value={(values.subcategory as string) ?? ""} onValueChange={(v) => set("subcategory", v)}>
-                    <SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
+                  <Select
+                    value={(values.subcategory as string) ?? ""}
+                    onValueChange={(v) => set("subcategory", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seçin" />
+                    </SelectTrigger>
                     <SelectContent>
-                      {categoryByKey[category]?.subcategories.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+                      {categoryByKey[category]?.subcategories.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>
+                          {s.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Field>
@@ -174,7 +213,9 @@ function NewPortfolioWizard() {
                       onClick={() => set("transaction", t.value)}
                       className={cn(
                         "rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
-                        values.transaction === t.value ? "border-gold/50 bg-gold/10 text-gold" : "border-border bg-surface-2 text-secondary-foreground",
+                        values.transaction === t.value
+                          ? "border-gold/50 bg-gold/10 text-gold"
+                          : "border-border bg-surface-2 text-secondary-foreground",
                       )}
                     >
                       {t.label}
@@ -183,10 +224,17 @@ function NewPortfolioWizard() {
                 </div>
               </Field>
               <Field label="Portföy Başlığı">
-                <Input value={(values.title as string) ?? ""} onChange={(e) => set("title", e.target.value)} />
+                <Input
+                  value={(values.title as string) ?? ""}
+                  onChange={(e) => set("title", e.target.value)}
+                />
               </Field>
               <Field label="Kısa Açıklama">
-                <Textarea rows={3} value={(values.shortDescription as string) ?? ""} onChange={(e) => set("shortDescription", e.target.value)} />
+                <Textarea
+                  rows={3}
+                  value={(values.shortDescription as string) ?? ""}
+                  onChange={(e) => set("shortDescription", e.target.value)}
+                />
               </Field>
             </div>
           )}
@@ -197,7 +245,11 @@ function NewPortfolioWizard() {
               <Field label="Konum Tipi">
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { key: "approximate", label: "Yaklaşık Bölge", desc: "Sadece bölge gösterilir" },
+                    {
+                      key: "approximate",
+                      label: "Yaklaşık Bölge",
+                      desc: "Sadece bölge gösterilir",
+                    },
                     { key: "exact", label: "Tam Konum", desc: "Erişim onayıyla açılır" },
                   ].map((o) => (
                     <button
@@ -205,7 +257,9 @@ function NewPortfolioWizard() {
                       onClick={() => set("locationMode", o.key)}
                       className={cn(
                         "rounded-xl border p-3 text-left transition-colors",
-                        values.locationMode === o.key ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2",
+                        values.locationMode === o.key
+                          ? "border-gold/50 bg-gold/10"
+                          : "border-border bg-surface-2",
                       )}
                     >
                       <p className="text-sm font-semibold text-foreground">{o.label}</p>
@@ -216,23 +270,60 @@ function NewPortfolioWizard() {
               </Field>
               <ApproxLocationMap label={region} x={58} y={42} />
               <div className="grid grid-cols-3 gap-4">
-                <Field label="Şehir"><Input value={(values.city as string) ?? ""} onChange={(e) => set("city", e.target.value)} /></Field>
-                <Field label="İlçe"><Input value={(values.district as string) ?? ""} onChange={(e) => set("district", e.target.value)} /></Field>
-                <Field label="Mahalle"><Input value={(values.neighborhood as string) ?? ""} onChange={(e) => set("neighborhood", e.target.value)} /></Field>
+                <Field label="Şehir">
+                  <Input
+                    value={(values.city as string) ?? ""}
+                    onChange={(e) => set("city", e.target.value)}
+                  />
+                </Field>
+                <Field label="İlçe">
+                  <Input
+                    value={(values.district as string) ?? ""}
+                    onChange={(e) => set("district", e.target.value)}
+                  />
+                </Field>
+                <Field label="Mahalle">
+                  <Input
+                    value={(values.neighborhood as string) ?? ""}
+                    onChange={(e) => set("neighborhood", e.target.value)}
+                  />
+                </Field>
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <Field label="Fiyat">
-                  <Input type="number" value={(values.price as number) ?? ""} onChange={(e) => set("price", e.target.value === "" ? undefined : Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    value={(values.price as number) ?? ""}
+                    onChange={(e) =>
+                      set("price", e.target.value === "" ? undefined : Number(e.target.value))
+                    }
+                  />
                 </Field>
                 <Field label="Para Birimi">
-                  <Select value={(values.currency as string) ?? "TRY"} onValueChange={(v) => set("currency", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{currencies.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}</SelectContent>
+                  <Select
+                    value={(values.currency as string) ?? "TRY"}
+                    onValueChange={(v) => set("currency", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Fiyat Görünürlüğü">
-                  <Select value={(values.priceVisibility as string) ?? "visible"} onValueChange={(v) => set("priceVisibility", v)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                  <Select
+                    value={(values.priceVisibility as string) ?? "visible"}
+                    onValueChange={(v) => set("priceVisibility", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="visible">Herkese Açık</SelectItem>
                       <SelectItem value="on_request">Talep Üzerine</SelectItem>
@@ -248,7 +339,8 @@ function NewPortfolioWizard() {
           {step === 2 && (
             <div className="mt-5 space-y-5">
               <div className="rounded-xl border border-gold/25 bg-gold/[0.05] px-3.5 py-2.5 text-xs text-secondary-foreground">
-                <span className="font-semibold text-gold">{categoryByKey[category]?.label}</span> kategorisi için detay alanları gösteriliyor.
+                <span className="font-semibold text-gold">{categoryByKey[category]?.label}</span>{" "}
+                kategorisi için detay alanları gösteriliyor.
               </div>
               {detailGroups.map((g) => (
                 <div key={g.id} className="space-y-3">
@@ -257,7 +349,12 @@ function NewPortfolioWizard() {
                 </div>
               ))}
               <Field label="Açıklama">
-                <Textarea rows={4} value={(values.description as string) ?? ""} onChange={(e) => set("description", e.target.value)} placeholder="Portföy hakkında detaylı açıklama..." />
+                <Textarea
+                  rows={4}
+                  value={(values.description as string) ?? ""}
+                  onChange={(e) => set("description", e.target.value)}
+                  placeholder="Portföy hakkında detaylı açıklama..."
+                />
               </Field>
             </div>
           )}
@@ -268,25 +365,44 @@ function NewPortfolioWizard() {
               <Field label="Fotoğraflar & Kapak Görseli">
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center">
                   <UploadCloud className="size-7 text-gold" />
-                  <p className="mt-2 text-sm font-medium text-foreground">Fotoğrafları sürükleyin veya seçin</p>
-                  <p className="text-xs text-muted-foreground">JPG, PNG · maks. 20 görsel · ilk görsel kapak olur</p>
+                  <p className="mt-2 text-sm font-medium text-foreground">
+                    Fotoğrafları sürükleyin veya seçin
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG · maks. 20 görsel · ilk görsel kapak olur
+                  </p>
                 </div>
               </Field>
               <div className="grid grid-cols-4 gap-3">
                 {galleryImages.map((img, i) => (
-                  <div key={i} className={cn("relative aspect-[4/3] overflow-hidden rounded-lg border", i === 0 ? "border-gold" : "border-border")}>
+                  <div
+                    key={i}
+                    className={cn(
+                      "relative aspect-[4/3] overflow-hidden rounded-lg border",
+                      i === 0 ? "border-gold" : "border-border",
+                    )}
+                  >
                     <img src={img} alt="" className="size-full object-cover" />
-                    {i === 0 && <span className="absolute bottom-1 left-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">Kapak</span>}
+                    {i === 0 && (
+                      <span className="absolute bottom-1 left-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        Kapak
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
               <Field label="Belgeler (erişim onayına kadar kilitli)">
                 <div className="grid grid-cols-2 gap-2">
-                  {["PDF Portföy", "Tapu Belgesi", "İmar / Ruhsat", "Kat Planı", "Video Turu"].map((d) => (
-                    <div key={d} className="flex items-center gap-2 rounded-lg border border-dashed border-border-strong bg-surface-2 px-3 py-2.5 text-xs text-muted-foreground">
-                      <UploadCloud className="size-4 text-gold" /> {d}
-                    </div>
-                  ))}
+                  {["PDF Portföy", "Tapu Belgesi", "İmar / Ruhsat", "Kat Planı", "Video Turu"].map(
+                    (d) => (
+                      <div
+                        key={d}
+                        className="flex items-center gap-2 rounded-lg border border-dashed border-border-strong bg-surface-2 px-3 py-2.5 text-xs text-muted-foreground"
+                      >
+                        <UploadCloud className="size-4 text-gold" /> {d}
+                      </div>
+                    ),
+                  )}
                 </div>
               </Field>
             </div>
@@ -298,23 +414,65 @@ function NewPortfolioWizard() {
               <Field label="Görünürlük Seviyesi">
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { key: "verified", label: "Platform Üyelerine Açık", desc: "Tüm doğrulanmış üyeler görebilir" },
-                    { key: "invite", label: "Sadece Davetle", desc: "Yalnızca paylaştığınız kişiler" },
+                    {
+                      key: "verified",
+                      label: "Platform Üyelerine Açık",
+                      desc: "Tüm doğrulanmış üyeler görebilir",
+                    },
+                    {
+                      key: "invite",
+                      label: "Sadece Davetle",
+                      desc: "Yalnızca paylaştığınız kişiler",
+                    },
                   ].map((o) => (
-                    <button key={o.key} onClick={() => set("visibility", o.key)} className={cn("rounded-xl border p-3 text-left", (values.visibility ?? "verified") === o.key ? "border-gold/50 bg-gold/10" : "border-border bg-surface-2")}>
+                    <button
+                      key={o.key}
+                      onClick={() => set("visibility", o.key)}
+                      className={cn(
+                        "rounded-xl border p-3 text-left",
+                        (values.visibility ?? "verified") === o.key
+                          ? "border-gold/50 bg-gold/10"
+                          : "border-border bg-surface-2",
+                      )}
+                    >
                       <p className="text-sm font-semibold text-foreground">{o.label}</p>
                       <p className="text-xs text-muted-foreground">{o.desc}</p>
                     </button>
                   ))}
                 </div>
               </Field>
-              <ToggleRow label="Detay talebi gerekli" desc="Kilitli bilgiler için onay isteyin" checked={(values.requestRequired as boolean) ?? true} onChange={(c) => set("requestRequired", c)} />
-              <ToggleRow label="Tam adresi gizle" desc="Adres erişim sonrası açılır" checked={(values.hideAddress as boolean) ?? true} onChange={(c) => set("hideAddress", c)} />
-              <ToggleRow label="Telefon numarasını gizle" desc="İletişim erişim sonrası açılır" checked={(values.hidePhone as boolean) ?? true} onChange={(c) => set("hidePhone", c)} />
-              <ToggleRow label="PDF portföyü kilitle" desc="PDF yalnızca onaylı taleplere açılır" checked={(values.lockPdf as boolean) ?? true} onChange={(c) => set("lockPdf", c)} />
+              <ToggleRow
+                label="Detay talebi gerekli"
+                desc="Kilitli bilgiler için onay isteyin"
+                checked={(values.requestRequired as boolean) ?? true}
+                onChange={(c) => set("requestRequired", c)}
+              />
+              <ToggleRow
+                label="Tam adresi gizle"
+                desc="Adres erişim sonrası açılır"
+                checked={(values.hideAddress as boolean) ?? true}
+                onChange={(c) => set("hideAddress", c)}
+              />
+              <ToggleRow
+                label="Telefon numarasını gizle"
+                desc="İletişim erişim sonrası açılır"
+                checked={(values.hidePhone as boolean) ?? true}
+                onChange={(c) => set("hidePhone", c)}
+              />
+              <ToggleRow
+                label="PDF portföyü kilitle"
+                desc="PDF yalnızca onaylı taleplere açılır"
+                checked={(values.lockPdf as boolean) ?? true}
+                onChange={(c) => set("lockPdf", c)}
+              />
               <Field label="Erişim Geçerlilik Süresi">
-                <Select value={(values.accessValidity as string) ?? "30"} onValueChange={(v) => set("accessValidity", v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select
+                  value={(values.accessValidity as string) ?? "30"}
+                  onValueChange={(v) => set("accessValidity", v)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="7">7 gün</SelectItem>
                     <SelectItem value="30">30 gün</SelectItem>
@@ -328,13 +486,19 @@ function NewPortfolioWizard() {
           {/* Step 6 — Preview & completeness */}
           {step === 5 && (
             <div className="mt-5 space-y-4">
-              <div className={cn(
-                "flex items-start gap-2 rounded-xl border px-4 py-3 text-sm",
-                completeness.missingImportant.length === 0
-                  ? "border-success/25 bg-success/5 text-success"
-                  : "border-warning/25 bg-warning/5 text-warning",
-              )}>
-                {completeness.missingImportant.length === 0 ? <Check className="mt-0.5 size-4" /> : <AlertCircle className="mt-0.5 size-4" />}
+              <div
+                className={cn(
+                  "flex items-start gap-2 rounded-xl border px-4 py-3 text-sm",
+                  completeness.missingImportant.length === 0
+                    ? "border-success/25 bg-success/5 text-success"
+                    : "border-warning/25 bg-warning/5 text-warning",
+                )}
+              >
+                {completeness.missingImportant.length === 0 ? (
+                  <Check className="mt-0.5 size-4" />
+                ) : (
+                  <AlertCircle className="mt-0.5 size-4" />
+                )}
                 <div>
                   {completeness.missingImportant.length === 0
                     ? "Tüm zorunlu alanlar tamamlandı. Yayınlamaya hazır."
@@ -342,13 +506,35 @@ function NewPortfolioWizard() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <StatBox label="Zorunlu alanlar" value={`${completeness.requiredDone}/${completeness.requiredTotal}`} />
-                <StatBox label="Opsiyonel alanlar" value={`${completeness.optionalDone}/${completeness.optionalTotal}`} />
+                <StatBox
+                  label="Zorunlu alanlar"
+                  value={`${completeness.requiredDone}/${completeness.requiredTotal}`}
+                />
+                <StatBox
+                  label="Opsiyonel alanlar"
+                  value={`${completeness.optionalDone}/${completeness.optionalTotal}`}
+                />
               </div>
-              <SummaryRow label="Başlık" value={(values.title as string) ?? "—"} onEdit={() => setStep(0)} />
-              <SummaryRow label="Kategori & Bölge" value={`${categoryByKey[category]?.label} · ${region}`} onEdit={() => setStep(1)} />
-              <SummaryRow label="Fiyat" value={formatPrice(Number(values.price) || 0)} onEdit={() => setStep(1)} />
-              <SummaryRow label="Gizlilik" value={`${(values.visibility ?? "verified") === "invite" ? "Sadece davetle" : "Platform üyelerine açık"} · ${values.requestRequired === false ? "Talep gerekmiyor" : "Detay talebi gerekli"}`} onEdit={() => setStep(4)} />
+              <SummaryRow
+                label="Başlık"
+                value={(values.title as string) ?? "—"}
+                onEdit={() => setStep(0)}
+              />
+              <SummaryRow
+                label="Kategori & Bölge"
+                value={`${categoryByKey[category]?.label} · ${region}`}
+                onEdit={() => setStep(1)}
+              />
+              <SummaryRow
+                label="Fiyat"
+                value={formatPrice(Number(values.price) || 0)}
+                onEdit={() => setStep(1)}
+              />
+              <SummaryRow
+                label="Gizlilik"
+                value={`${(values.visibility ?? "verified") === "invite" ? "Sadece davetle" : "Platform üyelerine açık"} · ${values.requestRequired === false ? "Talep gerekmiyor" : "Detay talebi gerekli"}`}
+                onEdit={() => setStep(4)}
+              />
               <ApproxLocationMap label={region} x={58} y={42} />
             </div>
           )}
@@ -359,11 +545,17 @@ function NewPortfolioWizard() {
               <ChevronLeft className="size-4" /> Geri
             </Button>
             {step < steps.length - 1 ? (
-              <Button onClick={next} className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Button
+                onClick={next}
+                className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
                 Devam Et <ChevronRight className="size-4" />
               </Button>
             ) : (
-              <Button onClick={publish} className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Button
+                onClick={publish}
+                className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
                 <Rocket className="size-4" /> Yayınla
               </Button>
             )}
@@ -374,30 +566,47 @@ function NewPortfolioWizard() {
         <div className="lg:sticky lg:top-20 lg:self-start">
           <SurfaceCard className="p-0">
             <div className="border-b border-border px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Canlı Önizleme</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Canlı Önizleme
+              </p>
             </div>
             <div className="p-4">
               <div className="relative aspect-[16/10] overflow-hidden rounded-xl">
                 <img src={propertyImages.villa1} alt="" className="size-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
               </div>
-              <h3 className="mt-3 line-clamp-2 font-semibold text-foreground">{(values.title as string) || "Portföy başlığı"}</h3>
+              <h3 className="mt-3 line-clamp-2 font-semibold text-foreground">
+                {(values.title as string) || "Portföy başlığı"}
+              </h3>
               <p className="text-xs text-muted-foreground">~{region}</p>
-              <p className="mt-1.5 font-display text-xl font-semibold text-gold">{formatPrice(Number(values.price) || 0)}</p>
+              <p className="mt-1.5 font-display text-xl font-semibold text-gold">
+                {formatPrice(Number(values.price) || 0)}
+              </p>
             </div>
             <div className="border-t border-border px-4 py-3">
               <p className="mb-2 text-xs text-muted-foreground">Adım İlerlemesi</p>
               <div className="h-2 overflow-hidden rounded-full bg-surface-3">
-                <div className="h-full rounded-full bg-gradient-gold transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
+                <div
+                  className="h-full rounded-full bg-gradient-gold transition-all"
+                  style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+                />
               </div>
-              <p className="mt-1.5 text-xs text-gold">{Math.round(((step + 1) / steps.length) * 100)}% · Adım {step + 1}/{steps.length}</p>
+              <p className="mt-1.5 text-xs text-gold">
+                {Math.round(((step + 1) / steps.length) * 100)}% · Adım {step + 1}/{steps.length}
+              </p>
             </div>
             <div className="flex items-center gap-3 border-t border-border px-4 py-3">
               <DataScoreRing score={completeness.score} level={dataLevel} size={48} />
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Veri Tamlık Skoru</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Veri Tamlık Skoru
+                </p>
                 <p className="mt-0.5 text-xs text-secondary-foreground">
-                  {dataLevel === "high" ? "Güçlü veri — yayına hazır" : dataLevel === "medium" ? "İyi, daha fazla detay ekleyin" : "Daha fazla bilgi ekleyin"}
+                  {dataLevel === "high"
+                    ? "Güçlü veri — yayına hazır"
+                    : dataLevel === "medium"
+                      ? "İyi, daha fazla detay ekleyin"
+                      : "Daha fazla bilgi ekleyin"}
                 </p>
               </div>
             </div>
@@ -408,7 +617,12 @@ function NewPortfolioWizard() {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {completeness.missingImportant.slice(0, 6).map((m) => (
-                    <span key={m} className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-secondary-foreground">{m}</span>
+                    <span
+                      key={m}
+                      className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-secondary-foreground"
+                    >
+                      {m}
+                    </span>
                   ))}
                 </div>
               </div>
@@ -429,7 +643,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function ToggleRow({ label, desc, checked, onChange }: { label: string; desc: string; checked: boolean; onChange: (c: boolean) => void }) {
+function ToggleRow({
+  label,
+  desc,
+  checked,
+  onChange,
+}: {
+  label: string;
+  desc: string;
+  checked: boolean;
+  onChange: (c: boolean) => void;
+}) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3">
       <div>
@@ -450,14 +674,29 @@ function StatBox({ label, value }: { label: string; value: string }) {
   );
 }
 
-function SummaryRow({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) {
+function SummaryRow({
+  label,
+  value,
+  onEdit,
+}: {
+  label: string;
+  value: string;
+  onEdit: () => void;
+}) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-border bg-surface-2 px-4 py-3">
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="truncate text-sm font-medium text-foreground">{value}</p>
       </div>
-      <Button variant="ghost" size="sm" className="text-gold hover:text-gold-light" onClick={onEdit}>Düzenle</Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-gold hover:text-gold-light"
+        onClick={onEdit}
+      >
+        Düzenle
+      </Button>
     </div>
   );
 }

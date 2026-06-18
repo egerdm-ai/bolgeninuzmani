@@ -1,9 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { Bookmark, MapPin, BedDouble, Maximize, Bath, ShieldCheck, Send, Share2 } from "lucide-react";
+import {
+  Bookmark,
+  MapPin,
+  BedDouble,
+  Maximize,
+  Bath,
+  ShieldCheck,
+  Send,
+  Share2,
+} from "lucide-react";
 import { toast } from "sonner";
 import type { Portfolio } from "@/lib/mock/types";
 import { cn } from "@/lib/utils";
-import { formatNumber, formatPrice, portfolioTypeLabels, statusLabels, statusTones } from "@/lib/format";
+import {
+  formatNumber,
+  formatPrice,
+  portfolioTypeLabels,
+  statusLabels,
+  statusTones,
+} from "@/lib/format";
 import { FeatureChip, LockedBadge, StatusBadge } from "./badges";
 import { BrokerAvatar } from "./broker-avatar";
 import { Button } from "@/components/ui/button";
@@ -52,7 +67,10 @@ export function PortfolioCard({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
           <div className="absolute left-3 top-3 flex gap-2">
-            <StatusBadge label={statusLabels[portfolio.status]} tone={statusTones[portfolio.status]} />
+            <StatusBadge
+              label={statusLabels[portfolio.status]}
+              tone={statusTones[portfolio.status]}
+            />
             {portfolio.requestRequired && <LockedBadge label="Detay Kilitli" />}
           </div>
           <button
@@ -89,13 +107,22 @@ export function PortfolioCard({
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-secondary-foreground">
           {portfolio.rooms && (
-            <span className="flex items-center gap-1"><BedDouble className="size-3.5 text-muted-foreground" />{portfolio.rooms}</span>
+            <span className="flex items-center gap-1">
+              <BedDouble className="size-3.5 text-muted-foreground" />
+              {portfolio.rooms}
+            </span>
           )}
           {portfolio.grossM2 && (
-            <span className="flex items-center gap-1"><Maximize className="size-3.5 text-muted-foreground" />{formatNumber(portfolio.grossM2)} m²</span>
+            <span className="flex items-center gap-1">
+              <Maximize className="size-3.5 text-muted-foreground" />
+              {formatNumber(portfolio.grossM2)} m²
+            </span>
           )}
           {portfolio.bathrooms && (
-            <span className="flex items-center gap-1"><Bath className="size-3.5 text-muted-foreground" />{portfolio.bathrooms}</span>
+            <span className="flex items-center gap-1">
+              <Bath className="size-3.5 text-muted-foreground" />
+              {portfolio.bathrooms}
+            </span>
           )}
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -110,13 +137,21 @@ export function PortfolioCard({
             params={{ id: portfolio.owner.id }}
             className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-2.5 py-2 transition-colors hover:border-border-strong"
           >
-            <BrokerAvatar name={portfolio.owner.fullName} src={portfolio.owner.avatarUrl || undefined} size="sm" />
+            <BrokerAvatar
+              name={portfolio.owner.fullName}
+              src={portfolio.owner.avatarUrl || undefined}
+              size="sm"
+            />
             <div className="min-w-0">
               <div className="flex items-center gap-1">
-                <span className="truncate text-xs font-semibold text-foreground">{portfolio.owner.fullName}</span>
+                <span className="truncate text-xs font-semibold text-foreground">
+                  {portfolio.owner.fullName}
+                </span>
                 <ShieldCheck className="size-3 shrink-0 text-gold" />
               </div>
-              <span className="truncate text-[11px] text-muted-foreground">{portfolio.owner.companyName}</span>
+              <span className="truncate text-[11px] text-muted-foreground">
+                {portfolio.owner.companyName}
+              </span>
             </div>
             <span className="ml-auto shrink-0 text-[11px] font-medium text-gold">Profili Gör</span>
           </Link>
@@ -131,7 +166,13 @@ export function PortfolioCard({
             >
               <Send className="size-3.5" /> Detay Talep Et
             </Button>
-            <Button size="sm" variant="outline" className="gap-1.5" onClick={sharePortfolio} aria-label="Paylaş">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={sharePortfolio}
+              aria-label="Paylaş"
+            >
               <Share2 className="size-3.5" />
             </Button>
             <Button

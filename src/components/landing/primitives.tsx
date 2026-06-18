@@ -96,7 +96,9 @@ export function LockedPortfolioMiniCard({
         </span>
       </div>
       <div className="space-y-2 p-3">
-        <p className="font-display text-base font-semibold leading-tight text-foreground">{title}</p>
+        <p className="font-display text-base font-semibold leading-tight text-foreground">
+          {title}
+        </p>
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>Tam adres</span>

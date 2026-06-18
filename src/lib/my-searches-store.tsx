@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { mySearches as seedMySearches } from "@/lib/mock/matching";
 import { currentUser, professionals } from "@/lib/mock/data";
@@ -47,10 +40,7 @@ export function MySearchesProvider({ children }: { children: ReactNode }) {
   // network search id -> generated my-search id
   const [savedNetwork, setSavedNetwork] = useState<Record<string, string>>({});
 
-  const getById = useCallback(
-    (id: string) => searches.find((s) => s.id === id),
-    [searches],
-  );
+  const getById = useCallback((id: string) => searches.find((s) => s.id === id), [searches]);
 
   const create = useCallback((input: CreateMySearchInput) => {
     const id = nextId();
@@ -106,7 +96,8 @@ export function MySearchesProvider({ children }: { children: ReactNode }) {
         savedBy: 0,
         notify: "instant",
         clientLabel: source.clientLabel ?? `${source.owner.fullName} arayışı`,
-        notes: `Network arayışından kaydedildi (${source.owner.fullName}). ${source.notes ?? ""}`.trim(),
+        notes:
+          `Network arayışından kaydedildi (${source.owner.fullName}). ${source.notes ?? ""}`.trim(),
       };
       setSearches((prev) => [copy, ...prev]);
       setSavedNetwork((prev) => ({ ...prev, [source.id]: id }));
@@ -123,9 +114,7 @@ export function MySearchesProvider({ children }: { children: ReactNode }) {
   const setStatus = useCallback(
     (id: string, status: BuyerSearch["status"]) => {
       update(id, { status });
-      toast.success(
-        status === "closed" ? "Arayış pasifleştirildi" : "Arayış güncellendi",
-      );
+      toast.success(status === "closed" ? "Arayış pasifleştirildi" : "Arayış güncellendi");
     },
     [update],
   );

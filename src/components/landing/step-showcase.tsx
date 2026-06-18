@@ -40,7 +40,8 @@ function ImportVisual() {
         <div className="rounded-xl border border-border/60 bg-success/5 p-3">
           <p className="text-[11px] font-semibold text-success">Yapıştırılan WhatsApp mesajı</p>
           <p className="mt-2 text-[11.5px] leading-relaxed text-muted-foreground">
-            "Yalıkavak'ta deniz manzaralı 5+1 villa, havuzlu, 450m², 145M TL, acil satılık. Detaylar için ara."
+            "Yalıkavak'ta deniz manzaralı 5+1 villa, havuzlu, 450m², 145M TL, acil satılık. Detaylar
+            için ara."
           </p>
         </div>
         <div className="space-y-1.5">
@@ -197,7 +198,8 @@ function ShareVisual() {
             <span className="text-[11px] font-medium">WhatsApp önizleme</span>
           </div>
           <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
-            Yalıkavak deniz manzaralı private villa · 5+1 · Havuzlu. Detaylar için: vault.app/p/yalikavak-villa
+            Yalıkavak deniz manzaralı private villa · 5+1 · Havuzlu. Detaylar için:
+            bolgeninuzmani.com/p/yalikavak-villa
           </p>
         </div>
         <div className="rounded-xl border border-border/60 bg-surface-2/50 p-3">
@@ -213,7 +215,9 @@ function ShareVisual() {
           </span>
           <div>
             <p className="text-[11px] font-medium text-foreground">QR & paylaşım linki</p>
-            <p className="text-[10px] text-muted-foreground">vault.app/p/yalikavak-villa</p>
+            <p className="text-[10px] text-muted-foreground">
+              bolgeninuzmani.com/p/yalikavak-villa
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-gold/25 bg-gold/5 p-3">
@@ -328,7 +332,9 @@ export function StepProcessShowcase() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-display text-sm font-semibold text-gold/70">0{s.id}</span>
-                    <h3 className="font-display text-lg font-semibold text-foreground">{s.title}</h3>
+                    <h3 className="font-display text-lg font-semibold text-foreground">
+                      {s.title}
+                    </h3>
                   </div>
                   <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
                 </div>

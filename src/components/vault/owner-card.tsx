@@ -53,12 +53,20 @@ export function OwnerCard({ owner }: { owner: Broker }) {
 
       <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-lg bg-surface-2 px-3 py-2">
-          <span className="flex items-center gap-1 text-xs text-muted-foreground"><FolderLock className="size-3" /> Aktif Portföy</span>
-          <span className="font-semibold text-foreground">{pro?.activePortfolios ?? owner.portfolioCount}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <FolderLock className="size-3" /> Aktif Portföy
+          </span>
+          <span className="font-semibold text-foreground">
+            {pro?.activePortfolios ?? owner.portfolioCount}
+          </span>
         </div>
         <div className="rounded-lg bg-surface-2 px-3 py-2">
-          <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users className="size-3" /> Takipçi</span>
-          <span className="font-semibold text-foreground">{followers != null ? formatNumber(followers) : "—"}</span>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="size-3" /> Takipçi
+          </span>
+          <span className="font-semibold text-foreground">
+            {followers != null ? formatNumber(followers) : "—"}
+          </span>
         </div>
       </div>
 
@@ -70,10 +78,21 @@ export function OwnerCard({ owner }: { owner: Broker }) {
         <FollowButton id={owner.id} name={owner.fullName} fullWidth />
         <div className="grid grid-cols-2 gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/dashboard/professionals/$id" params={{ id: owner.id }}>Profili Gör</Link>
+            <Link to="/dashboard/professionals/$id" params={{ id: owner.id }}>
+              Profili Gör
+            </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="border-gold/30 text-gold hover:bg-gold/10">
-            <Link to="/dashboard/professionals/$id" params={{ id: owner.id }} hash="portfoy-vitrini">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="border-gold/30 text-gold hover:bg-gold/10"
+          >
+            <Link
+              to="/dashboard/professionals/$id"
+              params={{ id: owner.id }}
+              hash="portfoy-vitrini"
+            >
               Diğer Portföyleri
             </Link>
           </Button>

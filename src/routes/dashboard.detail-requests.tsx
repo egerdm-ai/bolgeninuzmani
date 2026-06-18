@@ -68,16 +68,27 @@ function StatusPipeline({ status }: { status: DetailRequestStatus }) {
               <span
                 className={cn(
                   "flex size-7 items-center justify-center rounded-full text-xs font-bold transition-colors",
-                  done ? "bg-gradient-gold text-primary-foreground" : "bg-surface-3 text-muted-foreground",
+                  done
+                    ? "bg-gradient-gold text-primary-foreground"
+                    : "bg-surface-3 text-muted-foreground",
                   active && "ring-2 ring-gold/40 ring-offset-2 ring-offset-surface",
                 )}
               >
                 {done && currentIdx > stageIdx ? <Check className="size-3.5" /> : i + 1}
               </span>
-              <span className={cn("text-[10px] font-medium", done ? "text-gold" : "text-muted-foreground")}>{stage.label}</span>
+              <span
+                className={cn(
+                  "text-[10px] font-medium",
+                  done ? "text-gold" : "text-muted-foreground",
+                )}
+              >
+                {stage.label}
+              </span>
             </div>
             {i < pipeline.length - 1 && (
-              <div className={cn("mx-1 h-px flex-1", currentIdx > stageIdx ? "bg-gold" : "bg-border")} />
+              <div
+                className={cn("mx-1 h-px flex-1", currentIdx > stageIdx ? "bg-gold" : "bg-border")}
+              />
             )}
           </div>
         );
@@ -138,10 +149,15 @@ function RequestListItem({
               <span className="truncate">{request.requester.fullName}</span>
               <ShieldCheck className="size-3.5 shrink-0 text-gold" />
             </p>
-            <p className="truncate text-xs text-muted-foreground">{request.requester.companyName}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {request.requester.companyName}
+            </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <StatusBadge label={requestStatusLabels[request.status]} tone={requestStatusTones[request.status]} />
+            <StatusBadge
+              label={requestStatusLabels[request.status]}
+              tone={requestStatusTones[request.status]}
+            />
             <span className="text-[11px] text-muted-foreground">{request.createdAt}</span>
           </div>
         </div>
@@ -189,11 +205,6 @@ function DetailRequestsInbox() {
     }, 100);
   };
 
-
-
-
-
-
   const updateStatus = (id: string, status: DetailRequestStatus, msg: string) => {
     setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
     toast.success(msg);
@@ -211,35 +222,57 @@ function DetailRequestsInbox() {
       {/* Opportunity summary strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[
-          { label: "Açık fırsat", value: requests.filter((r) => r.status !== "rejected").length, icon: Target },
+          {
+            label: "Açık fırsat",
+            value: requests.filter((r) => r.status !== "rejected").length,
+            icon: Target,
+          },
           { label: "Yeni", value: newCount, icon: Sparkles },
-          { label: "Bilgi paylaşıldı", value: requests.filter((r) => r.status === "approved").length, icon: Check },
+          {
+            label: "Bilgi paylaşıldı",
+            value: requests.filter((r) => r.status === "approved").length,
+            icon: Check,
+          },
           { label: "Ort. yanıt", value: "~2 sa", icon: Clock },
         ].map((s) => (
           <SurfaceCard key={s.label} className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</span>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                {s.label}
+              </span>
               <s.icon className="size-4 text-gold" />
             </div>
-            <div className="mt-2 font-display text-2xl font-semibold text-foreground">{s.value}</div>
+            <div className="mt-2 font-display text-2xl font-semibold text-foreground">
+              {s.value}
+            </div>
           </SurfaceCard>
         ))}
       </div>
 
       <div className="flex flex-wrap gap-1 rounded-xl border border-border bg-surface-2 p-1">
         {tabs.map((t) => {
-          const count = t.key === "all" ? requests.length : requests.filter((r) => r.status === t.key).length;
+          const count =
+            t.key === "all" ? requests.length : requests.filter((r) => r.status === t.key).length;
           return (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
               className={cn(
                 "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                tab === t.key ? "bg-gradient-gold text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                tab === t.key
+                  ? "bg-gradient-gold text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {t.label}
-              <span className={cn("rounded-full px-1.5 text-[11px]", tab === t.key ? "bg-primary-foreground/20" : "bg-surface-3")}>{count}</span>
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[11px]",
+                  tab === t.key ? "bg-primary-foreground/20" : "bg-surface-3",
+                )}
+              >
+                {count}
+              </span>
             </button>
           );
         })}
@@ -248,8 +281,11 @@ function DetailRequestsInbox() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_480px] xl:grid-cols-[minmax(0,1fr)_540px]">
         {/* List */}
         <div ref={listRef} className="space-y-3">
-
-          {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Bu kategoride talep yok.</p>}
+          {filtered.length === 0 && (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Bu kategoride talep yok.
+            </p>
+          )}
           {filtered.map((r) => (
             <RequestListItem
               key={r.id}
@@ -269,7 +305,10 @@ function DetailRequestsInbox() {
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                   <Target className="size-4 text-gold" /> Fırsat Detayı
                 </h3>
-                <StatusBadge label={requestStatusLabels[selected.status]} tone={requestStatusTones[selected.status]} />
+                <StatusBadge
+                  label={requestStatusLabels[selected.status]}
+                  tone={requestStatusTones[selected.status]}
+                />
               </div>
 
               {/* Body */}
@@ -283,7 +322,9 @@ function DetailRequestsInbox() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-3">
-                    <p className="truncate text-sm font-semibold text-foreground">{selected.portfolio.title}</p>
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {selected.portfolio.title}
+                    </p>
                     <div className="mt-0.5 flex items-center justify-between">
                       <p className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MapPin className="size-3 text-gold" /> ~{selected.portfolio.regionLabel}
@@ -313,11 +354,15 @@ function DetailRequestsInbox() {
                 {/* Purpose / budget */}
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-lg bg-surface-2 px-3 py-2">
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><Target className="size-3 text-gold" /> Amaç</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Target className="size-3 text-gold" /> Amaç
+                    </p>
                     <p className="font-medium text-foreground">{selected.purpose}</p>
                   </div>
                   <div className="rounded-lg bg-surface-2 px-3 py-2">
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground"><Wallet className="size-3 text-gold" /> Bütçe</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Wallet className="size-3 text-gold" /> Bütçe
+                    </p>
                     <p className="font-medium text-foreground">{selected.budgetLabel ?? "—"}</p>
                   </div>
                 </div>
@@ -325,7 +370,9 @@ function DetailRequestsInbox() {
                 {/* Message */}
                 <div>
                   <p className="mb-1.5 text-xs text-muted-foreground">Mesaj</p>
-                  <p className="rounded-xl border border-border bg-surface-2 p-3 text-sm leading-relaxed text-secondary-foreground">{selected.message}</p>
+                  <p className="rounded-xl border border-border bg-surface-2 p-3 text-sm leading-relaxed text-secondary-foreground">
+                    {selected.message}
+                  </p>
                 </div>
 
                 {/* Pipeline */}
@@ -361,7 +408,11 @@ function DetailRequestsInbox() {
               {/* Action footer */}
               <div className="space-y-3 border-t border-border p-4">
                 <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
-                  <Textarea rows={2} placeholder="Talebe bir not yazın..." className="resize-none" />
+                  <Textarea
+                    rows={2}
+                    placeholder="Talebe bir not yazın..."
+                    className="resize-none"
+                  />
                   <Button
                     onClick={() => updateStatus(selected.id, "approved", "Bilgiler paylaşıldı")}
                     className="h-auto gap-1.5 self-stretch bg-gradient-gold py-2.5 text-primary-foreground hover:opacity-90 sm:w-44"
@@ -371,10 +422,18 @@ function DetailRequestsInbox() {
                   </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Button onClick={() => updateStatus(selected.id, "read", "Yanıt gönderildi")} variant="outline" className="gap-1.5">
+                  <Button
+                    onClick={() => updateStatus(selected.id, "read", "Yanıt gönderildi")}
+                    variant="outline"
+                    className="gap-1.5"
+                  >
                     <Reply className="size-4" /> Yanıtla
                   </Button>
-                  <Button onClick={() => updateStatus(selected.id, "rejected", "Talep reddedildi")} variant="outline" className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10">
+                  <Button
+                    onClick={() => updateStatus(selected.id, "rejected", "Talep reddedildi")}
+                    variant="outline"
+                    className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                  >
                     <X className="size-4" /> Reddet
                   </Button>
                 </div>

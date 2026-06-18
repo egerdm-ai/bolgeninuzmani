@@ -64,7 +64,10 @@ function ProfessionalsPage() {
     return professionals.filter((pro) => {
       if (search) {
         const q = search.toLocaleLowerCase("tr");
-        const hay = `${pro.fullName} ${pro.title} ${pro.companyName} ${pro.location} ${pro.expertiseRegions.join(" ")} ${pro.expertiseTypes.join(" ")}`.toLocaleLowerCase("tr");
+        const hay =
+          `${pro.fullName} ${pro.title} ${pro.companyName} ${pro.location} ${pro.expertiseRegions.join(" ")} ${pro.expertiseTypes.join(" ")}`.toLocaleLowerCase(
+            "tr",
+          );
         if (!hay.includes(q)) return false;
       }
       if (scopes.includes("following") && !isFollowing(pro.id)) return false;
@@ -85,7 +88,7 @@ function ProfessionalsPage() {
     <PageContainer className="space-y-5">
       <PageHeader
         title="Profesyoneller"
-        subtitle="VAULT ağı içindeki doğrulanmış emlak profesyonellerini, bölge uzmanlarını ve portföy vitrinlerini keşfedin."
+        subtitle="Bölgenin Uzmanı ağı içindeki doğrulanmış emlak profesyonellerini, bölge uzmanlarını ve portföy vitrinlerini keşfedin."
       />
 
       {/* Stats row */}
@@ -95,7 +98,9 @@ function ProfessionalsPage() {
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <s.icon className="size-3.5 text-gold" /> {s.label}
             </span>
-            <span className="mt-1 block font-display text-2xl font-semibold text-foreground">{s.value}</span>
+            <span className="mt-1 block font-display text-2xl font-semibold text-foreground">
+              {s.value}
+            </span>
           </div>
         ))}
       </div>
@@ -134,7 +139,8 @@ function ProfessionalsPage() {
 
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{results.length}</span> profesyonel bulundu
+          <span className="font-semibold text-foreground">{results.length}</span> profesyonel
+          bulundu
         </p>
         {hasFilters && (
           <button
@@ -152,7 +158,9 @@ function ProfessionalsPage() {
       {results.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center">
           <Users className="mx-auto size-8 text-muted-foreground" />
-          <p className="mt-3 text-sm text-muted-foreground">Aramanıza uygun profesyonel bulunamadı.</p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Aramanıza uygun profesyonel bulunamadı.
+          </p>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

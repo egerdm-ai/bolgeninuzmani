@@ -19,7 +19,7 @@ export function AIButton({
     className,
   );
 
-  // When no explicit handler is supplied, default to the VAULT Asistan import flow.
+  // When no explicit handler is supplied, default to the Asistan import flow.
   if (!onClick) {
     return (
       <Button asChild size={size} variant="outline" className={classes}>

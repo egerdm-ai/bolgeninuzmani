@@ -62,7 +62,11 @@ export function getMarketContext(p: Portfolio): MarketContext {
   const demandLevel: MarketContext["demandLevel"] =
     demandScore > 60 ? "high" : demandScore > 30 ? "medium" : "low";
   const demandLabel =
-    demandLevel === "high" ? "Yüksek talep" : demandLevel === "medium" ? "Orta talep" : "Düşük talep";
+    demandLevel === "high"
+      ? "Yüksek talep"
+      : demandLevel === "medium"
+        ? "Orta talep"
+        : "Düşük talep";
   return {
     region: p.regionLabel,
     similarRange: `${toM(low)} – ${toM(high)} ${p.currency === "TRY" ? "TL" : p.currency}`,
@@ -86,9 +90,24 @@ export type PortfolioEvent = {
 
 export function getPortfolioTimeline(p: Portfolio): PortfolioEvent[] {
   return [
-    { id: `${p.id}-e1`, type: "request", text: `${p.requestCount} detay talebi alındı`, time: "Bugün" },
-    { id: `${p.id}-e2`, type: "updated", text: "Portföy bilgileri güncellendi", time: "4 gün önce" },
-    { id: `${p.id}-e3`, type: "price", text: `Fiyat güncellendi → ${toM(p.price)} ${p.currency === "TRY" ? "TL" : p.currency}`, time: "2 hafta önce" },
+    {
+      id: `${p.id}-e1`,
+      type: "request",
+      text: `${p.requestCount} detay talebi alındı`,
+      time: "Bugün",
+    },
+    {
+      id: `${p.id}-e2`,
+      type: "updated",
+      text: "Portföy bilgileri güncellendi",
+      time: "4 gün önce",
+    },
+    {
+      id: `${p.id}-e3`,
+      type: "price",
+      text: `Fiyat güncellendi → ${toM(p.price)} ${p.currency === "TRY" ? "TL" : p.currency}`,
+      time: "2 hafta önce",
+    },
     { id: `${p.id}-e4`, type: "photo", text: "Yeni görseller eklendi", time: "3 hafta önce" },
     { id: `${p.id}-e5`, type: "created", text: "Portföy oluşturuldu", time: p.createdAt },
   ];

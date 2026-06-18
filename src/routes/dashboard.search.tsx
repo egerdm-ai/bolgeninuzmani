@@ -45,7 +45,9 @@ export const Route = createFileRoute("/dashboard/search")({
 const boolLabels: Record<string, string> = {};
 [
   ...recommendedFilters.map((r) => ({ key: r.key, label: r.label })),
-  ...searchQuickChips.filter((c) => c.kind === "toggle").map((c) => ({ key: c.key!, label: c.label })),
+  ...searchQuickChips
+    .filter((c) => c.kind === "toggle")
+    .map((c) => ({ key: c.key!, label: c.label })),
   ...privacyAccessFields,
   ...professionalFields,
   ...matchSearchFields,
@@ -57,7 +59,8 @@ const boolLabels: Record<string, string> = {};
 });
 
 function compactPrice(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
+  if (n >= 1_000_000)
+    return `${(n / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M`;
   if (n >= 1000) return `${Math.round(n / 1000)}K`;
   return `${n}`;
 }
@@ -89,7 +92,9 @@ function SearchPage() {
 
   // ---- Mock filtering ----
   const filtered = useMemo(() => {
-    const cat: CategoryKey | undefined = modalCategories.find((c) => c.value === filters.modalCategory)?.category;
+    const cat: CategoryKey | undefined = modalCategories.find(
+      (c) => c.value === filters.modalCategory,
+    )?.category;
     const featureHas = (p: Portfolio, kw: string) =>
       p.features.some((f) => f.toLocaleLowerCase("tr-TR").includes(kw.toLocaleLowerCase("tr-TR")));
     const isRecent = (p: Portfolio) => {
@@ -105,13 +110,35 @@ function SearchPage() {
     return searchable.filter((p) => {
       const q = query.trim().toLocaleLowerCase("tr-TR");
       if (q) {
-        const hay = `${p.title} ${p.regionLabel} ${p.district} ${p.city} ${p.owner.fullName} ${p.owner.companyName}`.toLocaleLowerCase("tr-TR");
+        const hay =
+          `${p.title} ${p.regionLabel} ${p.district} ${p.city} ${p.owner.fullName} ${p.owner.companyName}`.toLocaleLowerCase(
+            "tr-TR",
+          );
         if (!hay.includes(q)) return false;
       }
-      if (filters.modalCategory && filters.modalCategory !== "all" && cat && p.category !== cat) return false;
-      if (filters.city && !p.city.toLocaleLowerCase("tr-TR").includes((filters.city as string).toLocaleLowerCase("tr-TR"))) return false;
-      if (filters.region && !`${p.regionLabel} ${p.district}`.toLocaleLowerCase("tr-TR").includes((filters.region as string).toLocaleLowerCase("tr-TR"))) return false;
-      if (filters.neighborhood && !`${p.neighborhood ?? ""} ${p.regionLabel}`.toLocaleLowerCase("tr-TR").includes((filters.neighborhood as string).toLocaleLowerCase("tr-TR"))) return false;
+      if (filters.modalCategory && filters.modalCategory !== "all" && cat && p.category !== cat)
+        return false;
+      if (
+        filters.city &&
+        !p.city
+          .toLocaleLowerCase("tr-TR")
+          .includes((filters.city as string).toLocaleLowerCase("tr-TR"))
+      )
+        return false;
+      if (
+        filters.region &&
+        !`${p.regionLabel} ${p.district}`
+          .toLocaleLowerCase("tr-TR")
+          .includes((filters.region as string).toLocaleLowerCase("tr-TR"))
+      )
+        return false;
+      if (
+        filters.neighborhood &&
+        !`${p.neighborhood ?? ""} ${p.regionLabel}`
+          .toLocaleLowerCase("tr-TR")
+          .includes((filters.neighborhood as string).toLocaleLowerCase("tr-TR"))
+      )
+        return false;
       if (filters.priceMin && p.price < Number(filters.priceMin)) return false;
       if (filters.priceMax && p.price > Number(filters.priceMax)) return false;
       if (filters.grossM2 && (p.grossM2 ?? 0) < Number(filters.grossM2)) return false;
@@ -136,12 +163,20 @@ function SearchPage() {
       if ((filters.recDeniz || filters.qcDeniz) && !featureHas(p, "Deniz")) return false;
       if ((filters.recHavuz || filters.qcHavuz) && !featureHas(p, "Havuz")) return false;
       if ((filters.recPdf || filters.qcPdf) && !hasPdf(p)) return false;
-      if ((filters.recUzman || filters.qcUzman || filters.regionExpertsOnly) && !isExpert(p)) return false;
+      if ((filters.recUzman || filters.qcUzman || filters.regionExpertsOnly) && !isExpert(p))
+        return false;
       if ((filters.recYeni || filters.qcYeni) && !isRecent(p)) return false;
-      if ((filters.recTalep || filters.qcTalep || filters.requestRequired) && !p.requestRequired) return false;
-      if ((filters.recOtopark || filters.qcOtopark) && (p.parkingCapacity ?? 0) <= 0 && !featureHas(p, "Otopark")) return false;
+      if ((filters.recTalep || filters.qcTalep || filters.requestRequired) && !p.requestRequired)
+        return false;
+      if (
+        (filters.recOtopark || filters.qcOtopark) &&
+        (p.parkingCapacity ?? 0) <= 0 &&
+        !featureHas(p, "Otopark")
+      )
+        return false;
       if (filters.qc5Oda && beds < 5) return false;
-      if (filters.verifiedOnly && !isExpert(p) && p.owner.membershipTier === "standard") return false;
+      if (filters.verifiedOnly && !isExpert(p) && p.owner.membershipTier === "standard")
+        return false;
 
       return true;
     });
@@ -160,23 +195,45 @@ function SearchPage() {
     }
     if (filters.transaction && filters.transaction !== "satilik") {
       const label = modalTransactionTypes.find((t) => t.value === filters.transaction)?.label ?? "";
-      if (label) chips.push({ key: "transaction", label, onRemove: remove("transaction", "satilik") });
+      if (label)
+        chips.push({ key: "transaction", label, onRemove: remove("transaction", "satilik") });
     }
     for (const k of ["city", "region", "neighborhood"]) {
-      if (filters[k]) chips.push({ key: k, label: `${filters[k]}`, onRemove: remove(k, undefined) });
+      if (filters[k])
+        chips.push({ key: k, label: `${filters[k]}`, onRemove: remove(k, undefined) });
     }
     if (filters.priceMin || filters.priceMax) {
       const lo = filters.priceMin ? compactPrice(Number(filters.priceMin)) : "0";
       const hi = filters.priceMax ? compactPrice(Number(filters.priceMax)) : "∞";
-      chips.push({ key: "price", label: `${lo} – ${hi} ${filters.currency ?? "TRY"}`, onRemove: () => { setFilter("priceMin", undefined); setFilter("priceMax", undefined); } });
+      chips.push({
+        key: "price",
+        label: `${lo} – ${hi} ${filters.currency ?? "TRY"}`,
+        onRemove: () => {
+          setFilter("priceMin", undefined);
+          setFilter("priceMax", undefined);
+        },
+      });
     }
     for (const c of livingSpaceCounters) {
-      if (filters[c.key]) chips.push({ key: c.key, label: `${c.label} ${filters[c.key]}+`, onRemove: remove(c.key, undefined) });
+      if (filters[c.key])
+        chips.push({
+          key: c.key,
+          label: `${c.label} ${filters[c.key]}+`,
+          onRemove: remove(c.key, undefined),
+        });
     }
     const lux = Array.isArray(filters.luxuryFeatures) ? filters.luxuryFeatures : [];
     for (const v of lux) {
       const label = luxuryFeatures.find((f) => f.value === v)?.label ?? v;
-      chips.push({ key: `lux-${v}`, label, onRemove: () => setFilter("luxuryFeatures", lux.filter((x) => x !== v)) });
+      chips.push({
+        key: `lux-${v}`,
+        label,
+        onRemove: () =>
+          setFilter(
+            "luxuryFeatures",
+            lux.filter((x) => x !== v),
+          ),
+      });
     }
     for (const [k, v] of Object.entries(filters)) {
       if (v === true && boolLabels[k]) {
@@ -232,12 +289,26 @@ function SearchPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10">
-              <Link to="/dashboard/assistant"><Sparkles className="size-4" /> VAULT Asistan'a Sor</Link>
+            <Button
+              asChild
+              variant="outline"
+              className="gap-1.5 border-gold/40 text-gold hover:bg-gold/10"
+            >
+              <Link to="/dashboard/assistant">
+                <Sparkles className="size-4" /> Asistan'a Sor
+              </Link>
             </Button>
-            <Button variant="outline" className={cn("gap-1.5", activeCount > 0 && "border-gold/40 text-gold")} onClick={() => setFilterOpen(true)}>
+            <Button
+              variant="outline"
+              className={cn("gap-1.5", activeCount > 0 && "border-gold/40 text-gold")}
+              onClick={() => setFilterOpen(true)}
+            >
               <SlidersHorizontal className="size-4" /> Filtreler
-              {activeCount > 0 && <span className="rounded-full bg-gold/15 px-1.5 text-[10px] font-bold text-gold">{activeCount}</span>}
+              {activeCount > 0 && (
+                <span className="rounded-full bg-gold/15 px-1.5 text-[10px] font-bold text-gold">
+                  {activeCount}
+                </span>
+              )}
             </Button>
             <Button
               variant="outline"
@@ -257,7 +328,9 @@ function SearchPage() {
             return (
               <button
                 key={c.id}
-                onClick={() => (c.kind === "modal" ? setFilterOpen(true) : setFilter(c.key!, !active))}
+                onClick={() =>
+                  c.kind === "modal" ? setFilterOpen(true) : setFilter(c.key!, !active)
+                }
                 className={cn(
                   "inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors",
                   active
@@ -276,7 +349,9 @@ function SearchPage() {
       {/* Result count + applied chips */}
       <div className="flex flex-wrap items-center gap-2 py-3">
         <p className="text-sm">
-          <span className="font-display text-lg font-semibold text-foreground">{filtered.length}</span>
+          <span className="font-display text-lg font-semibold text-foreground">
+            {filtered.length}
+          </span>
           <span className="text-muted-foreground"> portföy</span>
         </p>
         {activeChips.length > 0 && (
@@ -293,7 +368,10 @@ function SearchPage() {
                   <X className="size-3" />
                 </button>
               ))}
-              <button onClick={resetFilters} className="px-2 text-xs font-medium text-gold underline-offset-2 hover:underline">
+              <button
+                onClick={resetFilters}
+                className="px-2 text-xs font-medium text-gold underline-offset-2 hover:underline"
+              >
                 Temizle
               </button>
             </div>
@@ -354,7 +432,11 @@ function SearchPage() {
         </div>
       </div>
 
-      <DetailRequestModal portfolio={requestTarget} open={!!requestTarget} onOpenChange={(o) => !o && setRequestTarget(null)} />
+      <DetailRequestModal
+        portfolio={requestTarget}
+        open={!!requestTarget}
+        onOpenChange={(o) => !o && setRequestTarget(null)}
+      />
 
       <FilterModal
         open={filterOpen}

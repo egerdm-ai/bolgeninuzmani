@@ -100,13 +100,17 @@ function MySearchDetail() {
   const notify = search.notify ?? "instant";
 
   const notificationHistory = [
-    { text: `${search.region} villa arayışınızla yüksek uyumlu yeni bir portföy eklendi.`, time: search.lastMatchAt ?? "3 saat önce" },
+    {
+      text: `${search.region} villa arayışınızla yüksek uyumlu yeni bir portföy eklendi.`,
+      time: search.lastMatchAt ?? "3 saat önce",
+    },
     { text: "Fiyat kriterlerinize uygun 2 portföy güncellendi.", time: "1 gün önce" },
     { text: "Bu arayış için yeni bir bölge uzmanı aktif oldu.", time: "2 gün önce" },
     { text: "Arayış oluşturuldu ve bildirimler etkinleştirildi.", time: search.createdAt },
   ];
 
-  const enterEdit = () => navigate({ to: "/dashboard/my-searches/$id", params: { id }, search: { mode: "edit" } });
+  const enterEdit = () =>
+    navigate({ to: "/dashboard/my-searches/$id", params: { id }, search: { mode: "edit" } });
   const exitEdit = () => navigate({ to: "/dashboard/my-searches/$id", params: { id }, search: {} });
 
   const saveEdits = () => {
@@ -157,11 +161,19 @@ function MySearchDetail() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Bütçe min</Label>
-                <Input type="number" value={budgetMin || ""} onChange={(e) => setBudgetMin(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={budgetMin || ""}
+                  onChange={(e) => setBudgetMin(Number(e.target.value))}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Bütçe max</Label>
-                <Input type="number" value={budgetMax || ""} onChange={(e) => setBudgetMax(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  value={budgetMax || ""}
+                  onChange={(e) => setBudgetMax(Number(e.target.value))}
+                />
               </div>
             </div>
 
@@ -216,7 +228,9 @@ function MySearchDetail() {
                     onClick={() => setFreq(f)}
                     className={cn(
                       "rounded-lg border px-2 py-2 text-xs font-medium transition-colors",
-                      freq === f ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                      freq === f
+                        ? "border-gold/40 bg-gold/10 text-gold"
+                        : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
                     )}
                   >
                     {notificationFrequencyLabels[f]}
@@ -232,7 +246,9 @@ function MySearchDetail() {
                   onClick={() => setLocalStatus("active")}
                   className={cn(
                     "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-                    status !== "closed" ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground",
+                    status !== "closed"
+                      ? "border-gold/40 bg-gold/10 text-gold"
+                      : "border-border bg-surface-2 text-muted-foreground",
                   )}
                 >
                   Aktif
@@ -241,7 +257,9 @@ function MySearchDetail() {
                   onClick={() => setLocalStatus("closed")}
                   className={cn(
                     "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-                    status === "closed" ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground",
+                    status === "closed"
+                      ? "border-gold/40 bg-gold/10 text-gold"
+                      : "border-border bg-surface-2 text-muted-foreground",
                   )}
                 >
                   Pasif
@@ -249,7 +267,10 @@ function MySearchDetail() {
               </div>
             </div>
 
-            <Button onClick={saveEdits} className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Button
+              onClick={saveEdits}
+              className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
               <Check className="size-4" /> Değişiklikleri Kaydet
             </Button>
           </div>
@@ -265,9 +286,10 @@ function MySearchDetail() {
               <div>
                 <p className="text-sm font-semibold text-foreground">AI Eşleşme Özeti</p>
                 <p className="mt-1 text-sm text-secondary-foreground">
-                  Bu arayış için <span className="font-semibold text-gold">{matches.length} uygun portföy</span> ve{" "}
-                  <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span> bulundu. En güçlü
-                  eşleşmeler {search.region} bölgesinde yoğunlaşıyor.
+                  Bu arayış için{" "}
+                  <span className="font-semibold text-gold">{matches.length} uygun portföy</span> ve{" "}
+                  <span className="font-semibold text-gold">{experts.length} bölge uzmanı</span>{" "}
+                  bulundu. En güçlü eşleşmeler {search.region} bölgesinde yoğunlaşıyor.
                 </p>
               </div>
             </div>
@@ -275,7 +297,9 @@ function MySearchDetail() {
 
           {/* Matching portfolios */}
           <div>
-            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Eşleşen Portföyler</h2>
+            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+              Eşleşen Portföyler
+            </h2>
             {matches.length === 0 ? (
               <EmptyStateCard
                 icon={Home}
@@ -299,7 +323,9 @@ function MySearchDetail() {
 
           {/* Region experts */}
           <div>
-            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">Bölge Uzmanı Önerileri</h2>
+            <h2 className="mb-3 font-display text-lg font-semibold text-foreground">
+              Bölge Uzmanı Önerileri
+            </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {experts.map((e) => (
                 <RegionExpertCard key={e.id} professional={e} regionName={search.region} />
@@ -325,13 +351,17 @@ function MySearchDetail() {
 
             {search.notes && (
               <div className="mt-4 rounded-xl border border-border bg-surface-2 p-3">
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Müşteri notu</p>
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Müşteri notu
+                </p>
                 <p className="text-sm text-secondary-foreground">{search.notes}</p>
               </div>
             )}
 
             <div className="mt-4">
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Olmazsa olmaz</p>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Olmazsa olmaz
+              </p>
               <div className="flex flex-wrap gap-1.5">
                 {search.mustHave.map((f) => (
                   <FeatureChip key={f} label={f} />
@@ -365,7 +395,9 @@ function MySearchDetail() {
                   onClick={() => setNotify(id, f)}
                   className={cn(
                     "rounded-lg border px-3 py-2 text-xs font-medium transition-colors",
-                    notify === f ? "border-gold/40 bg-gold/10 text-gold" : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+                    notify === f
+                      ? "border-gold/40 bg-gold/10 text-gold"
+                      : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {notificationFrequencyLabels[f]}
@@ -400,15 +432,7 @@ function MySearchDetail() {
   );
 }
 
-function Row({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof MapPin;
-  label: string;
-  value: string;
-}) {
+function Row({ icon: Icon, label, value }: { icon: typeof MapPin; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <dt className="flex items-center gap-1.5 text-muted-foreground">

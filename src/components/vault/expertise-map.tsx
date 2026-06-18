@@ -56,9 +56,7 @@ export function ExpertiseMap({
             <span
               className={cn(
                 "mt-1 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[10px] font-medium backdrop-blur",
-                active
-                  ? "bg-gold/20 text-gold"
-                  : "bg-background/70 text-secondary-foreground",
+                active ? "bg-gold/20 text-gold" : "bg-background/70 text-secondary-foreground",
               )}
             >
               {r.region}

@@ -60,7 +60,6 @@ export function ProfessionalAboutSection({ professional }: { professional: Profe
         </div>
       </InfoPanel>
 
-
       {/* Social / contact area */}
       <InfoPanel title="Sosyal & Bağlantılar" className="self-start">
         <p className="text-sm text-muted-foreground">

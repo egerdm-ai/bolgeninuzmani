@@ -2,7 +2,13 @@ import { Link } from "@tanstack/react-router";
 import { Eye, Pencil, Share2, MoreVertical, Send, PauseCircle, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Portfolio } from "@/lib/mock/types";
-import { formatNumber, formatPrice, portfolioTypeLabels, statusLabels, statusTones } from "@/lib/format";
+import {
+  formatNumber,
+  formatPrice,
+  portfolioTypeLabels,
+  statusLabels,
+  statusTones,
+} from "@/lib/format";
 import { StatusBadge } from "./badges";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +31,9 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
       </Link>
       <div className="min-w-0 flex-1">
         <Link to="/p/$slug" params={{ slug: portfolio.slug }}>
-          <h4 className="truncate text-sm font-semibold text-foreground hover:text-gold">{portfolio.title}</h4>
+          <h4 className="truncate text-sm font-semibold text-foreground hover:text-gold">
+            {portfolio.title}
+          </h4>
         </Link>
         <p className="truncate text-xs text-muted-foreground">
           {portfolioTypeLabels[portfolio.type]} · {portfolio.regionLabel}
@@ -34,7 +42,9 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
         </p>
       </div>
       <div className="hidden w-28 text-right md:block">
-        <div className="font-display text-base font-semibold text-gold">{formatPrice(portfolio.price, portfolio.currency)}</div>
+        <div className="font-display text-base font-semibold text-gold">
+          {formatPrice(portfolio.price, portfolio.currency)}
+        </div>
       </div>
       <div className="hidden w-24 text-center text-xs text-muted-foreground lg:block">
         <div className="font-medium text-foreground">{formatNumber(portfolio.viewCount)}</div>
@@ -54,7 +64,11 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
           </Link>
         </Button>
         <Button asChild variant="ghost" size="icon" className="size-8">
-          <Link to="/dashboard/portfolios/$id/share" params={{ id: portfolio.id }} aria-label="Paylaş">
+          <Link
+            to="/dashboard/portfolios/$id/share"
+            params={{ id: portfolio.id }}
+            aria-label="Paylaş"
+          >
             <Share2 className="size-4" />
           </Link>
         </Button>
@@ -65,7 +79,11 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => toast.info("Portföy düzenleme (mock)", { description: portfolio.title })}>
+            <DropdownMenuItem
+              onClick={() =>
+                toast.info("Portföy düzenleme (mock)", { description: portfolio.title })
+              }
+            >
               <Pencil className="size-4" /> Düzenle
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -73,12 +91,18 @@ export function PortfolioListRow({ portfolio }: { portfolio: Portfolio }) {
                 <Send className="size-4" /> Share Studio
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => toast.success("Portföy pasifleştirildi (mock)", { description: portfolio.title })}>
+            <DropdownMenuItem
+              onClick={() =>
+                toast.success("Portföy pasifleştirildi (mock)", { description: portfolio.title })
+              }
+            >
               <PauseCircle className="size-4" /> Pasifleştir
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
-              onClick={() => toast.error("Portföy silindi (mock)", { description: portfolio.title })}
+              onClick={() =>
+                toast.error("Portföy silindi (mock)", { description: portfolio.title })
+              }
             >
               <Trash2 className="size-4" /> Sil
             </DropdownMenuItem>

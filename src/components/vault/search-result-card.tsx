@@ -1,5 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, BedDouble, Maximize, Bath, ShieldCheck, BadgeCheck, Send, Bookmark } from "lucide-react";
+import {
+  MapPin,
+  BedDouble,
+  Maximize,
+  Bath,
+  ShieldCheck,
+  BadgeCheck,
+  Send,
+  Bookmark,
+} from "lucide-react";
 import type { Portfolio } from "@/lib/mock/types";
 import { formatNumber, formatPrice, portfolioTypeLabels } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -26,7 +35,8 @@ export function SearchResultCard({
 }) {
   const owner = portfolio.owner;
   const regionalExpert = owner.expertiseRegions.some(
-    (r) => portfolio.neighborhood === r || portfolio.district === r || portfolio.regionLabel.includes(r),
+    (r) =>
+      portfolio.neighborhood === r || portfolio.district === r || portfolio.regionLabel.includes(r),
   );
 
   return (
@@ -81,13 +91,22 @@ export function SearchResultCard({
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-secondary-foreground">
             {portfolio.rooms && (
-              <span className="flex items-center gap-1"><BedDouble className="size-3 text-muted-foreground" />{portfolio.rooms}</span>
+              <span className="flex items-center gap-1">
+                <BedDouble className="size-3 text-muted-foreground" />
+                {portfolio.rooms}
+              </span>
             )}
             {portfolio.grossM2 && (
-              <span className="flex items-center gap-1"><Maximize className="size-3 text-muted-foreground" />{formatNumber(portfolio.grossM2)} m²</span>
+              <span className="flex items-center gap-1">
+                <Maximize className="size-3 text-muted-foreground" />
+                {formatNumber(portfolio.grossM2)} m²
+              </span>
             )}
             {portfolio.bathrooms && (
-              <span className="flex items-center gap-1"><Bath className="size-3 text-muted-foreground" />{portfolio.bathrooms}</span>
+              <span className="flex items-center gap-1">
+                <Bath className="size-3 text-muted-foreground" />
+                {portfolio.bathrooms}
+              </span>
             )}
           </div>
         </div>

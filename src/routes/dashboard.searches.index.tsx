@@ -94,13 +94,16 @@ function Searches() {
     let arr = networkSearches.filter((b) => matchesChip(b, chip));
     if (q) {
       arr = arr.filter((b) =>
-        lc(`${b.title} ${b.region} ${b.city} ${b.owner.fullName} ${b.owner.companyName}`).includes(q),
+        lc(`${b.title} ${b.region} ${b.city} ${b.owner.fullName} ${b.owner.companyName}`).includes(
+          q,
+        ),
       );
     }
     const sorted = [...arr];
     if (sort === "match") sorted.sort((a, b) => b.matchCount - a.matchCount);
     else if (sort === "budget") sorted.sort((a, b) => b.budgetMax - a.budgetMax);
-    else if (sort === "urgency") sorted.sort((a, b) => urgencyRank[b.urgency] - urgencyRank[a.urgency]);
+    else if (sort === "urgency")
+      sorted.sort((a, b) => urgencyRank[b.urgency] - urgencyRank[a.urgency]);
     return sorted;
   }, [query, chip, sort]);
 
@@ -114,7 +117,7 @@ function Searches() {
     <PageContainer className="space-y-7">
       <PageHeader
         title="Arayışlar"
-        subtitle="VAULT ağı içindeki aktif alıcı arayışlarını keşfedin; portföylerinizle eşleşen talepleri bulun."
+        subtitle="Bölgenin Uzmanı ağı içindeki aktif alıcı arayışlarını keşfedin; portföylerinizle eşleşen talepleri bulun."
       />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -155,7 +158,9 @@ function Searches() {
 
       {/* Sort */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sırala</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Sırala
+        </span>
         {sorts.map((s) => (
           <button
             key={s.key}

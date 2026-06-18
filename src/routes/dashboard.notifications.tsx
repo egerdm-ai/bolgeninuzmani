@@ -1,13 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  Bell,
-  CheckCheck,
-  Sparkles,
-  Map,
-  FolderLock,
-  Inbox,
-  Target,
-} from "lucide-react";
+import { Bell, CheckCheck, Sparkles, Map, FolderLock, Inbox, Target } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";

@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 
 function priceLabel(price: number, currency: string) {
   const sym = currency === "USD" ? "$" : currency === "EUR" ? "€" : "₺";
-  if (price >= 1_000_000) return `${(price / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M ${sym}`;
+  if (price >= 1_000_000)
+    return `${(price / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M ${sym}`;
   return `${(price / 1000).toFixed(0)}K ${sym}`;
 }
 
@@ -31,7 +32,10 @@ export function MapCanvasMock({
 
   return (
     <div
-      className={cn("relative size-full overflow-hidden rounded-2xl border border-border", className)}
+      className={cn(
+        "relative size-full overflow-hidden rounded-2xl border border-border",
+        className,
+      )}
       style={{
         backgroundImage:
           "radial-gradient(ellipse at 25% 30%, oklch(0.24 0.03 250 / 0.7), transparent 50%), radial-gradient(ellipse at 75% 65%, oklch(0.2 0.035 245 / 0.6), transparent 45%), linear-gradient(160deg, oklch(0.17 0.018 252), oklch(0.13 0.012 250))",
@@ -47,7 +51,11 @@ export function MapCanvasMock({
         }}
       />
       {/* mock coastline */}
-      <svg className="absolute inset-0 size-full opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100">
+      <svg
+        className="absolute inset-0 size-full opacity-40"
+        preserveAspectRatio="none"
+        viewBox="0 0 100 100"
+      >
         <path
           d="M0,62 C18,55 30,70 46,60 C60,52 70,66 84,58 C92,54 100,60 100,60 L100,100 L0,100 Z"
           fill="oklch(0.16 0.03 245 / 0.6)"

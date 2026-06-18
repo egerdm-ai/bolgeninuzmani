@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-export function PortfolioGallery({
-  images,
-  title,
-}: {
-  images: string[];
-  title: string;
-}) {
+export function PortfolioGallery({ images, title }: { images: string[]; title: string }) {
   const [active, setActive] = useState(0);
   const main = images[active] ?? images[0];
 

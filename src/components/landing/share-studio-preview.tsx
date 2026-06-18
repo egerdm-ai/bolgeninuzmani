@@ -51,11 +51,7 @@ export function ShareStudioPreview() {
             {/* rich link card */}
             <div className="overflow-hidden rounded-lg border border-border/60 bg-surface">
               <div className="relative h-20">
-                <img
-                  src={propertyImages.villa1}
-                  alt="Villa"
-                  className="size-full object-cover"
-                />
+                <img src={propertyImages.villa1} alt="Villa" className="size-full object-cover" />
                 <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded border border-gold/30 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-medium text-gold backdrop-blur">
                   <Lock className="size-2" /> Kapalı İlan
                 </span>
@@ -76,7 +72,9 @@ export function ShareStudioPreview() {
                   </span>
                 </div>
                 <p className="text-[10px] font-semibold text-gold">₺145.000.000</p>
-                <p className="truncate text-[8.5px] text-success">vault.app/p/yalikavak-villa</p>
+                <p className="truncate text-[8.5px] text-success">
+                  bolgeninuzmani.com/p/yalikavak-villa
+                </p>
               </div>
             </div>
             <p className="rounded-lg rounded-bl-sm bg-success/10 px-2.5 py-1.5 text-[10px] leading-relaxed text-foreground">
@@ -133,7 +131,7 @@ export function ShareStudioPreview() {
             <div className="min-w-0 flex-1">
               <p className="text-[10.5px] font-medium text-foreground">Paylaşım linki</p>
               <p className="truncate text-[9.5px] text-muted-foreground">
-                vault.app/p/yalikavak-villa
+                bolgeninuzmani.com/p/yalikavak-villa
               </p>
             </div>
             <span className="flex size-7 shrink-0 items-center justify-center rounded-lg border border-border/60 bg-background/50 text-gold">
