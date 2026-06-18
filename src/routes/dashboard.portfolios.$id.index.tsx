@@ -14,6 +14,7 @@ import {
   formatPortfolioPrice,
 } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
+import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/")({
   component: OwnerPortfolioDetail,
@@ -26,6 +27,7 @@ function OwnerPortfolioDetail() {
   const [full, setFull] = useState<PortfolioFull | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -74,6 +76,11 @@ function OwnerPortfolioDetail() {
 
   const p = full.portfolio;
   const isOwner = user?.id === p.owner_id;
+  const imageUrls = full.images.map((i) => i.url);
+  const coverIdx = Math.max(
+    0,
+    full.images.findIndex((i) => i.is_cover),
+  );
   const cover = full.images.find((i) => i.is_cover) ?? full.images[0];
 
   return (
@@ -110,7 +117,12 @@ function OwnerPortfolioDetail() {
           <div className="overflow-hidden rounded-2xl border border-border bg-surface-2">
             <div className="relative aspect-[16/9]">
               {cover ? (
-                <img src={cover.url} alt={p.title} className="size-full object-cover" />
+                <img
+                  src={cover.url}
+                  alt={p.title}
+                  onClick={() => setLightbox(coverIdx)}
+                  className="size-full cursor-zoom-in object-cover"
+                />
               ) : (
                 <div className="flex size-full items-center justify-center text-muted-foreground">
                   <ImageOff className="size-8" />
@@ -122,12 +134,13 @@ function OwnerPortfolioDetail() {
             </div>
             {full.images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-2">
-                {full.images.map((img) => (
+                {full.images.map((img, idx) => (
                   <img
                     key={img.id}
                     src={img.url}
                     alt=""
-                    className="h-16 w-24 shrink-0 rounded-md object-cover"
+                    onClick={() => setLightbox(idx)}
+                    className="h-16 w-24 shrink-0 cursor-zoom-in rounded-md object-cover"
                   />
                 ))}
               </div>
@@ -242,6 +255,9 @@ function OwnerPortfolioDetail() {
           </SurfaceCard>
         </div>
       </div>
+      {lightbox !== null && (
+        <ImageLightbox images={imageUrls} startIndex={lightbox} onClose={() => setLightbox(null)} />
+      )}
     </PageContainer>
   );
 }
