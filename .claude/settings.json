@@ -1,0 +1,11 @@
+{
+  "$comment": "Bölgenin Uzmanı project settings. Verify hook format against current Claude Code docs for your version. Superpowers registers its own SessionStart hook; these are additive.",
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [ { "type": "command", "command": ".claude/hooks/guard-destructive-sql.sh" } ] }
+    ],
+    "PostToolUse": [
+      { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": ".claude/hooks/warn-agentonly-leak.sh" } ] }
+    ]
+  }
+}
