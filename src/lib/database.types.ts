@@ -44,6 +44,194 @@ export type Database = {
         };
         Relationships: [];
       };
+      portfolio_documents: {
+        Row: {
+          id: string;
+          kind: Database["public"]["Enums"]["document_kind"];
+          path: string;
+          portfolio_id: string;
+          uploaded_at: string;
+        };
+        Insert: {
+          id?: string;
+          kind?: Database["public"]["Enums"]["document_kind"];
+          path: string;
+          portfolio_id: string;
+          uploaded_at?: string;
+        };
+        Update: {
+          id?: string;
+          kind?: Database["public"]["Enums"]["document_kind"];
+          path?: string;
+          portfolio_id?: string;
+          uploaded_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_documents_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: false;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      portfolio_images: {
+        Row: {
+          id: string;
+          is_cover: boolean;
+          path: string;
+          portfolio_id: string;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          is_cover?: boolean;
+          path: string;
+          portfolio_id: string;
+          sort_order?: number;
+        };
+        Update: {
+          id?: string;
+          is_cover?: boolean;
+          path?: string;
+          portfolio_id?: string;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_images_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: false;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      portfolio_private: {
+        Row: {
+          exact_address: string | null;
+          exact_lat: number | null;
+          exact_lng: number | null;
+          malik_info: Json | null;
+          portfolio_id: string;
+          private_description: string | null;
+          private_notes: string | null;
+        };
+        Insert: {
+          exact_address?: string | null;
+          exact_lat?: number | null;
+          exact_lng?: number | null;
+          malik_info?: Json | null;
+          portfolio_id: string;
+          private_description?: string | null;
+          private_notes?: string | null;
+        };
+        Update: {
+          exact_address?: string | null;
+          exact_lat?: number | null;
+          exact_lng?: number | null;
+          malik_info?: Json | null;
+          portfolio_id?: string;
+          private_description?: string | null;
+          private_notes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_private_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: true;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      portfolios: {
+        Row: {
+          approx_lat: number | null;
+          approx_lng: number | null;
+          category: Database["public"]["Enums"]["portfolio_category"];
+          city: string | null;
+          created_at: string;
+          currency: Database["public"]["Enums"]["currency"];
+          district: string | null;
+          features: string[];
+          gross_m2: number | null;
+          id: string;
+          land_m2: number | null;
+          neighborhood: string | null;
+          net_m2: number | null;
+          owner_id: string;
+          price: number | null;
+          public_description: string | null;
+          room_count: string | null;
+          slug: string;
+          status: Database["public"]["Enums"]["portfolio_status"];
+          subcategory: string | null;
+          title: string;
+          transaction_type: Database["public"]["Enums"]["transaction_type"];
+          updated_at: string;
+        };
+        Insert: {
+          approx_lat?: number | null;
+          approx_lng?: number | null;
+          category: Database["public"]["Enums"]["portfolio_category"];
+          city?: string | null;
+          created_at?: string;
+          currency?: Database["public"]["Enums"]["currency"];
+          district?: string | null;
+          features?: string[];
+          gross_m2?: number | null;
+          id?: string;
+          land_m2?: number | null;
+          neighborhood?: string | null;
+          net_m2?: number | null;
+          owner_id: string;
+          price?: number | null;
+          public_description?: string | null;
+          room_count?: string | null;
+          slug: string;
+          status?: Database["public"]["Enums"]["portfolio_status"];
+          subcategory?: string | null;
+          title: string;
+          transaction_type: Database["public"]["Enums"]["transaction_type"];
+          updated_at?: string;
+        };
+        Update: {
+          approx_lat?: number | null;
+          approx_lng?: number | null;
+          category?: Database["public"]["Enums"]["portfolio_category"];
+          city?: string | null;
+          created_at?: string;
+          currency?: Database["public"]["Enums"]["currency"];
+          district?: string | null;
+          features?: string[];
+          gross_m2?: number | null;
+          id?: string;
+          land_m2?: number | null;
+          neighborhood?: string | null;
+          net_m2?: number | null;
+          owner_id?: string;
+          price?: number | null;
+          public_description?: string | null;
+          room_count?: string | null;
+          slug?: string;
+          status?: Database["public"]["Enums"]["portfolio_status"];
+          subcategory?: string | null;
+          title?: string;
+          transaction_type?: Database["public"]["Enums"]["transaction_type"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolios_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -127,7 +315,19 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      derive_approx: {
+        Args: { _lat: number; _lng: number; _seed: string };
+        Returns: {
+          approx_lat: number;
+          approx_lng: number;
+        }[];
+      };
+      generate_portfolio_slug: { Args: { _title: string }; Returns: string };
       generate_username: { Args: { _email: string }; Returns: string };
+      has_portfolio_access: {
+        Args: { _portfolio_id: string; _user_id?: string };
+        Returns: boolean;
+      };
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"];
@@ -137,12 +337,25 @@ export type Database = {
       };
       is_admin: { Args: { _user_id?: string }; Returns: boolean };
       is_verified: { Args: { _user_id?: string }; Returns: boolean };
+      owns_portfolio: {
+        Args: { _portfolio_id: string; _user_id?: string };
+        Returns: boolean;
+      };
+      portfolio_teaser_visible: {
+        Args: { _portfolio_id: string; _user_id?: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       app_role: "admin" | "agent";
       application_status: "new" | "reviewed" | "invited" | "rejected";
+      currency: "TRY" | "USD" | "EUR";
+      document_kind: "tapu" | "ruhsat" | "imar_plani" | "proje" | "pdf" | "diger";
       membership_tier: "standard" | "pro" | "elite";
+      portfolio_category: "konut" | "ticari" | "arsa" | "turizm" | "isletme" | "ozel_varlik";
+      portfolio_status: "draft" | "active" | "passive" | "sold";
       profile_status: "pending" | "verified" | "suspended";
+      transaction_type: "satilik" | "kiralik";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -270,8 +483,13 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "agent"],
       application_status: ["new", "reviewed", "invited", "rejected"],
+      currency: ["TRY", "USD", "EUR"],
+      document_kind: ["tapu", "ruhsat", "imar_plani", "proje", "pdf", "diger"],
       membership_tier: ["standard", "pro", "elite"],
+      portfolio_category: ["konut", "ticari", "arsa", "turizm", "isletme", "ozel_varlik"],
+      portfolio_status: ["draft", "active", "passive", "sold"],
       profile_status: ["pending", "verified", "suspended"],
+      transaction_type: ["satilik", "kiralik"],
     },
   },
 } as const;
