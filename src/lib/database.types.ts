@@ -44,6 +44,123 @@ export type Database = {
         };
         Relationships: [];
       };
+      detail_requests: {
+        Row: {
+          created_at: string;
+          id: string;
+          message: string | null;
+          owner_id: string;
+          portfolio_id: string;
+          requester_id: string;
+          status: Database["public"]["Enums"]["detail_request_status"];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          owner_id: string;
+          portfolio_id: string;
+          requester_id: string;
+          status?: Database["public"]["Enums"]["detail_request_status"];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          message?: string | null;
+          owner_id?: string;
+          portfolio_id?: string;
+          requester_id?: string;
+          status?: Database["public"]["Enums"]["detail_request_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "detail_requests_owner_id_fkey";
+            columns: ["owner_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "detail_requests_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: false;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "detail_requests_requester_id_fkey";
+            columns: ["requester_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      portfolio_access_grants: {
+        Row: {
+          created_at: string;
+          expires_at: string | null;
+          granted_by: string;
+          grantee_id: string;
+          id: string;
+          portfolio_id: string;
+          request_id: string | null;
+          revoked_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          expires_at?: string | null;
+          granted_by: string;
+          grantee_id: string;
+          id?: string;
+          portfolio_id: string;
+          request_id?: string | null;
+          revoked_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string | null;
+          granted_by?: string;
+          grantee_id?: string;
+          id?: string;
+          portfolio_id?: string;
+          request_id?: string | null;
+          revoked_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_access_grants_granted_by_fkey";
+            columns: ["granted_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "portfolio_access_grants_grantee_id_fkey";
+            columns: ["grantee_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "portfolio_access_grants_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: false;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "portfolio_access_grants_request_id_fkey";
+            columns: ["request_id"];
+            isOneToOne: false;
+            referencedRelation: "detail_requests";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       portfolio_documents: {
         Row: {
           id: string;
@@ -324,6 +441,25 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      approve_detail_request: {
+        Args: { _request_id: string };
+        Returns: {
+          created_at: string;
+          expires_at: string | null;
+          granted_by: string;
+          grantee_id: string;
+          id: string;
+          portfolio_id: string;
+          request_id: string | null;
+          revoked_at: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "portfolio_access_grants";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       derive_approx: {
         Args: { _lat: number; _lng: number; _seed: string };
         Returns: {
@@ -360,6 +496,44 @@ export type Database = {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;
       };
+      reject_detail_request: {
+        Args: { _request_id: string };
+        Returns: {
+          created_at: string;
+          id: string;
+          message: string | null;
+          owner_id: string;
+          portfolio_id: string;
+          requester_id: string;
+          status: Database["public"]["Enums"]["detail_request_status"];
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "detail_requests";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      request_detail: {
+        Args: { _message?: string; _portfolio_id: string };
+        Returns: {
+          created_at: string;
+          id: string;
+          message: string | null;
+          owner_id: string;
+          portfolio_id: string;
+          requester_id: string;
+          status: Database["public"]["Enums"]["detail_request_status"];
+          updated_at: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "detail_requests";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { "": string }; Returns: string[] };
     };
@@ -367,6 +541,7 @@ export type Database = {
       app_role: "admin" | "agent";
       application_status: "new" | "reviewed" | "invited" | "rejected";
       currency: "TRY" | "USD" | "EUR";
+      detail_request_status: "pending" | "approved" | "rejected";
       document_kind: "tapu" | "ruhsat" | "imar_plani" | "proje" | "pdf" | "diger";
       image_visibility: "public" | "locked";
       membership_tier: "standard" | "pro" | "elite";
@@ -502,6 +677,7 @@ export const Constants = {
       app_role: ["admin", "agent"],
       application_status: ["new", "reviewed", "invited", "rejected"],
       currency: ["TRY", "USD", "EUR"],
+      detail_request_status: ["pending", "approved", "rejected"],
       document_kind: ["tapu", "ruhsat", "imar_plani", "proje", "pdf", "diger"],
       image_visibility: ["public", "locked"],
       membership_tier: ["standard", "pro", "elite"],
