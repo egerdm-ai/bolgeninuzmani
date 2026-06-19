@@ -19,7 +19,7 @@ import {
   QuickInfoStrip,
   AttributesSection,
   ApproxLocationBox,
-  AgentContactCard,
+  AgentPanelCard,
   type DetailImage,
   type DetailAgent,
 } from "@/components/portfolio/detail-parts";
@@ -109,9 +109,9 @@ function Teaser({ data }: { data: PublicPortfolio }) {
   const wa = data.agent?.contact_whatsapp?.replace(/\D/g, "");
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+    <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
       {/* Main column */}
-      <div className="min-w-0 space-y-8">
+      <div className="min-w-0 space-y-10">
         <DetailGallery images={images} title={data.title} />
         <DetailHeader
           title={data.title}
@@ -151,7 +151,6 @@ function Teaser({ data }: { data: PublicPortfolio }) {
           district={data.district}
           city={data.city}
         />
-        {agent && <AgentContactCard agent={agent} />}
       </div>
 
       {/* Right sticky panel */}
@@ -164,36 +163,35 @@ function Teaser({ data }: { data: PublicPortfolio }) {
         </div>
 
         {callOnly ? (
-          <div className="overflow-hidden rounded-bu-xl border border-bu-lock-border bg-bu-lock-bg shadow-bu-lock">
-            <div className="h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
-            <div className="space-y-3 p-6 text-center">
-              <Phone className="mx-auto size-6 text-bu-gold" />
-              <p className="text-sm font-semibold text-bu-text">Kapalı Portföy</p>
-              <p className="text-xs text-bu-text-2">
-                Bu portföyün detayları paylaşılmıyor. Tüm bilgiler için emlakçıyı arayın.
-              </p>
-              {data.agent?.contact_phone && (
-                <a
-                  href={`tel:${data.agent.contact_phone}`}
-                  className={cn(s.btnGold, "w-full justify-center")}
-                >
-                  <Phone className="size-4" /> {data.agent.contact_phone}
-                </a>
-              )}
-              {wa && (
-                <a
-                  href={`https://wa.me/${wa}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={cn(s.btnSecondary, "w-full justify-center")}
-                >
-                  <MessageCircle className="size-4" /> WhatsApp
-                </a>
-              )}
-            </div>
+          // call_only = normal info card (NOT the dark lock panel) — light-friendly.
+          <div className={cn(s.card, "space-y-3 p-6 text-center")}>
+            <Phone className="mx-auto size-6 text-bu-gold" />
+            <p className="text-sm font-semibold text-bu-text">Kapalı Portföy</p>
+            <p className="text-xs text-bu-text-2">
+              Bu portföyün detayları paylaşılmıyor. Tüm bilgiler için emlakçıyı arayın.
+            </p>
+            {data.agent?.contact_phone && (
+              <a
+                href={`tel:${data.agent.contact_phone}`}
+                className={cn(s.btnGold, "w-full justify-center")}
+              >
+                <Phone className="size-4" /> {data.agent.contact_phone}
+              </a>
+            )}
+            {wa && (
+              <a
+                href={`https://wa.me/${wa}`}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(s.btnSecondary, "w-full justify-center")}
+              >
+                <MessageCircle className="size-4" /> WhatsApp
+              </a>
+            )}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-bu-xl border border-bu-lock-border bg-bu-lock-bg shadow-bu-lock">
+          // controlled: gold-accented lock panel (theme-adaptive → readable in both modes).
+          <div className="overflow-hidden rounded-bu-xl border border-bu-gold-border bg-bu-bg-subtle shadow-bu-lock">
             <div className="h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
             <div className="space-y-4 p-6">
               <div className="flex items-center gap-2">
@@ -208,6 +206,16 @@ function Teaser({ data }: { data: PublicPortfolio }) {
               </Button>
             </div>
           </div>
+        )}
+
+        {agent && (
+          <AgentPanelCard
+            agent={agent}
+            refNo={data.ref_no}
+            neighborhood={data.neighborhood}
+            district={data.district}
+            city={data.city}
+          />
         )}
       </aside>
     </div>

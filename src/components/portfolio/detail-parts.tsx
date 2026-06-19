@@ -76,7 +76,8 @@ export function DetailGallery({ images, title }: { images: DetailImage[]; title:
         )}
         {images.length > 0 && (
           <div className="absolute bottom-4 right-4 flex items-center gap-2">
-            <span className="rounded-bu-full border border-bu-border bg-bu-lock-bg/80 px-3 py-1.5 text-sm font-medium text-bu-text backdrop-blur-md">
+            {/* over-image scrim: readable in BOTH themes (not theme-tinted) */}
+            <span className="rounded-bu-full border border-white/15 bg-black/55 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-md">
               {active + 1} / {images.length}
             </span>
             <button
@@ -104,7 +105,7 @@ export function DetailGallery({ images, title }: { images: DetailImage[]; title:
             >
               <ThumbImage thumb={img.thumbUrl} full={img.url} className="size-full object-cover" />
               {img.locked && (
-                <span className="absolute right-1 top-1 rounded bg-bu-lock-bg/80 p-0.5 text-bu-gold backdrop-blur-sm">
+                <span className="absolute right-1 top-1 rounded bg-black/55 p-0.5 text-bu-gold backdrop-blur-sm">
                   <Lock className="size-3" />
                 </span>
               )}
@@ -348,27 +349,42 @@ export function ApproxLocationBox({
   );
 }
 
-/* ── 6. AGENT CARD (§2.6) ── */
-export function AgentContactCard({ agent }: { agent: DetailAgent }) {
+/* ── 6. AGENT CARD (§2.6) — right-panel variant (avatar + verified + contact +
+   ref_no + approx location + profile link) ── */
+export function AgentPanelCard({
+  agent,
+  refNo,
+  neighborhood,
+  district,
+  city,
+}: {
+  agent: DetailAgent;
+  refNo: string;
+  neighborhood: string | null;
+  district: string | null;
+  city: string | null;
+}) {
   const wa = agent.contact_whatsapp?.replace(/\D/g, "");
   const expertise = [...(agent.expertise_regions ?? []), ...(agent.expertise_types ?? [])];
   return (
-    <section className="border-t border-bu-border pt-8">
-      <h2 className={s.sectionTitle}>Portföyü Paylaşan</h2>
-      <div className={cn(s.card, "mt-4 flex items-start gap-4 p-5")}>
+    <div className={cn(s.card, "space-y-4 p-5")}>
+      <p className="text-xs font-semibold uppercase tracking-wider text-bu-text-3">
+        Portföyü Paylaşan
+      </p>
+      <div className="flex items-start gap-3">
         {agent.avatar_url ? (
           <img
             src={agent.avatar_url}
             alt={agent.full_name}
-            className="size-14 shrink-0 rounded-full border-2 border-bu-gold/30 object-cover"
+            className="size-12 shrink-0 rounded-full border-2 border-bu-gold/30 object-cover"
           />
         ) : (
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-bu-gold/30 bg-bu-card-raised text-xl font-semibold text-bu-gold">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-bu-gold/30 bg-bu-card-raised text-lg font-semibold text-bu-gold">
             {agent.full_name.slice(0, 1)}
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-semibold text-bu-text">{agent.full_name}</span>
             <span className={s.verified}>
               <ShieldCheck className="size-3" /> Doğrulanmış
@@ -379,28 +395,36 @@ export function AgentContactCard({ agent }: { agent: DetailAgent }) {
               {[agent.title, agent.company_name].filter(Boolean).join(" · ")}
             </p>
           )}
-          {expertise.length > 0 && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {expertise.slice(0, 4).map((e) => (
-                <span
-                  key={e}
-                  className="rounded-bu-full bg-bu-gold-muted px-2 py-0.5 text-[11px] font-medium text-bu-gold"
-                >
-                  {e}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
-        <Link
-          to="/v/$username"
-          params={{ username: agent.username }}
-          className="shrink-0 text-xs text-bu-action transition-colors hover:text-bu-action-hover"
-        >
-          Profili Gör →
-        </Link>
       </div>
-      <div className="mt-3 flex gap-3">
+
+      {expertise.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {expertise.slice(0, 4).map((e) => (
+            <span
+              key={e}
+              className="rounded-bu-full bg-bu-gold-muted px-2 py-0.5 text-[11px] font-medium text-bu-gold"
+            >
+              {e}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="space-y-1.5 border-t border-bu-border pt-3 text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-bu-text-2">Portföy No</span>
+          <span className="font-medium text-bu-text">{refNo}</span>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-bu-text-2">Bölge</span>
+          <span className="truncate font-medium text-bu-text">
+            ~{fmtLocation(neighborhood, district, city)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex gap-2">
         {agent.contact_phone && (
           <a
             href={`tel:${agent.contact_phone}`}
@@ -420,6 +444,14 @@ export function AgentContactCard({ agent }: { agent: DetailAgent }) {
           </a>
         )}
       </div>
-    </section>
+
+      <Link
+        to="/v/$username"
+        params={{ username: agent.username }}
+        className="block text-center text-xs font-medium text-bu-action transition-colors hover:text-bu-action-hover"
+      >
+        Profili ve diğer portföyleri gör →
+      </Link>
+    </div>
   );
 }

@@ -46,7 +46,7 @@ import {
   QuickInfoStrip,
   AttributesSection,
   ApproxLocationBox,
-  AgentContactCard,
+  AgentPanelCard,
   type DetailImage,
   type DetailAgent,
 } from "@/components/portfolio/detail-parts";
@@ -189,9 +189,9 @@ function OwnerPortfolioDetail() {
         <span className="truncate text-bu-text">{p.title}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
         {/* Main column */}
-        <div className="min-w-0 space-y-8">
+        <div className="min-w-0 space-y-10">
           <DetailGallery images={galleryImages} title={p.title} />
           <DetailHeader
             title={p.title}
@@ -232,7 +232,6 @@ function OwnerPortfolioDetail() {
             attributes={p.attributes as Record<string, unknown>}
           />
           <ApproxLocationBox neighborhood={p.neighborhood} district={p.district} city={p.city} />
-          {!isOwner && ownerAgent && <AgentContactCard agent={ownerAgent} />}
         </div>
 
         {/* Right sticky panel */}
@@ -273,7 +272,8 @@ function OwnerPortfolioDetail() {
 
           {/* Locked / call_only section */}
           {callOnly ? (
-            <LockPanel>
+            // call_only = normal info card (light-friendly), not the lock panel.
+            <div className={cn(s.card, "space-y-3 p-5")}>
               <PanelHead icon={Phone} title="Kapalı Portföy" />
               {isOwner ? (
                 <p className="text-xs text-bu-text-2">
@@ -305,7 +305,7 @@ function OwnerPortfolioDetail() {
                   )}
                 </>
               )}
-            </LockPanel>
+            </div>
           ) : canSeeLocked ? (
             <LockPanel open>
               <PanelHead
@@ -336,7 +336,7 @@ function OwnerPortfolioDetail() {
                 <p className="text-xs text-bu-text-2">Kilitli bilgi eklenmemiş.</p>
               )}
               {full.documents.length > 0 && (
-                <div className="space-y-2 border-t border-bu-lock-border pt-3">
+                <div className="space-y-2 border-t border-bu-border pt-3">
                   <p className="text-xs font-medium text-bu-text-2">Belgeler</p>
                   {full.documents.map((d) => (
                     <DocRow key={d.id} doc={d} />
@@ -354,6 +354,16 @@ function OwnerPortfolioDetail() {
                 onRequest={() => setShowModal(true)}
               />
             </LockPanel>
+          )}
+
+          {!isOwner && ownerAgent && (
+            <AgentPanelCard
+              agent={ownerAgent}
+              refNo={p.ref_no}
+              neighborhood={p.neighborhood}
+              district={p.district}
+              city={p.city}
+            />
           )}
         </aside>
       </div>
@@ -376,8 +386,10 @@ function LockPanel({ children, open }: { children: React.ReactNode; open?: boole
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-bu-xl border bg-bu-lock-bg shadow-bu-lock",
-        open ? "border-bu-gold-border" : "border-bu-lock-border",
+        // theme-adaptive (dark navy in dark, light in light) so inner text stays
+        // readable in both modes; gold top line keeps the "locked" emphasis.
+        "overflow-hidden rounded-bu-xl border bg-bu-bg-subtle shadow-bu-lock",
+        open ? "border-bu-gold-border" : "border-bu-border",
       )}
     >
       <div className="h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
