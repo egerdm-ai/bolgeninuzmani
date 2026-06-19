@@ -186,3 +186,20 @@ UI'ı ertelendi (başta Supabase dashboard yeter).
   - `portfolio_images` SELECT RLS dallanır: public → `portfolio_teaser_visible()`;
     locked → `has_portfolio_access()`. M3'te grant gelince kilitli fotoğraflar da
     otomatik açılır (politika değişmeden).
+
+---
+
+## Tasarım yönü (2026-06-19)
+
+- **D35 — Tasarım yönü: "Bölge Uzmanı" (lacivert + altın), dark + light tema.**
+  İki tema modu (toggle), tek semantik token sistemiyle:
+  - **DARK:** zemin #0F1523 (navy), kart #162035, sınır #243150, metin #EEF2FF,
+    ikincil #8899BB, altın vurgu #C9A84C, aksiyon mavi #3B82F6, onay #10B981, red #EF4444.
+  - **LIGHT:** zemin #F4F6FB (soft slate), kart #FFFFFF, sınır #DCE3F0, metin #0F1523,
+    ikincil #5B6B8C, altın #A8862E, aksiyon #2563EB, onay #0E9F6E.
+  - Tipografi: başlık Playfair Display (korunur), gövde Inter, fiyat büyük + altın.
+  - Altın her iki modda korunur; durum rozetleri (bekleyen/onaylı/reddedilen) renk-kodlu.
+  - **Kilitli bölüm:** "erişim kapısı" UI — premium/ayrıcalık hissi (kısıt değil);
+    altın kalkan ikonu + net CTA. Galeri = büyük hero (fotoğraf yıldız). Emlakçı kartı
+    detayda görünür (güven). Bol boşluk, tipografi hiyerarşisi net.
+  - Renk dışındaki her şey (layout/boşluk/bileşen) iki modda ortak; sadece token değerleri değişir.
