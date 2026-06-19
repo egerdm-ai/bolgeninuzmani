@@ -1,64 +1,97 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Plus,
   Search,
   FolderLock,
-  Eye,
   Send,
+  Inbox,
   CheckCircle2,
   Sparkles,
   ArrowRight,
-  Activity as ActivityIcon,
-  Bookmark,
   Target,
-  Download,
-  MapPin,
+  ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
-import { KpiCard, QuickActionCard, InfoPanel, SurfaceCard } from "@/components/vault/cards";
+import { KpiCard, QuickActionCard, InfoPanel } from "@/components/vault/cards";
 import { AIButton } from "@/components/vault/ai-button";
 import { featureFlags } from "@/lib/feature-flags";
 import { Button } from "@/components/ui/button";
-import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { StatusBadge } from "@/components/vault/badges";
-import { PortfolioCard } from "@/components/vault/portfolio-card";
-import { DetailRequestModal } from "@/components/vault/detail-request-modal";
-import {
-  activities,
-  dashboardKpis,
-  detailRequests,
-  myPortfolios,
-  propertyImages,
-} from "@/lib/mock/data";
+import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
 import { useAuth } from "@/lib/auth/auth-context";
-import { networkAnalytics } from "@/lib/mock/matching";
-import { formatNumber, requestStatusLabels, requestStatusTones } from "@/lib/format";
-import { useSaved } from "@/lib/saved-store";
-import type { Portfolio } from "@/lib/mock/types";
+import { listMyPortfolios, type PortfolioWithCover } from "@/lib/data/portfolios";
+import { listInbox, listMyRequests, type InboxRequest } from "@/lib/data/access";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
 });
 
+const STATUS_TONE = { pending: "warning", approved: "success", rejected: "danger" } as const;
+const STATUS_LABEL = {
+  pending: "Bekliyor",
+  approved: "Onaylandı",
+  rejected: "Reddedildi",
+} as const;
+
+const toCard = (p: PortfolioWithCover): TeaserCardData => ({
+  id: p.id,
+  slug: p.slug,
+  title: p.title,
+  price: p.price,
+  currency: p.currency,
+  transaction_type: p.transaction_type,
+  category: p.category,
+  mode: p.mode,
+  ref_no: p.ref_no,
+  city: p.city,
+  district: p.district,
+  neighborhood: p.neighborhood,
+  coverThumb: p.cover_url,
+  coverFull: p.cover_url_full,
+  roomCount: p.room_count,
+  grossM2: p.gross_m2,
+  features: p.features,
+});
+
 function DashboardHome() {
-  const { isSaved, toggleSave } = useSaved();
-  const { profile } = useAuth();
-  const [requestTarget, setRequestTarget] = useState<Portfolio | null>(null);
-  const recent = myPortfolios.filter((p) => p.status === "active").slice(0, 3);
-  const incoming = detailRequests.slice(0, 3);
+  const { user, profile } = useAuth();
+  const [portfolios, setPortfolios] = useState<PortfolioWithCover[] | null>(null);
+  const [inbox, setInbox] = useState<InboxRequest[] | null>(null);
+  const [sentCount, setSentCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    Promise.all([
+      listMyPortfolios(user.id).catch(() => []),
+      listInbox(user.id).catch(() => []),
+      listMyRequests(user.id).catch(() => []),
+    ]).then(([ports, inb, sent]) => {
+      if (!active) return;
+      setPortfolios(ports);
+      setInbox(inb);
+      setSentCount(sent.length);
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  const activeCount = portfolios?.filter((p) => p.status === "active").length ?? 0;
+  const totalCount = portfolios?.length ?? 0;
+  const pendingCount = inbox?.filter((r) => r.status === "pending").length ?? 0;
+  const recent = (portfolios ?? []).slice(0, 3).map(toCard);
+  const incoming = (inbox ?? []).slice(0, 4);
+  const loading = portfolios === null;
 
   return (
     <PageContainer className="space-y-7">
       {/* Hero */}
       <div className="relative overflow-hidden rounded-3xl border border-border shadow-elegant">
-        <img
-          src={propertyImages.villa1}
-          alt=""
-          className="absolute inset-0 size-full object-cover"
-        />
-        {/* fixed dark scrim (bu-lock-bg stays dark in both themes) → cinematic + readable */}
-        <div className="absolute inset-0 bg-gradient-to-r from-bu-lock-bg via-bu-lock-bg/85 to-bu-lock-bg/40" />
+        <div className="absolute inset-0 bg-gradient-to-br from-bu-lock-bg via-bu-lock-bg to-bu-gold/25" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-bu-gold/[0.05] to-bu-gold/15" />
         <div className="relative flex flex-col gap-6 p-7 lg:p-10">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-medium text-gold-light ring-1 ring-inset ring-gold/30">
@@ -68,7 +101,7 @@ function DashboardHome() {
               Hoş geldiniz, {(profile?.full_name ?? "").split(" ")[0]}
             </h1>
             <p className="mt-3 text-base text-white/80">
-              Lüks portföylerinizi yönetin, harita üzerinde keşfedin ve doğrulanmış ağınızla güvenle
+              Portföylerinizi yönetin, doğrulanmış ağınızda keşfedin ve kontrollü erişimle güvenle
               paylaşın.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -87,89 +120,31 @@ function DashboardHome() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Link to="/dashboard/portfolios/new">
           <QuickActionCard
             label="Portföy Oluştur"
-            description="Yeni lüks portföy ekle"
+            description="Yeni portföy ekle"
             icon={Plus}
             accent
           />
         </Link>
+        <Link to="/dashboard/search">
+          <QuickActionCard label="Keşfet" description="Ağdaki portföyleri ara" icon={Search} />
+        </Link>
         {featureFlags.arayis && (
           <Link to="/dashboard/my-searches/new">
-            <QuickActionCard
-              label="Yeni Arayış"
-              description="Müşteri için portföy eşleştir"
-              icon={Target}
-            />
-          </Link>
-        )}
-        <Link to="/dashboard/search">
-          <QuickActionCard label="Portföy Ara" description="Harita üzerinde keşfet" icon={Search} />
-        </Link>
-        {featureFlags.assistant && (
-          <Link to="/dashboard/assistant">
-            <QuickActionCard
-              label="Asistan"
-              description="Akıllı eşleştirme & değerleme"
-              icon={Sparkles}
-            />
+            <QuickActionCard label="Yeni Arayış" description="Müşteri için ara" icon={Target} />
           </Link>
         )}
       </div>
 
-      {/* KPIs */}
+      {/* KPIs — real */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          label="Aktif Portföy"
-          value={formatNumber(networkAnalytics.activePortfolios)}
-          delta="+3 bu ay"
-          icon={FolderLock}
-        />
-        <KpiCard
-          label="Aktif Arayış"
-          value={formatNumber(networkAnalytics.activeSearches)}
-          delta="+2 bu hafta"
-          icon={Target}
-        />
-        <KpiCard
-          label="Eşleşen Arayışlar"
-          value={formatNumber(networkAnalytics.matchedSearches)}
-          delta="Yeni eşleşmeler"
-          icon={Sparkles}
-        />
-        <KpiCard
-          label="Gelen Detay Talepleri"
-          value={formatNumber(networkAnalytics.detailRequests)}
-          delta="+5 yeni"
-          icon={Send}
-        />
-        <KpiCard
-          label="PDF İndirme"
-          value={formatNumber(networkAnalytics.pdfDownloads)}
-          delta="+18 bu ay"
-          icon={Download}
-        />
-        <KpiCard
-          label="Profil Görüntülenme"
-          value={formatNumber(networkAnalytics.profileViews)}
-          delta="+12% bu ay"
-          icon={Eye}
-        />
-        <KpiCard
-          label="Kaydedilen Portföy"
-          value={formatNumber(dashboardKpis.savedPortfolios)}
-          delta="+4 bu ay"
-          icon={Bookmark}
-        />
-        <KpiCard
-          label="En Aktif Bölge"
-          value={networkAnalytics.topRegion}
-          delta="Yüksek talep"
-          deltaTone="muted"
-          icon={MapPin}
-        />
+        <KpiCard label="Aktif Portföy" value={String(activeCount)} icon={FolderLock} />
+        <KpiCard label="Toplam Portföy" value={String(totalCount)} icon={FolderLock} />
+        <KpiCard label="Bekleyen Talep" value={String(pendingCount)} icon={Inbox} />
+        <KpiCard label="Gönderdiğim Talep" value={String(sentCount)} icon={Send} />
       </div>
 
       <div className="grid gap-7 lg:grid-cols-3">
@@ -191,19 +166,29 @@ function DashboardHome() {
                 </Link>
               </Button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {recent.map((p) => (
-                <PortfolioCard
-                  key={p.id}
-                  portfolio={p}
-                  saved={isSaved(p.id)}
-                  onToggleSave={toggleSave}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+                <Loader2 className="size-6 animate-spin text-gold" />
+              </div>
+            ) : recent.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-12 text-center text-sm text-muted-foreground">
+                Henüz portföyünüz yok.{" "}
+                <Link to="/dashboard/portfolios/new" className="text-gold hover:underline">
+                  İlk portföyünüzü ekleyin.
+                </Link>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {recent.map((p) => (
+                  <PortfolioTeaserCard key={p.id} p={p} context="app" />
+                ))}
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Incoming requests */}
+        {/* Right rail — incoming requests */}
+        <div className="space-y-7">
           <InfoPanel
             title="Gelen Detay Talepleri"
             action={
@@ -219,86 +204,45 @@ function DashboardHome() {
               </Button>
             }
           >
-            <ul className="space-y-3">
-              {incoming.map((r) => (
-                <li
-                  key={r.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-3"
-                >
-                  <BrokerAvatar name={r.requester.fullName} size="md" />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-semibold text-foreground">
-                        {r.requester.fullName}
-                      </p>
-                      <StatusBadge
-                        label={requestStatusLabels[r.status]}
-                        tone={requestStatusTones[r.status]}
-                      />
-                    </div>
-                    <p className="truncate text-xs text-muted-foreground">{r.portfolio.title}</p>
-                  </div>
-                  <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:block">
-                    {r.createdAt}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </InfoPanel>
-        </div>
-
-        {/* Right rail */}
-        <div className="space-y-7">
-          {/* Asistan CTA — deferred (D18) */}
-          {featureFlags.assistant && (
-            <SurfaceCard className="border-gold/30 bg-gold/[0.05]">
-              <span className="flex size-10 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground">
-                <Sparkles className="size-5" />
-              </span>
-              <h3 className="mt-3 font-display text-lg font-semibold text-foreground">Asistan</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Arayıştan portföy bulun, portföyü arayışlarla eşleştirin ve bölge uzmanı önerileri
-                alın.
+            {loading ? (
+              <div className="flex items-center justify-center py-6">
+                <Loader2 className="size-5 animate-spin text-gold" />
+              </div>
+            ) : incoming.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Henüz erişim talebi yok.
               </p>
-              <Button
-                asChild
-                className="mt-4 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-              >
-                <Link to="/dashboard/assistant">
-                  <Sparkles className="size-4" /> Asistan ile Eşleştir
-                </Link>
-              </Button>
-            </SurfaceCard>
-          )}
-
-          {/* Activity */}
-          <InfoPanel title="Son Aktiviteler">
-            <ul className="space-y-4">
-              {activities.map((a) => (
-                <li key={a.id} className="flex gap-3">
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-gold">
-                    {a.type === "request" && <Send className="size-3.5" />}
-                    {a.type === "view" && <Eye className="size-3.5" />}
-                    {a.type === "save" && <Bookmark className="size-3.5" />}
-                    {a.type === "approve" && <CheckCircle2 className="size-3.5" />}
-                    {a.type === "publish" && <ActivityIcon className="size-3.5" />}
-                  </span>
-                  <div>
-                    <p className="text-sm text-secondary-foreground">{a.text}</p>
-                    <p className="text-xs text-muted-foreground">{a.time}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            ) : (
+              <ul className="space-y-3">
+                {incoming.map((r) => (
+                  <li
+                    key={r.id}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface-2 p-3"
+                  >
+                    <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-surface-3 text-gold">
+                      {r.status === "approved" ? (
+                        <CheckCircle2 className="size-4" />
+                      ) : (
+                        <Send className="size-4" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="flex items-center gap-1 truncate text-sm font-semibold text-foreground">
+                        {r.requester?.full_name ?? "Bir üye"}
+                        <ShieldCheck className="size-3 shrink-0 text-gold" />
+                      </p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {r.portfolio?.title ?? "Portföy"}
+                      </p>
+                    </div>
+                    <StatusBadge label={STATUS_LABEL[r.status]} tone={STATUS_TONE[r.status]} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </InfoPanel>
         </div>
       </div>
-
-      <DetailRequestModal
-        portfolio={requestTarget}
-        open={!!requestTarget}
-        onOpenChange={(o) => !o && setRequestTarget(null)}
-      />
     </PageContainer>
   );
 }
