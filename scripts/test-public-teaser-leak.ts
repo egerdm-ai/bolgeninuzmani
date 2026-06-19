@@ -100,4 +100,17 @@ assertNoForbidden(
   stripTsComments(readFileSync(join(root, "src/routes/v.$username.tsx"), "utf8")),
 );
 
-console.log("\npublic teaser + Keşfet + agent profile: no locked field leaks ✓");
+// 9) M3 request/inbox surfaces — metadata only; must NOT select locked columns.
+//    (The portfolio DETAIL page is intentionally excluded: it renders locked
+//    values gated by isOwner||hasPortfolioAccess + RLS, proven separately by
+//    scripts/m3-grant-test.sql + the read-only probe in M3_PROGRESS.md.)
+assertNoForbidden(
+  "access.ts (M3 data layer)",
+  stripTsComments(readFileSync(join(root, "src/lib/data/access.ts"), "utf8")),
+);
+assertNoForbidden(
+  "dashboard.detail-requests.tsx (inbox)",
+  stripTsComments(readFileSync(join(root, "src/routes/dashboard.detail-requests.tsx"), "utf8")),
+);
+
+console.log("\npublic teaser + Keşfet + agent profile + M3 inbox: no locked field leaks ✓");
