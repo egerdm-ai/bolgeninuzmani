@@ -100,3 +100,43 @@ indirilen bytes aynı. **En yüksek etki burada.**
 > Migration gerekirse (thumb_path kolonu) yalnızca TASLAK yazılacak, sen uygularsın.
 > Hiçbir DECISIONS değişmez, kilitli veri sızmaz (thumbnail'ler de visibility'e tabi:
 > locked foto thumb'u da private bucket + signed URL).
+
+---
+
+# ADIM 2 — UYGULANDI (öncesi / sonrası)
+
+**MIGRATION YOK** — `thumb_path` kolonu yerine path konvansiyonu (`<uuid>.webp` +
+`<uuid>_thumb.webp`, thumb yolu display'den türetiliyor). DECISIONS'a dokunulmadı.
+Kilitli görsel + thumb private bucket'ta, ikisi de signed URL.
+
+### 1. Görsel optimizasyonu (en yüksek etki)
+- Upload'ta client-side (canvas/WebP) **iki türev**: display ≤1600px q0.8, thumb ≤400px q0.7.
+  Ham ~4 MB **artık saklanmıyor**. Kart/liste/galeri-thumb → thumb; detay kapak/lightbox → display.
+- **Bundle etkisi (ölçüldü):** client JS toplam **1208 KB** (öncesi de ~1208 KB),
+  `index` chunk **336 KB** — değişmedi; `image-resize.ts` +1.7 KB. **Regresyon yok.**
+- **Görsel ağırlığı (projeksiyon — parametrelerden):** kart başına 4 MB → **~30–60 KB thumb**
+  (~%98 ↓). **Keşfet 12 kart: ~45 MB → ~0.5–0.7 MB.** Detay küçük resimleri: her biri 4 MB →
+  ~50 KB. Kesin rakam **yeni bir görsel yükledikten sonra** ölçülür (Network sekmesi).
+- ⚠️ **Mevcut 11 eski görsel 4 MB kalır** (kart onError ile full'e düşer → kırılmaz, sadece
+  optimize değil). Bir kerelik dönüştürme için `scripts/backfill-thumbnails.mjs` (sharp, service
+  role) — **ben çalıştırmadım, sana bıraktım** (storage yazımı).
+
+### 2. Detay signed-URL batch (ölçüldü, kod)
+- Önce: kilitli görsel başına ayrı `createSignedUrl` (k istek). Sonra: **tek `createSignedUrls`**
+  (tüm locked display+thumb yolları tek çağrı). Test portföyü: 2 kilitli görsel →
+  önce ~2 ayrı istek, şimdi **1** istek (üstelik thumb'ları da imzalıyor).
+
+### 3. Keşfet (ölçüldü, kod)
+- `count:exact` → **`count:estimated`** (küçük tabloda exact, ölçekte planner tahmini → ucuz COUNT).
+- Her filtrede `setResult(null)` (tam spinner / boş ekran) → **eski sonuç ekranda kalır +
+  üstte ince loading bar** (titreme yok).
+
+### Doğrulama
+- `tsc` ✅ · `vite build` ✅ · `eslint` 0 hata · `test:leak` 10/10 (kilitli sızıntı yok;
+  locked thumb da private bucket + signed URL).
+- **dev vs prod:** ağırlık farkı `npm run build` + `vite preview`'da net görülür; `vite dev`'de
+  HMR/transform yavaşlığı bunun üstüne biner.
+
+### Commit'ler
+- `docs: PERF_REPORT — measured perf diagnosis (ADIM 1)`
+- `perf: client-side image resize on upload (WebP display+thumb) + thumb usage + batched signed URLs + Keşfet UX`
