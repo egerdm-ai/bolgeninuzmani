@@ -28,3 +28,32 @@ export function RefNoText({ value, className }: { value: string; className?: str
     <span className={cn("text-[11px] text-muted-foreground", className)}>Portföy No: {value}</span>
   );
 }
+
+/**
+ * D37 locked transparency — shows WHAT unlocks after an approved Detay Talebi
+ * (static labels, NOT values) + optional locked-photo COUNT (a non-identifying
+ * number; values never shown). Controlled portfolios only.
+ */
+export function LockedRevealList({ photoCount }: { photoCount?: number | null }) {
+  const items = ["Tam adres", "Malik bilgisi", "Tapu / belgeler", "Özel notlar"];
+  return (
+    <div className="space-y-1.5 text-left">
+      <p className="text-[11px] font-medium text-muted-foreground">Onay sonrası açılır:</p>
+      <div className="flex flex-wrap gap-1.5">
+        {items.map((i) => (
+          <span
+            key={i}
+            className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-secondary-foreground"
+          >
+            {i}
+          </span>
+        ))}
+        {photoCount != null && photoCount > 0 && (
+          <span className="rounded-md bg-surface-2 px-2 py-0.5 text-[11px] text-secondary-foreground">
+            🔒 {photoCount} kilitli fotoğraf
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}

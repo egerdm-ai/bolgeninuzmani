@@ -20,7 +20,11 @@ import {
   type PublicPortfolio,
 } from "@/lib/data/public-portfolio";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
-import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
+import {
+  ClosedModeBadge,
+  RefNoText,
+  LockedRevealList,
+} from "@/components/portfolio/portfolio-badges";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 
@@ -280,20 +284,43 @@ function Teaser({
           </div>
         )}
 
-        {/* Locked details → member-only (D5/D22). No values shown. */}
-        <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-5 text-center">
-          <Lock className="mx-auto size-6 text-gold" />
-          <p className="mt-2 text-sm font-semibold text-foreground">Tam detaylar üyelere özel</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Tam adres, tapu/belgeler ve özel bilgiler için doğrulanmış üye girişi gerekir.
-          </p>
-          <Button
-            asChild
-            className="mt-3 w-full bg-gradient-gold text-primary-foreground hover:opacity-90"
-          >
-            <Link to="/login">Detay Talebi için Giriş Yap</Link>
-          </Button>
-        </div>
+        {data.mode === "call_only" ? (
+          // D36 call_only: no locked reveal flow — contact-only.
+          <div className="rounded-2xl border border-gold/30 bg-gold/[0.05] p-5 text-center">
+            <Phone className="mx-auto size-6 text-gold" />
+            <p className="mt-2 text-sm font-semibold text-foreground">Kapalı Portföy</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Bu portföyün detayları paylaşılmıyor. Tüm bilgiler için emlakçıyı arayın.
+            </p>
+            {data.agent?.contact_phone && (
+              <Button
+                asChild
+                className="mt-3 w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+              >
+                <a href={`tel:${data.agent.contact_phone}`}>
+                  <Phone className="size-4" /> {data.agent.contact_phone}
+                </a>
+              </Button>
+            )}
+          </div>
+        ) : (
+          // controlled (D5/D22 + D37): member-only; show WHAT unlocks (labels only).
+          <div className="space-y-3 rounded-2xl border border-gold/30 bg-gold/[0.05] p-5">
+            <div className="text-center">
+              <Lock className="mx-auto size-6 text-gold" />
+              <p className="mt-2 text-sm font-semibold text-foreground">
+                Tam detaylar üyelere özel
+              </p>
+            </div>
+            <LockedRevealList photoCount={data.locked_photo_count} />
+            <Button
+              asChild
+              className="w-full bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/login">Detay Talebi için Giriş Yap</Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

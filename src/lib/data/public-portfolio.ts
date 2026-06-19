@@ -56,6 +56,9 @@ export type PublicPortfolio = {
   created_at: string;
   mode: Mode;
   ref_no: string;
+  // D37: count of LOCKED photos (non-identifying). Optional — populated only after
+  // the locked_photo_count migration draft is applied to get_public_portfolio.
+  locked_photo_count?: number | null;
   attributes: Record<string, unknown>;
   images: PublicTeaserImage[];
   agent: PublicAgent | null;

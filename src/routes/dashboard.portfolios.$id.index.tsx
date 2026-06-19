@@ -14,6 +14,8 @@ import {
   ArrowLeft,
   Clock,
   Send,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -24,8 +26,10 @@ import { useAuth } from "@/lib/auth/auth-context";
 import {
   getMyPortfolioFull,
   documentSignedUrl,
+  getOwnerContact,
   type PortfolioFull,
   type PortfolioDocument,
+  type OwnerContact,
 } from "@/lib/data/portfolios";
 import {
   requestDetail,
@@ -42,7 +46,11 @@ import {
 import { attributeDef } from "@/lib/portfolio-attributes";
 import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
-import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
+import {
+  ClosedModeBadge,
+  RefNoText,
+  LockedRevealList,
+} from "@/components/portfolio/portfolio-badges";
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/")({
   component: OwnerPortfolioDetail,
@@ -60,6 +68,7 @@ function OwnerPortfolioDetail() {
   // M3 controlled-access state (non-owner viewers).
   const [access, setAccess] = useState(false);
   const [myRequest, setMyRequest] = useState<DetailRequest | null>(null);
+  const [ownerContact, setOwnerContact] = useState<OwnerContact | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState("");
   const [requesting, setRequesting] = useState(false);
@@ -72,13 +81,19 @@ function OwnerPortfolioDetail() {
         if (!active) return;
         setFull(d);
         if (d && user && user.id !== d.portfolio.owner_id) {
-          const [acc, req] = await Promise.all([
-            hasPortfolioAccess(id),
-            myRequestForPortfolio(id, user.id),
-          ]);
-          if (!active) return;
-          setAccess(acc);
-          setMyRequest(req);
+          if (d.portfolio.mode === "call_only") {
+            // call_only: no access/request flow — just the agent's contact for "ara".
+            const c = await getOwnerContact(d.portfolio.owner_id);
+            if (active) setOwnerContact(c);
+          } else {
+            const [acc, req] = await Promise.all([
+              hasPortfolioAccess(id),
+              myRequestForPortfolio(id, user.id),
+            ]);
+            if (!active) return;
+            setAccess(acc);
+            setMyRequest(req);
+          }
         }
       } catch (e) {
         if (active) setError(e instanceof Error ? e.message : String(e));
@@ -137,13 +152,18 @@ function OwnerPortfolioDetail() {
 
   const p = full.portfolio;
   const isOwner = user?.id === p.owner_id;
-  const canSeeLocked = isOwner || access; // owner OR active grant (D6/D7)
-  const imageUrls = full.images.map((i) => i.url);
+  const callOnly = p.mode === "call_only"; // D36: no locked fields / no Detay Talebi flow
+  const canSeeLocked = !callOnly && (isOwner || access); // owner OR active grant (D6/D7)
+  // call_only has no "locked photo" concept → only public images anywhere.
+  const galleryImages = callOnly
+    ? full.images.filter((i) => i.visibility === "public")
+    : full.images;
+  const imageUrls = galleryImages.map((i) => i.url);
   const coverIdx = Math.max(
     0,
-    full.images.findIndex((i) => i.is_cover),
+    galleryImages.findIndex((i) => i.is_cover),
   );
-  const cover = full.images.find((i) => i.is_cover) ?? full.images[0];
+  const cover = galleryImages.find((i) => i.is_cover) ?? galleryImages[0];
 
   return (
     <PageContainer className="space-y-6">
@@ -199,9 +219,9 @@ function OwnerPortfolioDetail() {
                 {STATUS_LABELS[p.status]}
               </span>
             </div>
-            {full.images.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-2">
-                {full.images.map((img, idx) => (
+                {galleryImages.map((img, idx) => (
                   <div key={img.id} className="relative shrink-0">
                     <ThumbImage
                       thumb={img.thumbUrl}
@@ -273,52 +293,106 @@ function OwnerPortfolioDetail() {
           </SurfaceCard>
         </div>
 
-        {/* Right rail — LOCKED data (owner / granted only) */}
+        {/* Right rail */}
         <div className="space-y-5">
-          <SurfaceCard
-            className={`space-y-3 ${canSeeLocked ? "border-gold/40 bg-gold/[0.06]" : "border-gold/30 bg-gold/[0.04]"}`}
-          >
-            <div className="flex items-center gap-1.5">
-              {canSeeLocked ? (
-                <LockOpen className="size-4 text-gold" />
-              ) : (
-                <Lock className="size-4 text-gold" />
-              )}
-              <h3 className="text-sm font-semibold text-foreground">
-                Kilitli Bilgiler{!isOwner && access ? " (erişim onaylı)" : ""}
-              </h3>
-            </div>
-
-            {canSeeLocked ? (
-              <>
-                <p className="text-[11px] text-muted-foreground">
-                  {isOwner
-                    ? "Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20)."
-                    : "Portföy sahibi erişiminizi onayladı — tam bilgiler açık."}
+          {callOnly ? (
+            // D36 call_only: no locked fields / no Detay Talebi — contact-only.
+            <SurfaceCard className="space-y-3 border-gold/40 bg-gold/[0.06]">
+              <div className="flex items-center gap-1.5">
+                <Phone className="size-4 text-gold" />
+                <h3 className="text-sm font-semibold text-foreground">Kapalı Portföy</h3>
+              </div>
+              {isOwner ? (
+                <p className="text-xs text-muted-foreground">
+                  Bu portföy “Kapalı Portföy” modunda — kilitli alan yok. Paylaşımda müşteriye
+                  “detaylar için arayın” + telefonunuz gösterilir.
                 </p>
-                {full.private ? (
-                  <dl className="space-y-2 text-sm">
-                    <LockRow label="Tam Adres" value={full.private.exact_address} />
-                    <LockRow
-                      label="Tam Koordinat"
-                      value={
-                        full.private.exact_lat != null && full.private.exact_lng != null
-                          ? `${full.private.exact_lat}, ${full.private.exact_lng}`
-                          : null
-                      }
-                    />
-                    <LockRow label="Özel Açıklama" value={full.private.private_description} />
-                    <LockRow label="Özel Notlar" value={full.private.private_notes} />
-                    <AttrList data={full.private.attributes} />
-                  </dl>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    Bu kapalı bir portföydür. Detaylar için emlakçıyı arayın.
+                  </p>
+                  {ownerContact?.contact_phone && (
+                    <Button
+                      asChild
+                      className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+                    >
+                      <a href={`tel:${ownerContact.contact_phone}`}>
+                        <Phone className="size-4" /> {ownerContact.contact_phone}
+                      </a>
+                    </Button>
+                  )}
+                  {ownerContact?.contact_whatsapp && (
+                    <Button asChild variant="outline" className="w-full gap-1.5">
+                      <a
+                        href={`https://wa.me/${ownerContact.contact_whatsapp.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <MessageCircle className="size-4" /> WhatsApp
+                      </a>
+                    </Button>
+                  )}
+                  {ownerContact &&
+                    !ownerContact.contact_phone &&
+                    !ownerContact.contact_whatsapp && (
+                      <p className="text-xs text-muted-foreground">
+                        Emlakçı iletişim bilgisi paylaşmamış.
+                      </p>
+                    )}
+                </>
+              )}
+            </SurfaceCard>
+          ) : (
+            <SurfaceCard
+              className={`space-y-3 ${canSeeLocked ? "border-gold/40 bg-gold/[0.06]" : "border-gold/30 bg-gold/[0.04]"}`}
+            >
+              <div className="flex items-center gap-1.5">
+                {canSeeLocked ? (
+                  <LockOpen className="size-4 text-gold" />
                 ) : (
-                  <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
+                  <Lock className="size-4 text-gold" />
                 )}
-              </>
-            ) : (
-              <RequestPanel status={myRequest?.status} onRequest={() => setShowModal(true)} />
-            )}
-          </SurfaceCard>
+                <h3 className="text-sm font-semibold text-foreground">
+                  Kilitli Bilgiler{!isOwner && access ? " (erişim onaylı)" : ""}
+                </h3>
+              </div>
+
+              {canSeeLocked ? (
+                <>
+                  <p className="text-[11px] text-muted-foreground">
+                    {isOwner
+                      ? "Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20)."
+                      : "Portföy sahibi erişiminizi onayladı — tam bilgiler açık."}
+                  </p>
+                  {full.private ? (
+                    <dl className="space-y-2 text-sm">
+                      <LockRow label="Tam Adres" value={full.private.exact_address} />
+                      <LockRow
+                        label="Tam Koordinat"
+                        value={
+                          full.private.exact_lat != null && full.private.exact_lng != null
+                            ? `${full.private.exact_lat}, ${full.private.exact_lng}`
+                            : null
+                        }
+                      />
+                      <LockRow label="Özel Açıklama" value={full.private.private_description} />
+                      <LockRow label="Özel Notlar" value={full.private.private_notes} />
+                      <AttrList data={full.private.attributes} />
+                    </dl>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
+                  )}
+                </>
+              ) : (
+                <div className="space-y-3">
+                  <RequestPanel status={myRequest?.status} onRequest={() => setShowModal(true)} />
+                  {/* D37: what unlocks after approval (labels only, no values) */}
+                  <LockedRevealList />
+                </div>
+              )}
+            </SurfaceCard>
+          )}
 
           {/* Approx vs exact note (D30) */}
           <SurfaceCard className="space-y-1.5">
@@ -331,17 +405,19 @@ function OwnerPortfolioDetail() {
             </p>
           </SurfaceCard>
 
-          {/* Documents (locked) */}
-          <SurfaceCard className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">Belgeler (kilitli)</h3>
-            {!canSeeLocked ? (
-              <p className="text-xs text-muted-foreground">🔒 Erişim onayı ile görünür.</p>
-            ) : full.documents.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Belge eklenmemiş.</p>
-            ) : (
-              full.documents.map((d) => <DocRow key={d.id} doc={d} />)
-            )}
-          </SurfaceCard>
+          {/* Documents (locked) — controlled only */}
+          {!callOnly && (
+            <SurfaceCard className="space-y-2">
+              <h3 className="text-sm font-semibold text-foreground">Belgeler (kilitli)</h3>
+              {!canSeeLocked ? (
+                <p className="text-xs text-muted-foreground">🔒 Erişim onayı ile görünür.</p>
+              ) : full.documents.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Belge eklenmemiş.</p>
+              ) : (
+                full.documents.map((d) => <DocRow key={d.id} doc={d} />)
+              )}
+            </SurfaceCard>
+          )}
         </div>
       </div>
 

@@ -27,6 +27,7 @@ export type PortfolioStatus = Database["public"]["Enums"]["portfolio_status"];
 export type PortfolioCategory = Database["public"]["Enums"]["portfolio_category"];
 export type TransactionType = Database["public"]["Enums"]["transaction_type"];
 export type Currency = Database["public"]["Enums"]["currency"];
+export type PortfolioMode = Database["public"]["Enums"]["portfolio_mode"];
 
 const IMAGES_BUCKET = "portfolio-images";
 const IMAGES_LOCKED_BUCKET = "portfolio-images-locked";
@@ -61,6 +62,7 @@ export type PortfolioTeaserInput = {
   district?: string | null;
   neighborhood?: string | null;
   status?: PortfolioStatus;
+  mode?: PortfolioMode; // D36 controlled|call_only (public teaser column)
 };
 
 /** Locked fields (D20) — collected on an owner-only step; go to portfolio_private. */
@@ -102,6 +104,24 @@ export function portfolioThumbUrl(path: string): string {
 
 const privateHasData = (p: PortfolioPrivateInput) =>
   Object.values(p).some((v) => v !== undefined && v !== null && v !== "");
+
+/** Owner's PUBLIC contact (D8) — for the call_only "ara" CTA shown to other agents. */
+export type OwnerContact = {
+  full_name: string;
+  username: string;
+  contact_phone: string | null;
+  contact_whatsapp: string | null;
+};
+
+export async function getOwnerContact(ownerId: string): Promise<OwnerContact | null> {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("full_name, username, contact_phone, contact_whatsapp")
+    .eq("id", ownerId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ?? null;
+}
 
 // ---------------------------------------------------------------------------
 // Reads

@@ -91,6 +91,7 @@ function EditPortfolio() {
           net_m2: numStr(p.net_m2),
           land_m2: numStr(p.land_m2),
           features: (p.features ?? []).join(", "),
+          mode: p.mode,
         });
         const m =
           full.private?.malik_info && typeof full.private.malik_info === "object"

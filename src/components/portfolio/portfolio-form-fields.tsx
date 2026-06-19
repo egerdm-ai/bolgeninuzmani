@@ -24,6 +24,7 @@ import type {
   PortfolioTeaserInput,
   PortfolioPrivateInput,
   PortfolioStatus,
+  PortfolioMode,
   PendingImage,
 } from "@/lib/data/portfolios";
 import type { Json } from "@/lib/database.types";
@@ -45,6 +46,7 @@ export type TeaserFormState = {
   net_m2: string;
   land_m2: string;
   features: string;
+  mode: PortfolioMode;
 };
 
 export type PrivateFormState = {
@@ -73,6 +75,7 @@ export const emptyTeaser: TeaserFormState = {
   net_m2: "",
   land_m2: "",
   features: "",
+  mode: "controlled",
 };
 
 export const emptyPrivate: PrivateFormState = {
@@ -118,6 +121,7 @@ export function buildTeaserInput(
     land_m2: toNum(t.land_m2),
     features: toList(t.features),
     status,
+    mode: t.mode,
   };
 }
 
@@ -167,6 +171,16 @@ export function PortfolioFormFields({
   const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
   const sp = (k: keyof PrivateFormState) => (v: string) => setPriv({ ...priv, [k]: v });
   const setAttr = (k: string, v: string | boolean) => setAttrs({ ...attrs, [k]: v });
+
+  // Are any LOCKED inputs filled? Drives the call_only suggestion hint (D36).
+  const lockedFilled =
+    Object.values(priv).some((v) => v.trim() !== "") ||
+    LOCKED_ATTRIBUTES.some((d) => {
+      const v = attrs[d.key];
+      return v !== undefined && v !== "" && v !== false;
+    }) ||
+    images.some((i) => i.visibility === "locked");
+  const callOnly = teaser.mode === "call_only";
 
   return (
     <>
@@ -219,6 +233,30 @@ export function PortfolioFormFields({
             onChange={(e) => sf("public_description")(e.target.value)}
           />
         </Field>
+      </SurfaceCard>
+
+      {/* Portföy modu (D36) */}
+      <SurfaceCard className="space-y-3">
+        <SectionTitle icon={ShieldCheck} title="Portföy Modu" />
+        <div className="grid gap-3 sm:grid-cols-2">
+          <ModeOption
+            active={!callOnly}
+            onClick={() => sf("mode")("controlled")}
+            title="Kontrollü Paylaşım"
+            desc="Kilitli alanlar (tam adres, malik, belgeler) + Detay Talebi akışı. Diğer emlakçılar onay alarak görür."
+          />
+          <ModeOption
+            active={callOnly}
+            onClick={() => sf("mode")("call_only")}
+            title="Kapalı Portföy — sadece ara"
+            desc="Kilitli alan yok. Teaser'da 'detaylar için arayın' + telefonunuz görünür; Detay Talebi akışı kapalı."
+          />
+        </div>
+        {!callOnly && !lockedFilled && (
+          <p className="text-xs text-muted-foreground">
+            İpucu: kilitli bilgi girmeyecekseniz “Kapalı Portföy” modunu seçebilirsiniz.
+          </p>
+        )}
       </SurfaceCard>
 
       <SurfaceCard className="space-y-4">
@@ -364,25 +402,27 @@ export function PortfolioFormFields({
                   >
                     <X className="size-3" />
                   </button>
-                  {/* D34: pick visibility per photo at create time too */}
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setImages(
-                        images.map((it, j) =>
-                          j === i
-                            ? {
-                                ...it,
-                                visibility: it.visibility === "locked" ? "public" : "locked",
-                              }
-                            : it,
-                        ),
-                      )
-                    }
-                    className={`absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
-                  >
-                    {item.visibility === "locked" ? "Kilitli" : "Açık"}
-                  </button>
+                  {/* D34: pick visibility per photo (controlled only; call_only = all public) */}
+                  {!callOnly && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImages(
+                          images.map((it, j) =>
+                            j === i
+                              ? {
+                                  ...it,
+                                  visibility: it.visibility === "locked" ? "public" : "locked",
+                                }
+                              : it,
+                          ),
+                        )
+                      }
+                      className={`absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
+                    >
+                      {item.visibility === "locked" ? "Kilitli" : "Açık"}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -390,62 +430,97 @@ export function PortfolioFormFields({
         </SurfaceCard>
       )}
 
-      <SurfaceCard className="space-y-4 border-gold/25">
-        <SectionTitle icon={Lock} title="Kilitli Bilgiler" />
-        <p className="-mt-2 flex items-center gap-1.5 text-xs text-gold">
-          <Lock className="size-3.5" /> Bu alanlar teaser'da GÖRÜNMEZ; yalnızca size ve erişim
-          onayladığınız emlakçılara açılır. Tam koordinattan ~yaklaşık harita pini otomatik
-          üretilir.
-        </p>
-        <Field label="Tam Adres">
-          <Input value={priv.exact_address} onChange={(e) => sp("exact_address")(e.target.value)} />
-        </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Tam Enlem (lat)">
+      {!callOnly && (
+        <SurfaceCard className="space-y-4 border-gold/25">
+          <SectionTitle icon={Lock} title="Kilitli Bilgiler" />
+          <p className="-mt-2 flex items-center gap-1.5 text-xs text-gold">
+            <Lock className="size-3.5" /> Bu alanlar teaser'da GÖRÜNMEZ; yalnızca size ve erişim
+            onayladığınız emlakçılara açılır. Tam koordinattan ~yaklaşık harita pini otomatik
+            üretilir.
+          </p>
+          <Field label="Tam Adres">
             <Input
-              type="number"
-              value={priv.exact_lat}
-              onChange={(e) => sp("exact_lat")(e.target.value)}
-              placeholder="37.1234"
+              value={priv.exact_address}
+              onChange={(e) => sp("exact_address")(e.target.value)}
             />
           </Field>
-          <Field label="Tam Boylam (lng)">
-            <Input
-              type="number"
-              value={priv.exact_lng}
-              onChange={(e) => sp("exact_lng")(e.target.value)}
-              placeholder="27.4321"
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Tam Enlem (lat)">
+              <Input
+                type="number"
+                value={priv.exact_lat}
+                onChange={(e) => sp("exact_lat")(e.target.value)}
+                placeholder="37.1234"
+              />
+            </Field>
+            <Field label="Tam Boylam (lng)">
+              <Input
+                type="number"
+                value={priv.exact_lng}
+                onChange={(e) => sp("exact_lng")(e.target.value)}
+                placeholder="27.4321"
+              />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Malik Adı">
+              <Input value={priv.malik_name} onChange={(e) => sp("malik_name")(e.target.value)} />
+            </Field>
+            <Field label="Malik İletişim">
+              <Input
+                value={priv.malik_contact}
+                onChange={(e) => sp("malik_contact")(e.target.value)}
+              />
+            </Field>
+          </div>
+          <Field label="Özel Açıklama">
+            <Textarea
+              rows={3}
+              value={priv.private_description}
+              onChange={(e) => sp("private_description")(e.target.value)}
             />
           </Field>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Malik Adı">
-            <Input value={priv.malik_name} onChange={(e) => sp("malik_name")(e.target.value)} />
-          </Field>
-          <Field label="Malik İletişim">
-            <Input
-              value={priv.malik_contact}
-              onChange={(e) => sp("malik_contact")(e.target.value)}
+          <Field label="Özel Notlar">
+            <Textarea
+              rows={2}
+              value={priv.private_notes}
+              onChange={(e) => sp("private_notes")(e.target.value)}
             />
           </Field>
-        </div>
-        <Field label="Özel Açıklama">
-          <Textarea
-            rows={3}
-            value={priv.private_description}
-            onChange={(e) => sp("private_description")(e.target.value)}
-          />
-        </Field>
-        <Field label="Özel Notlar">
-          <Textarea
-            rows={2}
-            value={priv.private_notes}
-            onChange={(e) => sp("private_notes")(e.target.value)}
-          />
-        </Field>
-        <AttrGrid defs={LOCKED_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
-      </SurfaceCard>
+          <AttrGrid defs={LOCKED_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
+        </SurfaceCard>
+      )}
     </>
+  );
+}
+
+function ModeOption({
+  active,
+  onClick,
+  title,
+  desc,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-xl border p-3 text-left transition-colors ${active ? "border-gold/60 bg-gold/[0.06]" : "border-border bg-surface-2 hover:border-border-strong"}`}
+    >
+      <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+        <span
+          className={`flex size-4 items-center justify-center rounded-full border ${active ? "border-gold bg-gold" : "border-border-strong"}`}
+        >
+          {active && <span className="size-1.5 rounded-full bg-primary-foreground" />}
+        </span>
+        {title}
+      </span>
+      <span className="mt-1 block text-xs text-muted-foreground">{desc}</span>
+    </button>
   );
 }
 
