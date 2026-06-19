@@ -265,6 +265,13 @@ function Teaser({
                 </Button>
               )}
             </div>
+            <Link
+              to="/v/$username"
+              params={{ username: data.agent.username }}
+              className="mt-3 flex items-center justify-center gap-1 text-xs font-medium text-gold hover:underline"
+            >
+              Uzmanın tüm portföyleri →
+            </Link>
           </div>
         )}
 

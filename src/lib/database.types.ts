@@ -335,6 +335,9 @@ export type Database = {
       generate_username: { Args: { _email: string }; Returns: string };
       get_public_portfolio: { Args: { _slug: string }; Returns: Json };
       get_public_profile: { Args: { _username: string }; Returns: Json };
+      // STUB (slice3 polish — agent portfolios RPC) — migration drafted, NOT applied.
+      // Replace via type regen after `supabase db push`.
+      get_public_agent_portfolios: { Args: { _username: string }; Returns: Json };
       has_portfolio_access: {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;

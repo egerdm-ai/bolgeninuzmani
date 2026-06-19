@@ -85,4 +85,19 @@ assertNoForbidden(
   stripTsComments(readFileSync(join(root, "src/routes/dashboard.search.tsx"), "utf8")),
 );
 
-console.log("\npublic teaser + Keşfet: no locked field leaks ✓");
+// 7) agent portfolios RPC body (slice3 polish).
+const migFile2 = readdirSync(migDir).find((f) => f.includes("slice3_agent_portfolios_rpc"));
+assert.ok(migFile2, "slice3 agent portfolios RPC migration not found");
+const mig2 = readFileSync(join(migDir, migFile2), "utf8");
+const s2 = mig2.indexOf("create or replace function public.get_public_agent_portfolios");
+const e2 = mig2.indexOf("$$;", s2);
+assert.ok(s2 >= 0 && e2 > s2, "could not locate get_public_agent_portfolios body");
+assertNoForbidden("get_public_agent_portfolios body", stripSqlComments(mig2.slice(s2, e2)));
+
+// 8) /v/$username public profile page.
+assertNoForbidden(
+  "v.$username.tsx",
+  stripTsComments(readFileSync(join(root, "src/routes/v.$username.tsx"), "utf8")),
+);
+
+console.log("\npublic teaser + Keşfet + agent profile: no locked field leaks ✓");

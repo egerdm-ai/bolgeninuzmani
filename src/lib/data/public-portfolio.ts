@@ -74,6 +74,23 @@ export type PublicProfile = {
   membership_tier: Database["public"]["Enums"]["membership_tier"];
 };
 
+/** A teaser card for an agent's active portfolio (public allow-list). */
+export type PublicAgentPortfolioCard = {
+  id: string;
+  slug: string;
+  title: string;
+  price: number | null;
+  currency: Currency;
+  transaction_type: Txn;
+  category: Category;
+  subcategory: string | null;
+  city: string | null;
+  district: string | null;
+  neighborhood: string | null;
+  created_at: string;
+  cover_path: string | null;
+};
+
 /** Public bucket URL for a teaser image path (anon-readable). */
 export function publicTeaserImageUrl(path: string): string {
   return supabase.storage.from(PUBLIC_IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
@@ -91,4 +108,15 @@ export async function getPublicProfile(username: string): Promise<PublicProfile 
   const { data, error } = await supabase.rpc("get_public_profile", { _username: username });
   if (error) throw error;
   return (data as unknown as PublicProfile | null) ?? null;
+}
+
+/** Anon: a verified agent's ACTIVE portfolios as teaser cards (empty if none). */
+export async function getPublicAgentPortfolios(
+  username: string,
+): Promise<PublicAgentPortfolioCard[]> {
+  const { data, error } = await supabase.rpc("get_public_agent_portfolios", {
+    _username: username,
+  });
+  if (error) throw error;
+  return (data as unknown as PublicAgentPortfolioCard[] | null) ?? [];
 }
