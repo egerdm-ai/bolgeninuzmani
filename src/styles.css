@@ -281,8 +281,8 @@
   --info: #2563eb;
 
   --border: #dce3f0;
-  --border-strong: #c7d2e6;
-  --input: #dce3f0;
+  --border-strong: #b3c0d6; /* darker → visible drop-zone / radio / hover borders (light) */
+  --input: #c3cee0; /* darker → visible form input outlines (light) */
   --ring: #a8862e;
 
   --sidebar: #ffffff;

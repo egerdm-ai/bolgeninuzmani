@@ -57,16 +57,17 @@ function DashboardHome() {
           alt=""
           className="absolute inset-0 size-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+        {/* fixed dark scrim (bu-lock-bg stays dark in both themes) → cinematic + readable */}
+        <div className="absolute inset-0 bg-gradient-to-r from-bu-lock-bg via-bu-lock-bg/85 to-bu-lock-bg/40" />
         <div className="relative flex flex-col gap-6 p-7 lg:p-10">
           <div className="max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 text-xs font-medium text-gold ring-1 ring-inset ring-gold/25">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold/20 px-3 py-1 text-xs font-medium text-gold-light ring-1 ring-inset ring-gold/30">
               <Sparkles className="size-3.5" /> Özel Lüks Gayrimenkul Ağı
             </span>
-            <h1 className="mt-4 font-display text-4xl font-semibold leading-tight tracking-tight text-foreground lg:text-5xl">
+            <h1 className="mt-4 font-display text-4xl font-semibold leading-tight tracking-tight text-white lg:text-5xl">
               Hoş geldiniz, {(profile?.full_name ?? "").split(" ")[0]}
             </h1>
-            <p className="mt-3 text-base text-secondary-foreground">
+            <p className="mt-3 text-base text-white/80">
               Lüks portföylerinizi yönetin, harita üzerinde keşfedin ve doğrulanmış ağınızla güvenle
               paylaşın.
             </p>
