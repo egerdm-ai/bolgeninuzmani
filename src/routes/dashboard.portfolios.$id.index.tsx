@@ -42,6 +42,7 @@ import {
 import { attributeDef } from "@/lib/portfolio-attributes";
 import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/")({
   component: OwnerPortfolioDetail,
@@ -233,6 +234,10 @@ function OwnerPortfolioDetail() {
               <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
             </div>
             <h1 className="font-display text-2xl font-semibold text-foreground">{p.title}</h1>
+            <div className="flex items-center gap-2">
+              <RefNoText value={p.ref_no} />
+              <ClosedModeBadge mode={p.mode} />
+            </div>
             <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin className="size-4 text-gold" />~
               {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") ||

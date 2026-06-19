@@ -61,16 +61,28 @@ export async function requestDetail(portfolioId: string, message?: string): Prom
   return data as unknown as DetailRequest;
 }
 
-/** Owner approves → one bulk (D6) + permanent (D7) grant is created. */
-export async function approveRequest(requestId: string): Promise<AccessGrant> {
-  const { data, error } = await supabase.rpc("approve_detail_request", { _request_id: requestId });
+/** Owner approves → one bulk (D6) + permanent (D7) grant; optional note (D38). */
+export async function approveRequest(
+  requestId: string,
+  responseMessage?: string,
+): Promise<AccessGrant> {
+  const { data, error } = await supabase.rpc("approve_detail_request", {
+    _request_id: requestId,
+    _response_message: responseMessage?.trim() || undefined,
+  });
   if (error) throw error;
   return data as unknown as AccessGrant;
 }
 
-/** Owner rejects → no grant. */
-export async function rejectRequest(requestId: string): Promise<DetailRequest> {
-  const { data, error } = await supabase.rpc("reject_detail_request", { _request_id: requestId });
+/** Owner rejects → no grant; optional note (D38). */
+export async function rejectRequest(
+  requestId: string,
+  responseMessage?: string,
+): Promise<DetailRequest> {
+  const { data, error } = await supabase.rpc("reject_detail_request", {
+    _request_id: requestId,
+    _response_message: responseMessage?.trim() || undefined,
+  });
   if (error) throw error;
   return data as unknown as DetailRequest;
 }

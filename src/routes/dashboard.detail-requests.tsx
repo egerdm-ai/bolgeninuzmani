@@ -76,14 +76,14 @@ function DetailRequestsPage() {
     load();
   }, [load]);
 
-  async function act(reqId: string, action: "approve" | "reject") {
+  async function act(reqId: string, action: "approve" | "reject", note?: string) {
     setBusyId(reqId);
     try {
       if (action === "approve") {
-        await approveRequest(reqId);
+        await approveRequest(reqId, note);
         toast.success("Talep onaylandı — erişim verildi.");
       } else {
-        await rejectRequest(reqId);
+        await rejectRequest(reqId, note);
         toast.success("Talep reddedildi.");
       }
       await load();
@@ -155,92 +155,118 @@ function InboxRow({
 }: {
   r: InboxRequest;
   busy: boolean;
-  onAct: (id: string, a: "approve" | "reject") => void;
+  onAct: (id: string, a: "approve" | "reject", note?: string) => void;
 }) {
+  const [note, setNote] = useState("");
   return (
-    <SurfaceCard className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0 space-y-1">
-        <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
-          {r.requester?.full_name ?? "Bir üye"}
-          <ShieldCheck className="size-3.5 text-gold" />
-          {r.requester?.company_name && (
-            <span className="truncate text-xs font-normal text-muted-foreground">
-              · {r.requester.company_name}
-            </span>
-          )}
-        </p>
-        <p className="flex items-center gap-1 text-xs text-secondary-foreground">
-          <MapPin className="size-3 text-gold" />
-          {r.portfolio ? (
-            <Link
-              to="/dashboard/portfolios/$id"
-              params={{ id: r.portfolio.id }}
-              className="font-medium text-foreground hover:text-gold hover:underline"
-            >
-              {r.portfolio.title}
-            </Link>
+    <SurfaceCard className="space-y-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {r.requester?.full_name ?? "Bir üye"}
+            <ShieldCheck className="size-3.5 text-gold" />
+            {r.requester?.company_name && (
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                · {r.requester.company_name}
+              </span>
+            )}
+          </p>
+          <p className="flex items-center gap-1 text-xs text-secondary-foreground">
+            <MapPin className="size-3 text-gold" />
+            {r.portfolio ? (
+              <Link
+                to="/dashboard/portfolios/$id"
+                params={{ id: r.portfolio.id }}
+                className="font-medium text-foreground hover:text-gold hover:underline"
+              >
+                {r.portfolio.title}
+              </Link>
+            ) : (
+              "Portföy"
+            )}
+          </p>
+          {r.message && <p className="line-clamp-2 text-xs text-muted-foreground">“{r.message}”</p>}
+          <p className="text-[11px] text-muted-foreground">{fmtDate(r.created_at)}</p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2">
+          {r.status === "pending" ? (
+            <>
+              <Button
+                size="sm"
+                className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+                disabled={busy}
+                onClick={() => onAct(r.id, "approve", note)}
+              >
+                {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                Onayla
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
+                disabled={busy}
+                onClick={() => onAct(r.id, "reject", note)}
+              >
+                <X className="size-4" /> Reddet
+              </Button>
+            </>
           ) : (
-            "Portföy"
+            <div className="flex flex-col items-end gap-1">
+              <StatusPill status={r.status} />
+              {r.response_message && (
+                <p className="max-w-[220px] text-right text-[11px] text-muted-foreground">
+                  Notunuz: “{r.response_message}”
+                </p>
+              )}
+            </div>
           )}
-        </p>
-        {r.message && <p className="line-clamp-2 text-xs text-muted-foreground">“{r.message}”</p>}
-        <p className="text-[11px] text-muted-foreground">{fmtDate(r.created_at)}</p>
+        </div>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2">
-        {r.status === "pending" ? (
-          <>
-            <Button
-              size="sm"
-              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-              disabled={busy}
-              onClick={() => onAct(r.id, "approve")}
-            >
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-              Onayla
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10"
-              disabled={busy}
-              onClick={() => onAct(r.id, "reject")}
-            >
-              <X className="size-4" /> Reddet
-            </Button>
-          </>
-        ) : (
-          <StatusPill status={r.status} />
-        )}
-      </div>
+      {r.status === "pending" && (
+        <input
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Onaya/redde eklenecek not (opsiyonel)…"
+          className="h-9 w-full rounded-lg border border-border bg-surface-2 px-3 text-sm text-secondary-foreground outline-none placeholder:text-muted-foreground focus:border-gold/40"
+        />
+      )}
     </SurfaceCard>
   );
 }
 
 function SentRow({ r }: { r: SentRequest }) {
   return (
-    <SurfaceCard className="flex items-center justify-between gap-3">
-      <div className="min-w-0 space-y-1">
-        <p className="flex items-center gap-1 text-sm">
-          <MapPin className="size-3 text-gold" />
-          {r.portfolio ? (
-            <Link
-              to="/dashboard/portfolios/$id"
-              params={{ id: r.portfolio.id }}
-              className="font-medium text-foreground hover:text-gold hover:underline"
-            >
-              {r.portfolio.title}
-            </Link>
-          ) : (
-            <span className="text-foreground">Portföy</span>
-          )}
+    <SurfaceCard className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0 space-y-1">
+          <p className="flex items-center gap-1 text-sm">
+            <MapPin className="size-3 text-gold" />
+            {r.portfolio ? (
+              <Link
+                to="/dashboard/portfolios/$id"
+                params={{ id: r.portfolio.id }}
+                className="font-medium text-foreground hover:text-gold hover:underline"
+              >
+                {r.portfolio.title}
+              </Link>
+            ) : (
+              <span className="text-foreground">Portföy</span>
+            )}
+          </p>
+          <p className="text-[11px] text-muted-foreground">{fmtDate(r.created_at)}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {r.status === "pending" && <Clock className="size-4 text-gold" />}
+          <StatusPill status={r.status} />
+        </div>
+      </div>
+      {r.response_message && (
+        <p className="rounded-lg bg-surface-2 px-3 py-2 text-xs text-secondary-foreground">
+          <span className="text-muted-foreground">Emlakçı notu: </span>“{r.response_message}”
         </p>
-        <p className="text-[11px] text-muted-foreground">{fmtDate(r.created_at)}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        {r.status === "pending" && <Clock className="size-4 text-gold" />}
-        <StatusPill status={r.status} />
-      </div>
+      )}
     </SurfaceCard>
   );
 }

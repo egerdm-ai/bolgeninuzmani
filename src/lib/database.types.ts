@@ -451,7 +451,7 @@ export type Database = {
     };
     Functions: {
       approve_detail_request: {
-        Args: { _request_id: string };
+        Args: { _request_id: string; _response_message?: string };
         Returns: {
           created_at: string;
           expires_at: string | null;
@@ -507,7 +507,7 @@ export type Database = {
         Returns: boolean;
       };
       reject_detail_request: {
-        Args: { _request_id: string };
+        Args: { _request_id: string; _response_message?: string };
         Returns: {
           created_at: string;
           id: string;

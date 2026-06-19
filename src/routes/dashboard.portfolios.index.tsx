@@ -16,6 +16,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
@@ -192,6 +193,7 @@ function PortfolioCard({
           >
             {STATUS_LABELS[p.status]}
           </span>
+          <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
         </div>
         <div className="p-4">
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -206,6 +208,7 @@ function PortfolioCard({
           <p className="mt-2 font-display text-lg font-semibold text-gold">
             {formatPortfolioPrice(p.price, p.currency)}
           </p>
+          <RefNoText value={p.ref_no} className="mt-1 block" />
         </div>
       </Link>
       <div className="flex border-t border-border">

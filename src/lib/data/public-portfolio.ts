@@ -15,6 +15,7 @@ const PUBLIC_IMAGES_BUCKET = "portfolio-images";
 type Category = Database["public"]["Enums"]["portfolio_category"];
 type Txn = Database["public"]["Enums"]["transaction_type"];
 type Currency = Database["public"]["Enums"]["currency"];
+type Mode = Database["public"]["Enums"]["portfolio_mode"];
 
 export type PublicTeaserImage = { path: string; sort_order: number; is_cover: boolean };
 
@@ -53,6 +54,8 @@ export type PublicPortfolio = {
   approx_lat: number | null;
   approx_lng: number | null;
   created_at: string;
+  mode: Mode;
+  ref_no: string;
   attributes: Record<string, unknown>;
   images: PublicTeaserImage[];
   agent: PublicAgent | null;
@@ -88,6 +91,8 @@ export type PublicAgentPortfolioCard = {
   district: string | null;
   neighborhood: string | null;
   created_at: string;
+  mode: Mode;
+  ref_no: string;
   cover_path: string | null;
 };
 

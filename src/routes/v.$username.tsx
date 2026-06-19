@@ -21,6 +21,7 @@ import {
 } from "@/lib/data/public-portfolio";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 
 export const Route = createFileRoute("/v/$username")({
   head: () => ({
@@ -224,6 +225,7 @@ function AgentPortfolioCard({ p }: { p: PublicAgentPortfolioCard }) {
             <ImageOff className="size-7" />
           </div>
         )}
+        <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
       </div>
       <div className="p-4">
         <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
@@ -238,6 +240,7 @@ function AgentPortfolioCard({ p }: { p: PublicAgentPortfolioCard }) {
         <p className="mt-2 font-display text-lg font-semibold text-gold">
           {formatPortfolioPrice(p.price, p.currency)}
         </p>
+        <RefNoText value={p.ref_no} className="mt-1 block" />
       </div>
     </Link>
   );

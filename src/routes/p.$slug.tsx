@@ -20,6 +20,7 @@ import {
   type PublicPortfolio,
 } from "@/lib/data/public-portfolio";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 
@@ -177,6 +178,10 @@ function Teaser({
           <h1 className="mt-1.5 font-display text-2xl font-semibold text-foreground sm:text-3xl">
             {data.title}
           </h1>
+          <div className="mt-1 flex items-center gap-2">
+            <RefNoText value={data.ref_no} />
+            <ClosedModeBadge mode={data.mode} />
+          </div>
           <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="size-4 text-gold" />~
             {[data.neighborhood, data.district, data.city].filter(Boolean).join(", ") ||
