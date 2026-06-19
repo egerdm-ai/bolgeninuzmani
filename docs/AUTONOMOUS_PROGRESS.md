@@ -15,13 +15,24 @@
 | A6 | Dashboard ana sayfa `/dashboard/` | ✅ (bu tur) | (bu tur) | gerçek özet: kendi portföy sayısı/aktif, bekleyen gelen talep, gönderdiğim talep, son portföyler, son gelen talepler. |
 
 ## B — YENİ TABLO/MIGRATION GEREKENLER (kod + TASLAK, PUSH YOK)
+
+> ⚠️ Push edilemediği için (tip regen yok), B'de teslim edilen değer = **incelenip push
+> edilecek taslak migration'lar**. Veri katmanı + sayfa bağlama push+regen SONRASI adım
+> (bkz. RETURN_CHECKLIST.md). Kanıtlanmış kalıp: tablo+RLS taslağı → push → regen →
+> data layer → adapter → Lovable bileşenine bağla → leak'e ekle.
+
 | # | Özellik | Durum | Migration taslağı | Not |
 |---|---------|-------|-------------------|-----|
-| B7 | Arayış (searches) | ⏳ | — | üye-only tablo + RLS |
-| B8 | Eşleşme | ⏳ | — | teaser-only eşleştirme |
-| B9 | Bölgeler | ⏳ | — | portfolios'tan türetme |
-| B10 | Harita | ⏳ | — | approx pin (D30), exact ASLA |
-| B11 | Bildirim/Takip/Kaydet | ⏳ | — | yeni tablolar |
+| B7 | Arayış (searches) | 🟡 migration TASLAK | `20260619140000_b7_searches_DRAFT.sql` | Üye-only tablo (is_verified), owner-write, RLS enable+force, anon yok, D13 locked alan yok. Sayfa bağlama (my-searches) = push sonrası. |
+| B8 | Eşleşme | 📝 spec (RETURN) | — | searches↔portfolios kesişimi; teaser-only RPC/view. searches push'undan SONRA yazılmalı. Tasarım RETURN_CHECKLIST'te. |
+| B9 | Bölgeler | 📝 spec (RETURN) | — | portfolios'tan türetme (yeni tablo gerekmez): definer RPC `get_region_summary()` (verified-only, district+count). Tasarım RETURN'de. |
+| B10 | Harita | 📝 spec (RETURN) | migration GEREKMEZ | MapLibre (D3) + approx_lat/lng (D30, zaten var); exact ASLA. Frontend bileşen işi; tasarım RETURN'de. |
+| B11 | Bildirim/Takip/Kaydet | 🟡 migration TASLAK | `20260619141000_b11_follows_saved_notifications_DRAFT.sql` | 3 owner-scoped tablo; notifications client-insert YOK (server-yazımlı). Sayfa bağlama = push sonrası. |
+
+### Taslak migration'lar (UYGULANMADI)
+- `20260619140000_b7_searches_DRAFT.sql`
+- `20260619141000_b11_follows_saved_notifications_DRAFT.sql`
+(M4 öncesi taslaklar — m3/m4/m4b/m4c — ayrıca Ege'nin push sırasında.)
 
 ## HARİÇ
 - AI / Asistan (VAULT Asistan, AI ile Portföy) — feature-flag arkasında stub, dokunulmadı.
