@@ -10,11 +10,18 @@ import {
   Loader2,
   FolderLock,
   Compass,
+  Share2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { MembershipBadge } from "@/components/vault/badges";
 import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
+
+const TIER_LABEL: Record<string, string> = {
+  standard: "Standart",
+  pro: "PRO",
+  elite: "ELITE",
+};
 import { cn } from "@/lib/utils";
 import { s } from "@/lib/styles";
 import {
@@ -61,6 +68,19 @@ function PublicProfilePage() {
   }, [username]);
 
   const wa = data?.contact_whatsapp?.replace(/\D/g, "");
+
+  const shareProfile = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) await navigator.share({ title: data?.full_name ?? "", url });
+      else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Profil bağlantısı kopyalandı");
+      }
+    } catch {
+      /* user cancelled / unsupported — ignore */
+    }
+  };
   const cards: TeaserCardData[] = portfolios.map((p) => ({
     id: p.id,
     slug: p.slug,
@@ -115,54 +135,71 @@ function PublicProfilePage() {
           </div>
         ) : (
           <>
-            {/* Banner — gold-washed gradient empty-state (premium in both themes) */}
-            <div className="relative mt-6 h-40 overflow-hidden rounded-bu-xl bg-gradient-surface ring-1 ring-bu-border">
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-bu-gold/[0.04] to-bu-gold/10" />
+            {/* Banner with overlaid identity (Lovable structure). The banner is a
+                cinematic navy→gold gradient (bu-lock-bg stays dark in BOTH themes),
+                so the overlaid identity text is fixed-light and reads in both modes —
+                same intentional pattern as the dashboard hero. */}
+            <div className="relative mt-6 overflow-hidden rounded-bu-xl ring-1 ring-bu-border">
+              <div className="absolute inset-0 bg-gradient-to-br from-bu-lock-bg via-bu-lock-bg to-bu-gold/25" />
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-bu-gold/[0.05] to-bu-gold/15" />
+              <div className="absolute inset-0 bg-gradient-to-t from-bu-lock-bg via-bu-lock-bg/50 to-transparent" />
               <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
+
+              <button
+                type="button"
+                onClick={shareProfile}
+                className="absolute right-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-bu-md border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
+              >
+                <Share2 className="size-3.5" /> Profili Paylaş
+              </button>
+
+              <div className="relative flex min-h-[240px] flex-col justify-end p-5 sm:min-h-[270px] sm:p-7">
+                <div className="flex items-end gap-4">
+                  {data.avatar_url ? (
+                    <img
+                      src={data.avatar_url}
+                      alt={data.full_name}
+                      className="size-24 shrink-0 rounded-full bg-bu-card-raised object-cover shadow-bu-raised ring-4 ring-bu-bg sm:size-28"
+                    />
+                  ) : (
+                    <span className="flex size-24 shrink-0 items-center justify-center rounded-full bg-bu-card-raised text-3xl font-bold text-bu-gold shadow-bu-raised ring-4 ring-bu-bg sm:size-28">
+                      {data.full_name.slice(0, 1)}
+                    </span>
+                  )}
+                  <div className="min-w-0 pb-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="font-display text-2xl font-bold text-white sm:text-3xl">
+                        {data.full_name}
+                      </h1>
+                      <span className="inline-flex items-center gap-1 rounded-bu-full bg-bu-gold/20 px-2 py-0.5 text-[11px] font-medium text-gold-light ring-1 ring-inset ring-bu-gold/40">
+                        <ShieldCheck className="size-3" /> Doğrulanmış
+                      </span>
+                      <span className="rounded-bu-full bg-white/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-white ring-1 ring-inset ring-white/20">
+                        {TIER_LABEL[data.membership_tier] ?? data.membership_tier}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-white/75">
+                      {[data.title, data.company_name].filter(Boolean).join(" · ") ||
+                        "Emlak Uzmanı"}
+                    </p>
+                    {data.location && (
+                      <p className="mt-1 flex items-center gap-1 text-xs text-gold-light">
+                        <MapPin className="size-3.5" /> {data.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Identity — avatar overlaps banner; name sits BELOW (no overlap) */}
-            <div className="px-2 sm:px-6">
-              <div className="-mt-14">
-                {data.avatar_url ? (
-                  <img
-                    src={data.avatar_url}
-                    alt={data.full_name}
-                    className="size-28 rounded-bu-xl bg-bu-card-raised object-cover shadow-bu-raised ring-4 ring-bu-bg"
-                  />
-                ) : (
-                  <span className="flex size-28 items-center justify-center rounded-bu-xl bg-bu-card-raised text-4xl font-bold text-bu-gold shadow-bu-raised ring-4 ring-bu-bg">
-                    {data.full_name.slice(0, 1)}
-                  </span>
-                )}
-              </div>
-              <div className="mt-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="font-display text-3xl font-bold text-bu-text">{data.full_name}</h1>
-                  <span className={s.verified}>
-                    <ShieldCheck className="size-3" /> Doğrulanmış
-                  </span>
-                  <MembershipBadge tier={data.membership_tier} />
-                </div>
-                <p className="mt-1 text-sm text-bu-text-2">
-                  {[data.title, data.company_name].filter(Boolean).join(" · ") || "Emlak Uzmanı"}
-                </p>
-                {data.location && (
-                  <p className="mt-0.5 flex items-center gap-1 text-xs text-bu-gold">
-                    <MapPin className="size-3.5" /> {data.location}
-                  </p>
-                )}
-              </div>
-
-              {/* Stat cards */}
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:max-w-md">
-                <StatCard icon={FolderLock} value={portfolios.length} label="Aktif Portföy" />
-                <StatCard
-                  icon={Compass}
-                  value={data.expertise_regions.length}
-                  label="Uzmanlık Bölgesi"
-                />
-              </div>
+            {/* Stat cards */}
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
+              <StatCard icon={FolderLock} value={portfolios.length} label="Aktif Portföy" />
+              <StatCard
+                icon={Compass}
+                value={data.expertise_regions.length}
+                label="Uzmanlık Bölgesi"
+              />
             </div>
 
             {/* Body: tabs + contact rail */}
