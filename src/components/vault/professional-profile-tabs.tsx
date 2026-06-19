@@ -18,15 +18,19 @@ export function ProfessionalProfileTabs({
   active,
   onChange,
   counts,
+  tabs,
 }: {
   active: ProfileTab;
   onChange: (tab: ProfileTab) => void;
   counts?: Partial<Record<ProfileTab, number>>;
+  /** Optional subset/order of tabs to show (defaults to all). */
+  tabs?: ProfileTab[];
 }) {
+  const visible = tabs ? profileTabs.filter((t) => tabs.includes(t.id)) : profileTabs;
   return (
     <div className="sticky top-16 z-20 -mx-1 mb-6 rounded-2xl border border-border bg-surface/80 p-1.5 shadow-elegant backdrop-blur-xl">
       <div className="flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {profileTabs.map((t) => {
+        {visible.map((t) => {
           const isActive = active === t.id;
           const count = counts?.[t.id];
           return (
