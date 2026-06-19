@@ -132,6 +132,17 @@ export async function myRequestForPortfolio(
   return data ?? null;
 }
 
+/** Count of PENDING requests in my inbox (owner side) — for the nav badge. */
+export async function pendingInboxCount(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("detail_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", userId)
+    .eq("status", "pending");
+  if (error) throw error;
+  return count ?? 0;
+}
+
 /** Grant-aware access check (owner OR active grant) via the security-definer hook. */
 export async function hasPortfolioAccess(portfolioId: string): Promise<boolean> {
   const { data, error } = await supabase.rpc("has_portfolio_access", {

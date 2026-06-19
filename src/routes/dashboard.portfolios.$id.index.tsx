@@ -1,13 +1,38 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Share2, Loader2, Lock, MapPin, ImageOff, FileText, ArrowLeft } from "lucide-react";
+import {
+  Pencil,
+  Share2,
+  Loader2,
+  Lock,
+  LockOpen,
+  MapPin,
+  ImageOff,
+  FileText,
+  Download,
+  ArrowLeft,
+  Clock,
+  Send,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth/auth-context";
-import { getMyPortfolioFull, type PortfolioFull } from "@/lib/data/portfolios";
+import {
+  getMyPortfolioFull,
+  documentSignedUrl,
+  type PortfolioFull,
+  type PortfolioDocument,
+} from "@/lib/data/portfolios";
+import {
+  requestDetail,
+  myRequestForPortfolio,
+  hasPortfolioAccess,
+  type DetailRequest,
+} from "@/lib/data/access";
 import {
   CATEGORY_LABELS,
   TRANSACTION_LABELS,
@@ -30,23 +55,56 @@ function OwnerPortfolioDetail() {
   const [error, setError] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
+  // M3 controlled-access state (non-owner viewers).
+  const [access, setAccess] = useState(false);
+  const [myRequest, setMyRequest] = useState<DetailRequest | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [message, setMessage] = useState("");
+  const [requesting, setRequesting] = useState(false);
+
   useEffect(() => {
     let active = true;
-    getMyPortfolioFull(id)
-      .then((d) => {
+    (async () => {
+      try {
+        const d = await getMyPortfolioFull(id);
         if (!active) return;
         setFull(d);
-        setLoading(false);
-      })
-      .catch((e) => {
-        if (!active) return;
-        setError(e instanceof Error ? e.message : String(e));
-        setLoading(false);
-      });
+        if (d && user && user.id !== d.portfolio.owner_id) {
+          const [acc, req] = await Promise.all([
+            hasPortfolioAccess(id),
+            myRequestForPortfolio(id, user.id),
+          ]);
+          if (!active) return;
+          setAccess(acc);
+          setMyRequest(req);
+        }
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, user]);
+
+  async function submitRequest() {
+    setRequesting(true);
+    try {
+      const r = await requestDetail(id, message);
+      setMyRequest(r);
+      setShowModal(false);
+      setMessage("");
+      toast.success("Detay talebin iletildi — portföy sahibinin onayı bekleniyor.");
+    } catch (e) {
+      toast.error("Talep gönderilemedi", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setRequesting(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -77,6 +135,7 @@ function OwnerPortfolioDetail() {
 
   const p = full.portfolio;
   const isOwner = user?.id === p.owner_id;
+  const canSeeLocked = isOwner || access; // owner OR active grant (D6/D7)
   const imageUrls = full.images.map((i) => i.url);
   const coverIdx = Math.max(
     0,
@@ -119,7 +178,7 @@ function OwnerPortfolioDetail() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
-          {/* Gallery */}
+          {/* Gallery (locked photos appear only for owner/granted via RLS + signed URL) */}
           <div className="overflow-hidden rounded-2xl border border-border bg-surface-2">
             <div className="relative aspect-[16/9]">
               {cover ? (
@@ -141,15 +200,21 @@ function OwnerPortfolioDetail() {
             {full.images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto p-2">
                 {full.images.map((img, idx) => (
-                  <img
-                    key={img.id}
-                    src={img.url}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    onClick={() => setLightbox(idx)}
-                    className="h-16 w-24 shrink-0 cursor-zoom-in rounded-md object-cover"
-                  />
+                  <div key={img.id} className="relative shrink-0">
+                    <img
+                      src={img.url}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      onClick={() => setLightbox(idx)}
+                      className="h-16 w-24 cursor-zoom-in rounded-md object-cover"
+                    />
+                    {img.visibility === "locked" && (
+                      <span className="absolute right-1 top-1 rounded bg-background/80 p-0.5 text-gold">
+                        <Lock className="size-3" />
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -206,48 +271,48 @@ function OwnerPortfolioDetail() {
 
         {/* Right rail — LOCKED data (owner / granted only) */}
         <div className="space-y-5">
-          <SurfaceCard className="space-y-3 border-gold/30 bg-gold/[0.04]">
+          <SurfaceCard
+            className={`space-y-3 ${canSeeLocked ? "border-gold/40 bg-gold/[0.06]" : "border-gold/30 bg-gold/[0.04]"}`}
+          >
             <div className="flex items-center gap-1.5">
-              <Lock className="size-4 text-gold" />
-              <h3 className="text-sm font-semibold text-foreground">Kilitli Bilgiler</h3>
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              {isOwner
-                ? "Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20)."
-                : "Tam adres, malik bilgisi, belgeler ve özel notlar erişim onayı ile açılır."}
-            </p>
-            {isOwner ? (
-              full.private ? (
-                <dl className="space-y-2 text-sm">
-                  <LockRow label="Tam Adres" value={full.private.exact_address} />
-                  <LockRow
-                    label="Tam Koordinat"
-                    value={
-                      full.private.exact_lat != null && full.private.exact_lng != null
-                        ? `${full.private.exact_lat}, ${full.private.exact_lng}`
-                        : null
-                    }
-                  />
-                  <LockRow label="Özel Açıklama" value={full.private.private_description} />
-                  <LockRow label="Özel Notlar" value={full.private.private_notes} />
-                  <AttrList data={full.private.attributes} />
-                </dl>
+              {canSeeLocked ? (
+                <LockOpen className="size-4 text-gold" />
               ) : (
-                <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
-              )
+                <Lock className="size-4 text-gold" />
+              )}
+              <h3 className="text-sm font-semibold text-foreground">
+                Kilitli Bilgiler{!isOwner && access ? " (erişim onaylı)" : ""}
+              </h3>
+            </div>
+
+            {canSeeLocked ? (
+              <>
+                <p className="text-[11px] text-muted-foreground">
+                  {isOwner
+                    ? "Teaser'da görünmez. Yalnızca siz ve erişim onayladığınız emlakçılar görür (D13/D20)."
+                    : "Portföy sahibi erişiminizi onayladı — tam bilgiler açık."}
+                </p>
+                {full.private ? (
+                  <dl className="space-y-2 text-sm">
+                    <LockRow label="Tam Adres" value={full.private.exact_address} />
+                    <LockRow
+                      label="Tam Koordinat"
+                      value={
+                        full.private.exact_lat != null && full.private.exact_lng != null
+                          ? `${full.private.exact_lat}, ${full.private.exact_lng}`
+                          : null
+                      }
+                    />
+                    <LockRow label="Özel Açıklama" value={full.private.private_description} />
+                    <LockRow label="Özel Notlar" value={full.private.private_notes} />
+                    <AttrList data={full.private.attributes} />
+                  </dl>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Kilitli bilgi eklenmemiş.</p>
+                )}
+              </>
             ) : (
-              // Non-owner (logged-in verified agent): no values (RLS returns none). The
-              // Detay Talebi / controlled-access engine is M3 — not built this turn.
-              <div className="rounded-lg border border-gold/25 bg-gold/[0.06] p-3 text-center">
-                <p className="text-xs font-medium text-foreground">🔒 Detay Talebi gerekli</p>
-                <Button
-                  size="sm"
-                  className="mt-2 w-full bg-gradient-gold text-primary-foreground hover:opacity-90"
-                  onClick={() => toast.info("Kontrollü erişim (Detay Talebi) yakında")}
-                >
-                  Detay Talebi Gönder
-                </Button>
-              </div>
+              <RequestPanel status={myRequest?.status} onRequest={() => setShowModal(true)} />
             )}
           </SurfaceCard>
 
@@ -265,27 +330,151 @@ function OwnerPortfolioDetail() {
           {/* Documents (locked) */}
           <SurfaceCard className="space-y-2">
             <h3 className="text-sm font-semibold text-foreground">Belgeler (kilitli)</h3>
-            {!isOwner ? (
+            {!canSeeLocked ? (
               <p className="text-xs text-muted-foreground">🔒 Erişim onayı ile görünür.</p>
             ) : full.documents.length === 0 ? (
               <p className="text-xs text-muted-foreground">Belge eklenmemiş.</p>
             ) : (
-              full.documents.map((d) => (
-                <div
-                  key={d.id}
-                  className="flex items-center gap-2 text-sm text-secondary-foreground"
-                >
-                  <FileText className="size-4 text-gold" /> {d.kind}
-                </div>
-              ))
+              full.documents.map((d) => <DocRow key={d.id} doc={d} />)
             )}
           </SurfaceCard>
         </div>
       </div>
+
       {lightbox !== null && (
         <ImageLightbox images={imageUrls} startIndex={lightbox} onClose={() => setLightbox(null)} />
       )}
+
+      {showModal && (
+        <RequestModal
+          message={message}
+          setMessage={setMessage}
+          requesting={requesting}
+          onCancel={() => setShowModal(false)}
+          onSubmit={submitRequest}
+        />
+      )}
     </PageContainer>
+  );
+}
+
+/** Non-owner without access: request button reflecting the latest request state. */
+function RequestPanel({
+  status,
+  onRequest,
+}: {
+  status?: DetailRequest["status"];
+  onRequest: () => void;
+}) {
+  return (
+    <div className="space-y-2 rounded-lg border border-gold/25 bg-gold/[0.06] p-3 text-center">
+      <p className="text-xs font-medium text-foreground">🔒 Tam adres, malik, belgeler kilitli</p>
+      {status === "pending" ? (
+        <Button variant="outline" className="w-full gap-1.5" disabled>
+          <Clock className="size-4" /> Talebin beklemede
+        </Button>
+      ) : status === "rejected" ? (
+        <>
+          <p className="text-xs text-destructive">Talebin reddedildi.</p>
+          <Button
+            className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            onClick={onRequest}
+          >
+            <Send className="size-4" /> Tekrar Detay Talebi Gönder
+          </Button>
+        </>
+      ) : (
+        <Button
+          className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          onClick={onRequest}
+        >
+          <Send className="size-4" /> Detay Talebi Gönder
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** Optional-message modal for sending a detail request. */
+function RequestModal({
+  message,
+  setMessage,
+  requesting,
+  onCancel,
+  onSubmit,
+}: {
+  message: string;
+  setMessage: (v: string) => void;
+  requesting: boolean;
+  onCancel: () => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 p-4 backdrop-blur-sm"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-md space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-elegant"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div>
+          <h3 className="font-display text-lg font-semibold text-foreground">
+            Detay Talebi Gönder
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Portföy sahibine kısa bir not ekleyebilirsiniz (opsiyonel). Onaylanırsa tüm kilitli
+            alanlar size açılır.
+          </p>
+        </div>
+        <Textarea
+          rows={3}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Merhaba, bu portföyün detaylarını görmek istiyorum…"
+        />
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onCancel} disabled={requesting}>
+            İptal
+          </Button>
+          <Button
+            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            onClick={onSubmit}
+            disabled={requesting}
+          >
+            {requesting ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+            Gönder
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** A locked document row with a short-lived signed-URL download (access-checked). */
+function DocRow({ doc }: { doc: PortfolioDocument }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        try {
+          const url = await documentSignedUrl(doc.path);
+          if (url) window.open(url, "_blank");
+          else toast.error("İndirme bağlantısı oluşturulamadı (erişim yok).");
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-secondary-foreground hover:border-gold/40"
+    >
+      <span className="flex items-center gap-2">
+        <FileText className="size-4 text-gold" /> {doc.kind}
+      </span>
+      {busy ? <Loader2 className="size-4 animate-spin" /> : <Download className="size-4" />}
+    </button>
   );
 }
 

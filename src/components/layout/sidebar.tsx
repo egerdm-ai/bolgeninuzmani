@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Search,
@@ -16,12 +16,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
-import { detailRequests } from "@/lib/mock/data";
+import { pendingInboxCount } from "@/lib/data/access";
 import { appNotifications } from "@/lib/mock/notifications";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MembershipBadge } from "@/components/vault/badges";
 
-const newRequests = detailRequests.filter((r) => r.status === "new").length;
+// Notifications are still mock (M5); detail-request count is real (see component).
 const unreadNotifications = appNotifications.filter((n) => !n.read).length;
 
 const primaryNav = [
@@ -40,7 +40,7 @@ const discoverChildren = [{ label: "Portföyler", to: "/dashboard/search", icon:
 // docs/route-quarantine.md.
 const workNav = [
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
-  { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox, count: newRequests },
+  { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
 ] as const;
 
@@ -51,7 +51,15 @@ const accountNav = [
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const [pendingRequests, setPendingRequests] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    pendingInboxCount(user.id)
+      .then(setPendingRequests)
+      .catch(() => {});
+  }, [user, pathname]);
 
   const isActive = (to: string, exact?: boolean) =>
     exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
@@ -143,7 +151,16 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
           )}
 
           {workNav.map((item) => (
-            <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
+            <NavLink
+              key={item.to}
+              item={
+                item.to === "/dashboard/detail-requests"
+                  ? { ...item, count: pendingRequests }
+                  : item
+              }
+              active={isActive(item.to)}
+              collapsed={collapsed}
+            />
           ))}
         </div>
         <div className="space-y-1">
