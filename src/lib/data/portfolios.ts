@@ -311,7 +311,9 @@ export async function createPortfolio(
   // NOT NULL/unique check). approx_lat/lng omitted → set by the private trigger.
   const { data: created, error } = await supabase
     .from("portfolios")
-    .insert({ owner_id: ownerId, slug: "", ...teaser, attributes: publicAttrs as Json })
+    // slug & ref_no are filled by BEFORE INSERT triggers; "" satisfies the typed
+    // Insert (both NOT NULL, no column default) and trips the trigger's empty check.
+    .insert({ owner_id: ownerId, slug: "", ref_no: "", ...teaser, attributes: publicAttrs as Json })
     .select("id, slug")
     .single();
   if (error) throw error;

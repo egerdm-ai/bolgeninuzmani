@@ -52,6 +52,7 @@ export type Database = {
           owner_id: string;
           portfolio_id: string;
           requester_id: string;
+          response_message: string | null;
           status: Database["public"]["Enums"]["detail_request_status"];
           updated_at: string;
         };
@@ -62,6 +63,7 @@ export type Database = {
           owner_id: string;
           portfolio_id: string;
           requester_id: string;
+          response_message?: string | null;
           status?: Database["public"]["Enums"]["detail_request_status"];
           updated_at?: string;
         };
@@ -72,6 +74,7 @@ export type Database = {
           owner_id?: string;
           portfolio_id?: string;
           requester_id?: string;
+          response_message?: string | null;
           status?: Database["public"]["Enums"]["detail_request_status"];
           updated_at?: string;
         };
@@ -283,11 +286,13 @@ export type Database = {
           gross_m2: number | null;
           id: string;
           land_m2: number | null;
+          mode: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood: string | null;
           net_m2: number | null;
           owner_id: string;
           price: number | null;
           public_description: string | null;
+          ref_no: string;
           room_count: string | null;
           slug: string;
           status: Database["public"]["Enums"]["portfolio_status"];
@@ -309,11 +314,13 @@ export type Database = {
           gross_m2?: number | null;
           id?: string;
           land_m2?: number | null;
+          mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
           owner_id: string;
           price?: number | null;
           public_description?: string | null;
+          ref_no: string;
           room_count?: string | null;
           slug: string;
           status?: Database["public"]["Enums"]["portfolio_status"];
@@ -335,11 +342,13 @@ export type Database = {
           gross_m2?: number | null;
           id?: string;
           land_m2?: number | null;
+          mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
           owner_id?: string;
           price?: number | null;
           public_description?: string | null;
+          ref_no?: string;
           room_count?: string | null;
           slug?: string;
           status?: Database["public"]["Enums"]["portfolio_status"];
@@ -468,6 +477,7 @@ export type Database = {
         }[];
       };
       generate_portfolio_slug: { Args: { _title: string }; Returns: string };
+      generate_ref_no: { Args: never; Returns: string };
       generate_username: { Args: { _email: string }; Returns: string };
       get_public_agent_portfolios: {
         Args: { _username: string };
@@ -505,6 +515,7 @@ export type Database = {
           owner_id: string;
           portfolio_id: string;
           requester_id: string;
+          response_message: string | null;
           status: Database["public"]["Enums"]["detail_request_status"];
           updated_at: string;
         };
@@ -524,6 +535,7 @@ export type Database = {
           owner_id: string;
           portfolio_id: string;
           requester_id: string;
+          response_message: string | null;
           status: Database["public"]["Enums"]["detail_request_status"];
           updated_at: string;
         };
@@ -536,6 +548,7 @@ export type Database = {
       };
       show_limit: { Args: never; Returns: number };
       show_trgm: { Args: { "": string }; Returns: string[] };
+      to_base36: { Args: { _n: number }; Returns: string };
     };
     Enums: {
       app_role: "admin" | "agent";
@@ -546,6 +559,7 @@ export type Database = {
       image_visibility: "public" | "locked";
       membership_tier: "standard" | "pro" | "elite";
       portfolio_category: "konut" | "ticari" | "arsa" | "turizm" | "isletme" | "ozel_varlik";
+      portfolio_mode: "controlled" | "call_only";
       portfolio_status: "draft" | "active" | "passive" | "sold";
       profile_status: "pending" | "verified" | "suspended";
       transaction_type: "satilik" | "kiralik";
@@ -682,6 +696,7 @@ export const Constants = {
       image_visibility: ["public", "locked"],
       membership_tier: ["standard", "pro", "elite"],
       portfolio_category: ["konut", "ticari", "arsa", "turizm", "isletme", "ozel_varlik"],
+      portfolio_mode: ["controlled", "call_only"],
       portfolio_status: ["draft", "active", "passive", "sold"],
       profile_status: ["pending", "verified", "suspended"],
       transaction_type: ["satilik", "kiralik"],
