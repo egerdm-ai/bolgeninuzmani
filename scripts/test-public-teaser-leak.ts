@@ -113,4 +113,19 @@ assertNoForbidden(
   stripTsComments(readFileSync(join(root, "src/routes/dashboard.detail-requests.tsx"), "utf8")),
 );
 
-console.log("\npublic teaser + Keşfet + agent profile + M3 inbox: no locked field leaks ✓");
+// 10) Profile surface (reconnected Lovable design fed by real data). The adapter
+//     consumes ONLY public allow-list shapes; the view + catalog + contact card +
+//     in-app professional page must never name a locked token.
+for (const rel of [
+  "src/lib/profile-vm.ts",
+  "src/components/profile/professional-profile-view.tsx",
+  "src/components/profile/agent-portfolio-catalog.tsx",
+  "src/components/profile/profile-contact-card.tsx",
+  "src/routes/dashboard.professionals.$id.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+
+console.log(
+  "\npublic teaser + Keşfet + agent profile + profile surface + M3 inbox: no locked field leaks ✓",
+);
