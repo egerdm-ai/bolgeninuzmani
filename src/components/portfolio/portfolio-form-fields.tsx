@@ -1,4 +1,14 @@
-import { ShieldCheck, MapPin, ImagePlus, Lock, X } from "lucide-react";
+import type { ReactNode } from "react";
+import {
+  ShieldCheck,
+  MapPin,
+  ImagePlus,
+  Lock,
+  X,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,6 +197,24 @@ export function PortfolioFormFields({
   const catAttrs = attributesForCategory(teaser.category);
   const catPublicAttrs = catAttrs.filter((a) => a.visibility === "public");
   const catLockedAttrs = catAttrs.filter((a) => a.visibility === "locked");
+
+  // 3F: inline pending-photo management (order / cover / visibility / delete).
+  const moveImage = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= images.length) return;
+    const next = [...images];
+    [next[i], next[j]] = [next[j], next[i]];
+    setImages(next);
+  };
+  const setCover = (i: number) => setImages(images.map((it, j) => ({ ...it, isCover: j === i })));
+  const toggleVisibility = (i: number) =>
+    setImages(
+      images.map((it, j) => {
+        if (j !== i) return it;
+        const nv = it.visibility === "locked" ? "public" : "locked";
+        return { ...it, visibility: nv, isCover: nv === "public" ? it.isCover : false };
+      }),
+    );
 
   return (
     <>
@@ -390,7 +418,7 @@ export function PortfolioFormFields({
             />
           </label>
           {images.length > 0 && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {images.map((item, i) => (
                 <div
                   key={i}
@@ -401,34 +429,51 @@ export function PortfolioFormFields({
                     alt=""
                     className="size-full object-cover"
                   />
+                  {/* cover badge (public only) */}
+                  {item.isCover && item.visibility === "public" && (
+                    <span className="absolute left-1 top-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                      Kapak
+                    </span>
+                  )}
                   <button
                     type="button"
+                    title="Sil"
                     onClick={() => setImages(images.filter((_, j) => j !== i))}
                     className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
                   >
                     <X className="size-3" />
                   </button>
-                  {/* D34: pick visibility per photo (controlled only; call_only = all public) */}
-                  {!callOnly && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setImages(
-                          images.map((it, j) =>
-                            j === i
-                              ? {
-                                  ...it,
-                                  visibility: it.visibility === "locked" ? "public" : "locked",
-                                }
-                              : it,
-                          ),
-                        )
-                      }
-                      className={`absolute bottom-1 left-1 rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
-                    >
-                      {item.visibility === "locked" ? "Kilitli" : "Açık"}
-                    </button>
-                  )}
+                  {/* control bar: reorder · cover · visibility */}
+                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1">
+                    <div className="flex gap-0.5">
+                      <TileBtn title="Geri al" disabled={i === 0} onClick={() => moveImage(i, -1)}>
+                        <ChevronLeft className="size-3" />
+                      </TileBtn>
+                      <TileBtn
+                        title="İleri al"
+                        disabled={i === images.length - 1}
+                        onClick={() => moveImage(i, 1)}
+                      >
+                        <ChevronRight className="size-3" />
+                      </TileBtn>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {!callOnly && item.visibility === "public" && !item.isCover && (
+                        <TileBtn title="Kapak yap" onClick={() => setCover(i)}>
+                          <Star className="size-3" />
+                        </TileBtn>
+                      )}
+                      {!callOnly && (
+                        <button
+                          type="button"
+                          onClick={() => toggleVisibility(i)}
+                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
+                        >
+                          {item.visibility === "locked" ? "Kilitli" : "Açık"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -497,6 +542,30 @@ export function PortfolioFormFields({
         </SurfaceCard>
       )}
     </>
+  );
+}
+
+function TileBtn({
+  title,
+  disabled,
+  onClick,
+  children,
+}: {
+  title: string;
+  disabled?: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className="flex size-5 items-center justify-center rounded bg-background/80 text-foreground disabled:opacity-40"
+    >
+      {children}
+    </button>
   );
 }
 

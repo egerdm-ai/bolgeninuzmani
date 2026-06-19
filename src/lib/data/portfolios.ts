@@ -38,7 +38,7 @@ export type ImageVisibility = Database["public"]["Enums"]["image_visibility"];
 export type DocumentKind = Database["public"]["Enums"]["document_kind"];
 
 /** A picked-but-not-yet-uploaded image with its chosen visibility (create wizard). */
-export type PendingImage = { file: File; visibility: ImageVisibility };
+export type PendingImage = { file: File; visibility: ImageVisibility; isCover?: boolean };
 
 function imageBucket(visibility: ImageVisibility) {
   return visibility === "locked" ? IMAGES_LOCKED_BUCKET : IMAGES_BUCKET;
@@ -356,10 +356,7 @@ export async function createPortfolio(
 
   // Upload public first (so the first public image becomes the cover), then
   // locked → the correct bucket. Each group uploads its files in parallel.
-  const publicFiles = images.filter((i) => i.visibility === "public").map((i) => i.file);
-  const lockedFiles = images.filter((i) => i.visibility === "locked").map((i) => i.file);
-  await uploadImages(created.id, publicFiles, "public");
-  await uploadImages(created.id, lockedFiles, "locked");
+  await uploadPendingImages(created.id, images);
 
   const hasLockedAttrs = Object.keys(lockedAttrs).length > 0;
   if (privateHasData(priv) || hasLockedAttrs) {
@@ -413,6 +410,46 @@ export async function deletePortfolio(id: string): Promise<void> {
 }
 
 /** Upload images to portfolio-images/<portfolioId>/<uuid>.<ext> + row them. */
+/**
+ * Upload create-wizard PendingImages preserving the user's ORDER (sort_order =
+ * array index), chosen COVER (the public image flagged isCover, else the first
+ * public one), and per-image visibility (D34). Each image → display + thumb WebP.
+ */
+export async function uploadPendingImages(
+  portfolioId: string,
+  images: PendingImage[],
+): Promise<void> {
+  if (!images.length) return;
+  const firstPublic = images.findIndex((im) => im.visibility === "public");
+  const chosen = images.findIndex((im) => im.visibility === "public" && im.isCover);
+  const coverIdx = chosen >= 0 ? chosen : firstPublic;
+
+  await Promise.all(
+    images.map(async (im, i) => {
+      const { display, thumb } = await processPortfolioImage(im.file);
+      const bucket = imageBucket(im.visibility);
+      const path = `${portfolioId}/${crypto.randomUUID()}.webp`;
+      const up = async (p: string, blob: Blob) => {
+        const { error } = await supabase.storage.from(bucket).upload(p, blob, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: "image/webp",
+        });
+        if (error) throw error;
+      };
+      await Promise.all([up(path, display), up(deriveThumbPath(path), thumb)]);
+      const { error: rowErr } = await supabase.from("portfolio_images").insert({
+        portfolio_id: portfolioId,
+        path,
+        sort_order: i,
+        is_cover: i === coverIdx,
+        visibility: im.visibility,
+      });
+      if (rowErr) throw rowErr;
+    }),
+  );
+}
+
 export async function uploadImages(
   portfolioId: string,
   files: File[],
