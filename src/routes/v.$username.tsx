@@ -8,10 +8,15 @@ import {
   MessageCircle,
   Mail,
   Loader2,
-  ImageOff,
+  FolderLock,
+  Compass,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { MembershipBadge } from "@/components/vault/badges";
+import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
+import { cn } from "@/lib/utils";
+import { s } from "@/lib/styles";
 import {
   getPublicProfile,
   getPublicAgentPortfolios,
@@ -20,9 +25,6 @@ import {
   type PublicProfile,
   type PublicAgentPortfolioCard,
 } from "@/lib/data/public-portfolio";
-import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
-import { ThumbImage } from "@/components/portfolio/thumb-image";
-import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 
 export const Route = createFileRoute("/v/$username")({
   head: () => ({
@@ -40,6 +42,7 @@ function PublicProfilePage() {
   const [data, setData] = useState<PublicProfile | null>(null);
   const [portfolios, setPortfolios] = useState<PublicAgentPortfolioCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"portfolios" | "about">("portfolios");
 
   useEffect(() => {
     let active = true;
@@ -58,36 +61,52 @@ function PublicProfilePage() {
   }, [username]);
 
   const wa = data?.contact_whatsapp?.replace(/\D/g, "");
+  const cards: TeaserCardData[] = portfolios.map((p) => ({
+    id: p.id,
+    slug: p.slug,
+    title: p.title,
+    price: p.price,
+    currency: p.currency,
+    transaction_type: p.transaction_type,
+    category: p.category,
+    mode: p.mode,
+    ref_no: p.ref_no,
+    city: p.city,
+    district: p.district,
+    neighborhood: p.neighborhood,
+    coverThumb: p.cover_path ? publicTeaserThumbUrl(p.cover_path) : null,
+    coverFull: p.cover_path ? publicTeaserImageUrl(p.cover_path) : null,
+  }));
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-[1000px] items-center justify-between px-4 lg:px-7">
+    <div className="min-h-screen bg-bu-bg">
+      <header className="sticky top-0 z-30 border-b border-bu-border bg-bu-bg/80 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-4 lg:px-8">
           <Link to="/" className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-gold text-primary-foreground">
+            <span className="flex size-8 items-center justify-center rounded-bu-md bg-gradient-gold text-bu-text-inv">
               <ShieldCheck className="size-5" />
             </span>
-            <span className="font-display text-base font-bold uppercase tracking-tight text-foreground sm:text-xl sm:tracking-[0.18em]">
+            <span className="font-display text-base font-bold uppercase tracking-tight text-bu-text sm:text-xl sm:tracking-[0.18em]">
               Bölgenin Uzmanı
             </span>
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
+            <Button asChild className="bg-gradient-gold text-bu-text-inv hover:opacity-90">
               <Link to="/login">Üye Girişi</Link>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1000px] px-4 py-6 lg:px-7">
+      <main className="mx-auto max-w-[1100px] px-4 pb-12 lg:px-8">
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="size-6 animate-spin text-gold" />
+            <Loader2 className="size-6 animate-spin text-bu-gold" />
           </div>
         ) : !data ? (
-          <div className="rounded-2xl border border-border bg-surface px-6 py-20 text-center">
-            <p className="text-sm text-muted-foreground">Profesyonel bulunamadı.</p>
+          <div className={cn(s.card, "mt-8 px-6 py-20 text-center")}>
+            <p className="text-sm text-bu-text-2">Profesyonel bulunamadı.</p>
             <Button asChild variant="outline" className="mt-4 gap-1.5">
               <Link to="/">
                 <ArrowLeft className="size-4" /> Ana sayfa
@@ -95,157 +114,188 @@ function PublicProfilePage() {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
-            {/* Main column: identity + portfolios */}
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-border bg-surface p-6">
-                <div className="flex items-center gap-4">
-                  {data.avatar_url ? (
-                    <img
-                      src={data.avatar_url}
-                      alt=""
-                      className="size-16 rounded-full object-cover ring-2 ring-surface"
-                    />
-                  ) : (
-                    <span className="flex size-16 items-center justify-center rounded-full bg-surface-2 text-2xl font-semibold text-gold">
-                      {data.full_name.slice(0, 1)}
+          <>
+            {/* Banner + avatar overlap */}
+            <div className="relative mt-6 h-40 overflow-hidden rounded-bu-xl bg-gradient-surface ring-1 ring-bu-border">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
+            </div>
+            <div className="-mt-12 px-2 sm:px-6">
+              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+                {data.avatar_url ? (
+                  <img
+                    src={data.avatar_url}
+                    alt={data.full_name}
+                    className="size-24 rounded-bu-xl border-4 border-bu-bg object-cover shadow-bu-raised"
+                  />
+                ) : (
+                  <span className="flex size-24 items-center justify-center rounded-bu-xl border-4 border-bu-bg bg-bu-card-raised text-3xl font-semibold text-bu-gold shadow-bu-raised">
+                    {data.full_name.slice(0, 1)}
+                  </span>
+                )}
+                <div className="min-w-0 flex-1 pb-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="font-display text-3xl font-bold text-bu-text">
+                      {data.full_name}
+                    </h1>
+                    <span className={s.verified}>
+                      <ShieldCheck className="size-3" /> Doğrulanmış
                     </span>
-                  )}
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <h1 className="font-display text-2xl font-semibold text-foreground">
-                        {data.full_name}
-                      </h1>
-                      <ShieldCheck className="size-4 text-gold" aria-label="Doğrulanmış" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {[data.title, data.company_name].filter(Boolean).join(" · ")}
+                    <MembershipBadge tier={data.membership_tier} />
+                  </div>
+                  <p className="mt-1 text-sm text-bu-text-2">
+                    {[data.title, data.company_name].filter(Boolean).join(" · ") || "Emlak Uzmanı"}
+                  </p>
+                  {data.location && (
+                    <p className="mt-0.5 flex items-center gap-1 text-xs text-bu-gold">
+                      <MapPin className="size-3.5" /> {data.location}
                     </p>
-                    {data.location && (
-                      <p className="flex items-center gap-1 text-xs text-gold">
-                        <MapPin className="size-3.5" /> {data.location}
-                      </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Stat cards */}
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
+                <StatCard icon={FolderLock} value={portfolios.length} label="Aktif Portföy" />
+                <StatCard
+                  icon={Compass}
+                  value={data.expertise_regions.length}
+                  label="Uzmanlık Bölgesi"
+                />
+              </div>
+            </div>
+
+            {/* Body: tabs + contact rail */}
+            <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px] lg:gap-12">
+              <div className="min-w-0">
+                <div className="flex gap-1 border-b border-bu-border">
+                  <TabBtn active={tab === "portfolios"} onClick={() => setTab("portfolios")}>
+                    Portföyleri
+                  </TabBtn>
+                  <TabBtn active={tab === "about"} onClick={() => setTab("about")}>
+                    Hakkında
+                  </TabBtn>
+                </div>
+
+                {tab === "portfolios" ? (
+                  <div className="mt-6">
+                    {cards.length === 0 ? (
+                      <div className="rounded-bu-lg border border-dashed border-bu-border bg-bu-card/50 px-6 py-16 text-center text-sm text-bu-text-2">
+                        Şu an yayında portföy yok.
+                      </div>
+                    ) : (
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        {cards.map((p) => (
+                          <PortfolioTeaserCard key={p.id} p={p} context="public" />
+                        ))}
+                      </div>
                     )}
                   </div>
-                </div>
-                {data.bio && (
-                  <p className="mt-4 text-sm leading-relaxed text-secondary-foreground">
-                    {data.bio}
-                  </p>
-                )}
-                {(data.expertise_regions.length > 0 || data.expertise_types.length > 0) && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {[...data.expertise_regions, ...data.expertise_types].map((x) => (
-                      <span
-                        key={x}
-                        className="rounded-md bg-gold/10 px-2 py-0.5 text-xs font-medium text-gold ring-1 ring-inset ring-gold/20"
-                      >
-                        {x}
-                      </span>
-                    ))}
+                ) : (
+                  <div className="mt-6 space-y-6">
+                    {data.bio ? (
+                      <p className="leading-relaxed text-bu-text-2">{data.bio}</p>
+                    ) : (
+                      <p className="text-sm text-bu-text-3">Henüz bir biyografi eklenmemiş.</p>
+                    )}
+                    {(data.expertise_regions.length > 0 || data.expertise_types.length > 0) && (
+                      <div>
+                        <h3 className={s.sectionTitle}>Uzmanlık</h3>
+                        <div className="mt-3 flex flex-wrap gap-1.5">
+                          {[...data.expertise_regions, ...data.expertise_types].map((x) => (
+                            <span key={x} className={s.chipGold}>
+                              {x}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* This agent's active portfolios (teaser) */}
-              <section className="space-y-3">
-                <div className="flex items-baseline justify-between">
-                  <h2 className="font-display text-lg font-semibold text-foreground">
-                    Bu uzmanın portföyleri
-                  </h2>
-                  {portfolios.length > 0 && (
-                    <span className="text-xs text-muted-foreground">{portfolios.length} adet</span>
+              {/* Contact rail */}
+              <aside className="lg:sticky lg:top-24 lg:self-start">
+                <div className={cn(s.card, "space-y-3 p-5")}>
+                  <h2 className="text-sm font-semibold text-bu-text">İletişim Bilgileri</h2>
+                  {wa && (
+                    <a
+                      href={`https://wa.me/${wa}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={cn(s.btnGold, "w-full justify-center")}
+                    >
+                      <MessageCircle className="size-4" /> WhatsApp
+                    </a>
+                  )}
+                  {data.contact_phone && (
+                    <a
+                      href={`tel:${data.contact_phone}`}
+                      className={cn(s.btnSecondary, "w-full justify-center")}
+                    >
+                      <Phone className="size-4" /> {data.contact_phone}
+                    </a>
+                  )}
+                  {data.contact_email && (
+                    <a
+                      href={`mailto:${data.contact_email}`}
+                      className={cn(s.btnSecondary, "w-full justify-center")}
+                    >
+                      <Mail className="size-4" /> E-posta
+                    </a>
+                  )}
+                  {!wa && !data.contact_phone && !data.contact_email && (
+                    <p className="text-xs text-bu-text-2">İletişim bilgisi paylaşılmamış.</p>
                   )}
                 </div>
-                {portfolios.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-border-strong bg-surface/40 px-6 py-12 text-center text-sm text-muted-foreground">
-                    Şu an yayında portföy yok.
-                  </div>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {portfolios.map((p) => (
-                      <AgentPortfolioCard key={p.id} p={p} />
-                    ))}
-                  </div>
-                )}
-              </section>
+              </aside>
             </div>
-
-            {/* Contact rail (D8 open) */}
-            <div className="space-y-2 rounded-2xl border border-border bg-surface p-5 lg:sticky lg:top-20 lg:self-start">
-              <h2 className="text-sm font-semibold text-foreground">İletişim</h2>
-              {wa && (
-                <Button
-                  asChild
-                  className="w-full gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-                >
-                  <a href={`https://wa.me/${wa}`} target="_blank" rel="noreferrer">
-                    <MessageCircle className="size-4" /> WhatsApp
-                  </a>
-                </Button>
-              )}
-              {data.contact_phone && (
-                <Button asChild variant="outline" className="w-full gap-1.5">
-                  <a href={`tel:${data.contact_phone}`}>
-                    <Phone className="size-4" /> {data.contact_phone}
-                  </a>
-                </Button>
-              )}
-              {data.contact_email && (
-                <Button asChild variant="outline" className="w-full gap-1.5">
-                  <a href={`mailto:${data.contact_email}`}>
-                    <Mail className="size-4" /> E-posta
-                  </a>
-                </Button>
-              )}
-              {!wa && !data.contact_phone && !data.contact_email && (
-                <p className="text-xs text-muted-foreground">İletişim bilgisi paylaşılmamış.</p>
-              )}
-            </div>
-          </div>
+          </>
         )}
       </main>
     </div>
   );
 }
 
-function AgentPortfolioCard({ p }: { p: PublicAgentPortfolioCard }) {
+function StatCard({
+  icon: Icon,
+  value,
+  label,
+}: {
+  icon: typeof FolderLock;
+  value: number;
+  label: string;
+}) {
   return (
-    <Link
-      to="/p/$slug"
-      params={{ slug: p.slug }}
-      className="group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong"
+    <div className={cn(s.card, "p-4")}>
+      <div className="flex items-center justify-between">
+        <span className="text-xs uppercase tracking-wider text-bu-text-2">{label}</span>
+        <Icon className="size-4 text-bu-gold" />
+      </div>
+      <div className="mt-2 font-display text-2xl font-bold text-bu-text">{value}</div>
+    </div>
+  );
+}
+
+function TabBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors",
+        active
+          ? "border-bu-gold text-bu-text"
+          : "border-transparent text-bu-text-2 hover:text-bu-text",
+      )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
-        {p.cover_path ? (
-          <ThumbImage
-            thumb={publicTeaserThumbUrl(p.cover_path)}
-            full={publicTeaserImageUrl(p.cover_path)}
-            alt={p.title}
-            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center text-muted-foreground">
-            <ImageOff className="size-7" />
-          </div>
-        )}
-        <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
-      </div>
-      <div className="p-4">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span>{CATEGORY_LABELS[p.category]}</span>
-          <span>·</span>
-          <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
-        </div>
-        <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">{p.title}</h3>
-        <p className="text-xs text-muted-foreground">
-          {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—"}
-        </p>
-        <p className="mt-2 font-display text-lg font-semibold text-gold">
-          {formatPortfolioPrice(p.price, p.currency)}
-        </p>
-        <RefNoText value={p.ref_no} className="mt-1 block" />
-      </div>
-    </Link>
+      {children}
+    </button>
   );
 }
