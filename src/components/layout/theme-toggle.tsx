@@ -34,6 +34,7 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label="Temayı değiştir"
       title={light ? "Koyu temaya geç" : "Açık temaya geç"}
+      className="text-bu-text"
     >
       {light ? <Moon className="size-4" /> : <Sun className="size-4" />}
     </Button>

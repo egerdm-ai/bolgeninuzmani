@@ -338,7 +338,7 @@ export function ApproxLocationBox({
       <p className="mt-1 text-xs text-bu-text-3">
         Yaklaşık konum gösterilmektedir. Tam adres, detay talebi onaylandıktan sonra paylaşılır.
       </p>
-      <div className="mt-4 flex h-48 items-center justify-center rounded-bu-lg border border-bu-border bg-bu-card">
+      <div className="mt-4 flex h-48 items-center justify-center rounded-bu-lg border border-bu-border bg-bu-card shadow-bu-card">
         <div className="text-center">
           <MapPin className="mx-auto mb-2 size-8 text-bu-gold" />
           <p className="text-sm text-bu-text-2">~{fmtLocation(neighborhood, district, city)}</p>
