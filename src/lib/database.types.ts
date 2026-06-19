@@ -1,6 +1,8 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5";
   };
@@ -331,9 +333,6 @@ export type Database = {
       };
       generate_portfolio_slug: { Args: { _title: string }; Returns: string };
       generate_username: { Args: { _email: string }; Returns: string };
-      // STUB (Slice 3 public-teaser RPCs) — migration drafted but NOT yet applied.
-      // Returns jsonb (Json) until `supabase db push` + type regen replaces these
-      // with the real generated signatures. See supabase/migrations/*slice3*.
       get_public_portfolio: { Args: { _slug: string }; Returns: Json };
       get_public_profile: { Args: { _username: string }; Returns: Json };
       has_portfolio_access: {
@@ -357,6 +356,8 @@ export type Database = {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;
       };
+      show_limit: { Args: never; Returns: number };
+      show_trgm: { Args: { "": string }; Returns: string[] };
     };
     Enums: {
       app_role: "admin" | "agent";

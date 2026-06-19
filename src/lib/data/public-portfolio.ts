@@ -6,9 +6,9 @@ import type { Database } from "@/lib/database.types";
 // base table (D13). The RPC returns a strict PUBLIC allow-list, so no locked field
 // (exact_*, malik_info, private_*, locked attributes/images, documents) is reachable.
 //
-// NOTE: the RPC migration is DRAFTED but NOT applied yet — these calls will only
-// resolve at runtime after `supabase db push` + type regen. Build/types are green
-// via the stubs in database.types.ts.
+// The RPCs return jsonb, so the generated client types them as `Json`; we cast the
+// validated payload to the typed shapes below (the RPC's column allow-list is the
+// real contract). Migration applied; types regenerated.
 
 const PUBLIC_IMAGES_BUCKET = "portfolio-images";
 
