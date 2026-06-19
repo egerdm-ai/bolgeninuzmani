@@ -7,7 +7,13 @@ import {
   splitAttributes,
   assertNoLockedInPublic,
   attributeVisibility,
+  attributesForCategory,
+  PORTFOLIO_ATTRIBUTES,
+  PUBLIC_ATTRIBUTES,
+  LOCKED_ATTRIBUTES,
 } from "../src/lib/portfolio-attributes.ts";
+
+const sampleValue = (type: string) => (type === "boolean" ? true : type === "number" ? 1 : "x");
 
 let passed = 0;
 const ok = (name: string, fn: () => void) => {
@@ -63,6 +69,60 @@ ok("registry visibility lookups are correct", () => {
   assert.equal(attributeVisibility("cephe"), "public");
   assert.equal(attributeVisibility("daire_no"), "locked");
   assert.equal(attributeVisibility("nope"), undefined);
+});
+
+// ---- D40 expanded registry: generic coverage of ALL fields ----
+
+ok("EVERY locked key routes to lockedAttrs, NEVER publicAttrs (full sweep)", () => {
+  const input = Object.fromEntries(LOCKED_ATTRIBUTES.map((a) => [a.key, sampleValue(a.type)]));
+  const { publicAttrs, lockedAttrs } = splitAttributes(input);
+  for (const a of LOCKED_ATTRIBUTES) {
+    assert.equal(a.key in lockedAttrs, true, `${a.key} should be locked`);
+    assert.equal(a.key in publicAttrs, false, `${a.key} must NOT be public`);
+  }
+});
+
+ok("assertNoLockedInPublic throws for EVERY locked key individually", () => {
+  for (const a of LOCKED_ATTRIBUTES) {
+    assert.throws(
+      () => assertNoLockedInPublic({ [a.key]: sampleValue(a.type) }),
+      /Güvenlik ihlali/,
+      `${a.key} must be rejected from the public bag`,
+    );
+  }
+});
+
+ok("EVERY public key routes to publicAttrs (full sweep) + guard passes", () => {
+  const input = Object.fromEntries(PUBLIC_ATTRIBUTES.map((a) => [a.key, sampleValue(a.type)]));
+  const { publicAttrs, lockedAttrs } = splitAttributes(input);
+  for (const a of PUBLIC_ATTRIBUTES) {
+    assert.equal(a.key in publicAttrs, true, `${a.key} should be public`);
+    assert.equal(a.key in lockedAttrs, false);
+  }
+  assert.doesNotThrow(() => assertNoLockedInPublic(publicAttrs));
+});
+
+ok("new locked identity keys are present + locked", () => {
+  for (const k of ["ada_no", "parsel_no", "blok", "pafta", "bina_site_adi"]) {
+    assert.equal(attributeVisibility(k), "locked", `${k} must be locked`);
+  }
+});
+
+ok("attributesForCategory filters by category (konut has konut fields, not arsa-only)", () => {
+  const konut = attributesForCategory("konut").map((a) => a.key);
+  assert.equal(konut.includes("balkon"), true);
+  assert.equal(konut.includes("ada_no"), false); // arsa/ticari-only locked key
+  const arsa = attributesForCategory("arsa").map((a) => a.key);
+  assert.equal(arsa.includes("ada_no"), true);
+  assert.equal(arsa.includes("balkon"), false);
+});
+
+ok("registry integrity: unique keys + every field has >=1 category", () => {
+  const keys = PORTFOLIO_ATTRIBUTES.map((a) => a.key);
+  assert.equal(new Set(keys).size, keys.length, "attribute keys must be unique");
+  for (const a of PORTFOLIO_ATTRIBUTES) {
+    assert.equal(a.categories.length > 0, true, `${a.key} must declare >=1 category`);
+  }
 });
 
 console.log(`\n${passed} checks passed ✓`);
