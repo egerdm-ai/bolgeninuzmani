@@ -11,6 +11,7 @@ import {
   ImageOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import {
   getPublicProfile,
   getPublicAgentPortfolios,
@@ -70,9 +71,12 @@ function PublicProfilePage() {
               Bölgenin Uzmanı
             </span>
           </Link>
-          <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
-            <Link to="/login">Üye Girişi</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
+              <Link to="/login">Üye Girişi</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

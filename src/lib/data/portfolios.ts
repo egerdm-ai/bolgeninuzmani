@@ -114,18 +114,25 @@ export function portfolioThumbUrl(path: string): string {
 const privateHasData = (p: PortfolioPrivateInput) =>
   Object.values(p).some((v) => v !== undefined && v !== null && v !== "");
 
-/** Owner's PUBLIC contact (D8) — for the call_only "ara" CTA shown to other agents. */
+/** Owner's PUBLIC profile (D8) — agent card + call_only "ara" CTA for other agents. */
 export type OwnerContact = {
   full_name: string;
   username: string;
+  avatar_url: string | null;
+  title: string | null;
+  company_name: string | null;
   contact_phone: string | null;
   contact_whatsapp: string | null;
+  expertise_regions: string[];
+  expertise_types: string[];
 };
 
 export async function getOwnerContact(ownerId: string): Promise<OwnerContact | null> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("full_name, username, contact_phone, contact_whatsapp")
+    .select(
+      "full_name, username, avatar_url, title, company_name, contact_phone, contact_whatsapp, expertise_regions, expertise_types",
+    )
     .eq("id", ownerId)
     .maybeSingle();
   if (error) throw error;
