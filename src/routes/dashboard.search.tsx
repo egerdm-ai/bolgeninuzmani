@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -7,6 +7,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
+import { Constants } from "@/lib/database.types";
 import {
   listNetworkPortfolios,
   type NetworkFilters,
@@ -34,25 +36,55 @@ export const Route = createFileRoute("/dashboard/search")({
 });
 
 const PAGE_SIZE = 12;
-const emptyDraft = {
-  q: "",
-  city: "",
-  district: "",
-  neighborhood: "",
-  transaction_type: "",
-  category: "",
-  priceMin: "",
-  priceMax: "",
-  room_count: "",
-};
+const ALL = "all";
+// Options come straight from the DB enums (no wrong/missing values).
+const CATEGORIES = Constants.public.Enums.portfolio_category;
+const TRANSACTIONS = Constants.public.Enums.transaction_type;
+const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "6+1"];
+
+function useDebounced<T>(value: T, ms: number): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(t);
+  }, [value, ms]);
+  return v;
+}
 
 function Kesfet() {
   const { user } = useAuth();
-  const [draft, setDraft] = useState(emptyDraft);
-  const [filters, setFilters] = useState<NetworkFilters>({});
+  // Typed fields debounce; selects apply immediately.
+  const [q, setQ] = useState("");
+  const [priceMin, setPriceMin] = useState("");
+  const [priceMax, setPriceMax] = useState("");
+  const [category, setCategory] = useState<string>(ALL);
+  const [transaction, setTransaction] = useState<string>(ALL);
+  const [rooms, setRooms] = useState<string>(ALL);
+  const [showMore, setShowMore] = useState(false);
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const dq = useDebounced(q, 300);
+  const dMin = useDebounced(priceMin, 400);
+  const dMax = useDebounced(priceMax, 400);
+
+  const filters = useMemo<NetworkFilters>(
+    () => ({
+      q: dq.trim() || undefined,
+      category: (category === ALL ? undefined : category) as NetworkFilters["category"],
+      transaction_type: (transaction === ALL
+        ? undefined
+        : transaction) as NetworkFilters["transaction_type"],
+      room_count: rooms === ALL ? undefined : rooms,
+      priceMin: dMin ? Number(dMin) : undefined,
+      priceMax: dMax ? Number(dMax) : undefined,
+    }),
+    [dq, category, transaction, rooms, dMin, dMax],
+  );
+
+  // Filters changed → back to page 0 (instant filter; no "Filtrele" button).
+  useEffect(() => setPage(0), [filters]);
 
   useEffect(() => {
     if (!user) return;
@@ -67,126 +99,158 @@ function Kesfet() {
     };
   }, [user, filters, page]);
 
-  const apply = () => {
-    setFilters({
-      q: draft.q.trim() || undefined,
-      city: draft.city.trim() || undefined,
-      district: draft.district.trim() || undefined,
-      neighborhood: draft.neighborhood.trim() || undefined,
-      transaction_type: (draft.transaction_type || undefined) as NetworkFilters["transaction_type"],
-      category: (draft.category || undefined) as NetworkFilters["category"],
-      priceMin: draft.priceMin ? Number(draft.priceMin) : undefined,
-      priceMax: draft.priceMax ? Number(draft.priceMax) : undefined,
-      room_count: draft.room_count.trim() || undefined,
-    });
-    setPage(0);
-  };
-
   const reset = () => {
-    setDraft(emptyDraft);
-    setFilters({});
-    setPage(0);
+    setQ("");
+    setPriceMin("");
+    setPriceMax("");
+    setCategory(ALL);
+    setTransaction(ALL);
+    setRooms(ALL);
   };
 
-  const sd = (k: keyof typeof draft) => (v: string) => setDraft((p) => ({ ...p, [k]: v }));
+  // Active-filter chips (each clears its own field).
+  const chips: { key: string; label: string; clear: () => void }[] = [];
+  if (q.trim()) chips.push({ key: "q", label: `“${q.trim()}”`, clear: () => setQ("") });
+  if (category !== ALL)
+    chips.push({
+      key: "cat",
+      label: CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS],
+      clear: () => setCategory(ALL),
+    });
+  if (transaction !== ALL)
+    chips.push({
+      key: "txn",
+      label: TRANSACTION_LABELS[transaction as keyof typeof TRANSACTION_LABELS],
+      clear: () => setTransaction(ALL),
+    });
+  if (rooms !== ALL)
+    chips.push({ key: "rooms", label: `${rooms} oda`, clear: () => setRooms(ALL) });
+  if (priceMin) chips.push({ key: "pmin", label: `≥ ${priceMin}`, clear: () => setPriceMin("") });
+  if (priceMax) chips.push({ key: "pmax", label: `≤ ${priceMax}`, clear: () => setPriceMax("") });
+
   const total = result?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <PageContainer className="space-y-6">
+    <PageContainer className="space-y-5">
       <PageHeader
         title="Keşfet"
-        subtitle="Ağdaki doğrulanmış emlakçıların yayındaki portföylerini keşfedin (teaser)."
+        subtitle="Ağdaki doğrulanmış emlakçıların yayındaki portföyleri (teaser)."
       />
 
-      {/* Search + filters */}
-      <div className="space-y-4 rounded-2xl border border-border bg-surface p-4">
-        <div className="flex gap-2">
+      {/* Primary filter bar — one clean row */}
+      <div className="space-y-3 rounded-2xl border border-border bg-surface p-4">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={draft.q}
-              onChange={(e) => sd("q")(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && apply()}
-              placeholder="Başlık, şehir, ilçe, mahalle ara…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Başlık, şehir, ilçe veya mahalle ara…"
               className="pl-9"
             />
           </div>
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className="sm:w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Tüm kategoriler</SelectItem>
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {CATEGORY_LABELS[c]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={transaction} onValueChange={setTransaction}>
+            <SelectTrigger className="sm:w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>Tüm işlemler</SelectItem>
+              {TRANSACTIONS.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {TRANSACTION_LABELS[t]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
-            onClick={apply}
-            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => setShowMore((s) => !s)}
+            aria-expanded={showMore}
           >
-            <SlidersHorizontal className="size-4" /> Filtrele
+            <SlidersHorizontal className="size-4" /> Daha fazla
           </Button>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <FilterField label="Kategori">
-            <Select value={draft.category} onValueChange={sd("category")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tümü" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(CATEGORY_LABELS).map(([v, l]) => (
-                  <SelectItem key={v} value={v}>
-                    {l}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FilterField>
-          <FilterField label="İşlem">
-            <Select value={draft.transaction_type} onValueChange={sd("transaction_type")}>
-              <SelectTrigger>
-                <SelectValue placeholder="Tümü" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(TRANSACTION_LABELS).map(([v, l]) => (
-                  <SelectItem key={v} value={v}>
-                    {l}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FilterField>
-          <FilterField label="Şehir">
-            <Input value={draft.city} onChange={(e) => sd("city")(e.target.value)} />
-          </FilterField>
-          <FilterField label="İlçe">
-            <Input value={draft.district} onChange={(e) => sd("district")(e.target.value)} />
-          </FilterField>
-          <FilterField label="Mahalle">
-            <Input
-              value={draft.neighborhood}
-              onChange={(e) => sd("neighborhood")(e.target.value)}
-            />
-          </FilterField>
-          <FilterField label="Oda">
-            <Input
-              value={draft.room_count}
-              onChange={(e) => sd("room_count")(e.target.value)}
-              placeholder="5+1"
-            />
-          </FilterField>
-          <FilterField label="Min Fiyat">
-            <Input
-              type="number"
-              value={draft.priceMin}
-              onChange={(e) => sd("priceMin")(e.target.value)}
-            />
-          </FilterField>
-          <FilterField label="Maks Fiyat">
-            <Input
-              type="number"
-              value={draft.priceMax}
-              onChange={(e) => sd("priceMax")(e.target.value)}
-            />
-          </FilterField>
-        </div>
-        <div className="flex justify-end">
-          <Button variant="ghost" size="sm" onClick={reset} className="text-muted-foreground">
-            Filtreleri temizle
-          </Button>
-        </div>
+
+        {/* Secondary filters (collapsed by default → uncluttered) */}
+        {showMore && (
+          <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-3">
+            <Field label="Oda sayısı">
+              <Select value={rooms} onValueChange={setRooms}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>Tümü</SelectItem>
+                  {ROOM_OPTIONS.map((r) => (
+                    <SelectItem key={r} value={r}>
+                      {r}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Min. fiyat">
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={priceMin}
+                onChange={(e) => setPriceMin(e.target.value)}
+                placeholder="0"
+              />
+            </Field>
+            <Field label="Maks. fiyat">
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={priceMax}
+                onChange={(e) => setPriceMax(e.target.value)}
+                placeholder="∞"
+              />
+            </Field>
+          </div>
+        )}
+
+        {/* Active chips + count + clear */}
+        {(chips.length > 0 || result !== null) && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+            {result !== null && (
+              <span className="text-sm font-medium text-foreground">{total} portföy</span>
+            )}
+            {chips.map((c) => (
+              <button
+                key={c.key}
+                onClick={c.clear}
+                className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-xs font-medium text-gold hover:bg-gold/20"
+              >
+                {c.label}
+                <X className="size-3" />
+              </button>
+            ))}
+            {chips.length > 0 && (
+              <button
+                onClick={reset}
+                className="ml-auto text-xs text-muted-foreground hover:text-foreground"
+              >
+                Filtreleri temizle
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Results */}
@@ -204,7 +268,6 @@ function Kesfet() {
         </div>
       ) : (
         <>
-          <p className="text-xs text-muted-foreground">{total} portföy bulundu</p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {result.items.map((p) => (
               <TeaserCard key={p.id} p={p} />
@@ -241,7 +304,7 @@ function Kesfet() {
   );
 }
 
-function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs text-muted-foreground">{label}</Label>
