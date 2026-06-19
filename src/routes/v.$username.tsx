@@ -15,10 +15,12 @@ import {
   getPublicProfile,
   getPublicAgentPortfolios,
   publicTeaserImageUrl,
+  publicTeaserThumbUrl,
   type PublicProfile,
   type PublicAgentPortfolioCard,
 } from "@/lib/data/public-portfolio";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 
 export const Route = createFileRoute("/v/$username")({
   head: () => ({
@@ -211,11 +213,10 @@ function AgentPortfolioCard({ p }: { p: PublicAgentPortfolioCard }) {
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
         {p.cover_path ? (
-          <img
-            src={publicTeaserImageUrl(p.cover_path)}
+          <ThumbImage
+            thumb={publicTeaserThumbUrl(p.cover_path)}
+            full={publicTeaserImageUrl(p.cover_path)}
             alt={p.title}
-            loading="lazy"
-            decoding="async"
             className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

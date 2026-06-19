@@ -41,6 +41,7 @@ import {
 } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 import { ImageLightbox } from "@/components/portfolio/image-lightbox";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/")({
   component: OwnerPortfolioDetail,
@@ -201,11 +202,9 @@ function OwnerPortfolioDetail() {
               <div className="flex gap-2 overflow-x-auto p-2">
                 {full.images.map((img, idx) => (
                   <div key={img.id} className="relative shrink-0">
-                    <img
-                      src={img.url}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
+                    <ThumbImage
+                      thumb={img.thumbUrl}
+                      full={img.url}
                       onClick={() => setLightbox(idx)}
                       className="h-16 w-24 cursor-zoom-in rounded-md object-cover"
                     />

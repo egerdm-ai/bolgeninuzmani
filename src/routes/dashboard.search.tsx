@@ -30,6 +30,7 @@ import {
   type PortfolioWithCover,
 } from "@/lib/data/portfolios";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 
 export const Route = createFileRoute("/dashboard/search")({
   component: Kesfet,
@@ -64,6 +65,7 @@ function Kesfet() {
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [fetching, setFetching] = useState(false);
 
   const dq = useDebounced(q, 300);
   const dMin = useDebounced(priceMin, 400);
@@ -89,11 +91,14 @@ function Kesfet() {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    setResult(null);
+    // Keep the previous results on screen during a refetch (thin loading bar
+    // instead of a full spinner / blank flash on every filter keystroke).
+    setFetching(true);
     setError(null);
     listNetworkPortfolios(user.id, filters, page, PAGE_SIZE)
       .then((r) => active && setResult(r))
-      .catch((e) => active && setError(e instanceof Error ? e.message : String(e)));
+      .catch((e) => active && setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => active && setFetching(false));
     return () => {
       active = false;
     };
@@ -253,6 +258,13 @@ function Kesfet() {
         )}
       </div>
 
+      {/* Thin loading bar on refetch (results stay on screen) */}
+      <div className="h-0.5 overflow-hidden rounded-full bg-transparent">
+        {fetching && result !== null && (
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-gold" />
+        )}
+      </div>
+
       {/* Results */}
       {error ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-12 text-center text-sm text-destructive">
@@ -324,11 +336,10 @@ function TeaserCard({ p }: { p: PortfolioWithCover }) {
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
         {p.cover_url ? (
-          <img
-            src={p.cover_url}
+          <ThumbImage
+            thumb={p.cover_url}
+            full={p.cover_url_full}
             alt={p.title}
-            loading="lazy"
-            decoding="async"
             className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

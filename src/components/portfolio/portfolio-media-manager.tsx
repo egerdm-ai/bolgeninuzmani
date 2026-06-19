@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 import {
   Select,
   SelectContent,
@@ -116,7 +117,11 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
             {images.map((img, i) => (
               <div key={img.id} className="overflow-hidden rounded-lg border border-border">
                 <div className="relative aspect-[4/3] bg-surface-2">
-                  <img src={img.url} alt="" className="size-full object-cover" />
+                  <ThumbImage
+                    thumb={img.thumbUrl}
+                    full={img.url}
+                    className="size-full object-cover"
+                  />
                   <div className="absolute left-1 top-1 flex gap-1">
                     {img.is_cover && (
                       <span className="rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">

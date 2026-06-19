@@ -15,6 +15,7 @@ import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { KpiCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
@@ -172,11 +173,10 @@ function PortfolioCard({
       <Link to="/dashboard/portfolios/$id" params={{ id: p.id }} className="block">
         <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
           {p.cover_url ? (
-            <img
-              src={p.cover_url}
+            <ThumbImage
+              thumb={p.cover_url}
+              full={p.cover_url_full}
               alt={p.title}
-              loading="lazy"
-              decoding="async"
               className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

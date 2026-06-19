@@ -5,6 +5,7 @@ import {
   assertNoLockedInPublic,
   type AttributesInput,
 } from "@/lib/portfolio-attributes";
+import { processPortfolioImage } from "@/lib/image-resize";
 
 // ---------------------------------------------------------------------------
 // Portfolio data access (M2). Typed CRUD. NO business logic in components.
@@ -72,18 +73,31 @@ export type PortfolioPrivateInput = {
   private_notes?: string | null;
 };
 
-export type PortfolioWithCover = Portfolio & { cover_url: string | null };
+export type PortfolioWithCover = Portfolio & {
+  cover_url: string | null; // thumb (small) — cards/lists
+  cover_url_full: string | null; // display — onError fallback for legacy (pre-thumb) images
+};
 
 export type PortfolioFull = {
   portfolio: Portfolio;
   private: PortfolioPrivate | null;
-  images: (PortfolioImage & { url: string })[];
+  images: (PortfolioImage & { url: string; thumbUrl: string })[];
   documents: PortfolioDocument[];
 };
+
+/** Derive the thumb path from a display path: `<uuid>.webp` → `<uuid>_thumb.webp`. */
+export function deriveThumbPath(path: string): string {
+  return path.replace(/(\.[^./]+)$/, "_thumb$1");
+}
 
 /** Public URL for a teaser image path (portfolio-images is a public bucket). */
 export function portfolioImageUrl(path: string): string {
   return supabase.storage.from(IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/** Public URL for the THUMB of a teaser image path (cards/lists). */
+export function portfolioThumbUrl(path: string): string {
+  return portfolioImageUrl(deriveThumbPath(path));
 }
 
 const privateHasData = (p: PortfolioPrivateInput) =>
@@ -122,7 +136,8 @@ export async function listMyPortfolios(ownerId: string): Promise<PortfolioWithCo
     void _drop;
     return {
       ...(portfolio as Portfolio),
-      cover_url: cover ? portfolioImageUrl(cover.path) : null,
+      cover_url: cover ? portfolioThumbUrl(cover.path) : null,
+      cover_url_full: cover ? portfolioImageUrl(cover.path) : null,
     };
   });
 }
@@ -155,11 +170,28 @@ export async function getMyPortfolioFull(id: string): Promise<PortfolioFull | nu
       .order("uploaded_at", { ascending: true }),
   ]);
 
-  // Locked images live in the PRIVATE bucket → short-lived signed URL (owner via
-  // has_portfolio_access RLS). Public images → public URL.
-  const images = await Promise.all(
-    (imgs.data ?? []).map(async (i) => ({ ...i, url: await imageUrlFor(i) })),
-  );
+  // Resolve display + thumb URLs. Public → local public URLs (no network). Locked
+  // → ONE batched createSignedUrls call (signs every locked display + thumb path
+  // at once) instead of one round-trip per image.
+  const rows = imgs.data ?? [];
+  const lockedPaths = rows
+    .filter((i) => i.visibility === "locked")
+    .flatMap((i) => [i.path, deriveThumbPath(i.path)]);
+  const signed = new Map<string, string>();
+  if (lockedPaths.length) {
+    const { data: urls } = await supabase.storage
+      .from(IMAGES_LOCKED_BUCKET)
+      .createSignedUrls(lockedPaths, SIGNED_URL_TTL);
+    for (const u of urls ?? []) if (u.path && u.signedUrl) signed.set(u.path, u.signedUrl);
+  }
+  const images = rows.map((i) => {
+    if (i.visibility === "locked") {
+      const url = signed.get(i.path) ?? "";
+      // legacy locked images have no thumb → fall back to the display signed URL
+      return { ...i, url, thumbUrl: signed.get(deriveThumbPath(i.path)) ?? url };
+    }
+    return { ...i, url: portfolioImageUrl(i.path), thumbUrl: portfolioThumbUrl(i.path) };
+  });
 
   return {
     portfolio,
@@ -167,17 +199,6 @@ export async function getMyPortfolioFull(id: string): Promise<PortfolioFull | nu
     images,
     documents: docs.data ?? [],
   };
-}
-
-/** Resolve a viewable URL for an image row honoring its visibility. */
-async function imageUrlFor(img: Pick<PortfolioImage, "path" | "visibility">): Promise<string> {
-  if (img.visibility === "locked") {
-    const { data } = await supabase.storage
-      .from(IMAGES_LOCKED_BUCKET)
-      .createSignedUrl(img.path, SIGNED_URL_TTL);
-    return data?.signedUrl ?? "";
-  }
-  return portfolioImageUrl(img.path);
 }
 
 /** Keşfet filters (Slice 5). All optional; combined with AND (q is a text OR). */
@@ -195,13 +216,16 @@ export type NetworkFilters = {
 
 export type NetworkResult = { items: PortfolioWithCover[]; total: number };
 
-const coverUrlFromJoin = (
+const coverUrlsFromJoin = (
   images: Pick<PortfolioImage, "path" | "is_cover" | "sort_order" | "visibility">[],
-): string | null => {
+): { cover_url: string | null; cover_url_full: string | null } => {
   const pub = images.filter((i) => i.visibility === "public");
   const cover =
     pub.find((i) => i.is_cover) ?? [...pub].sort((a, b) => a.sort_order - b.sort_order)[0];
-  return cover ? portfolioImageUrl(cover.path) : null;
+  return {
+    cover_url: cover ? portfolioThumbUrl(cover.path) : null,
+    cover_url_full: cover ? portfolioImageUrl(cover.path) : null,
+  };
 };
 
 /**
@@ -218,7 +242,8 @@ export async function listNetworkPortfolios(
 ): Promise<NetworkResult> {
   let query = supabase
     .from("portfolios")
-    .select("*, portfolio_images(path, is_cover, sort_order, visibility)", { count: "exact" })
+    // estimated: exact for small tables, planner estimate at scale (cheap COUNT).
+    .select("*, portfolio_images(path, is_cover, sort_order, visibility)", { count: "estimated" })
     .eq("status", "active")
     .neq("owner_id", viewerId);
 
@@ -254,7 +279,7 @@ export async function listNetworkPortfolios(
       portfolio_images: unknown;
     };
     void _drop;
-    return { ...(portfolio as Portfolio), cover_url: coverUrlFromJoin(images) };
+    return { ...(portfolio as Portfolio), ...coverUrlsFromJoin(images) };
   });
 
   return { items, total: count ?? 0 };
@@ -367,13 +392,19 @@ export async function uploadImages(
   // Upload all files in parallel (independent work) so many images don't feel slow.
   await Promise.all(
     files.map(async (file, i) => {
-      const ext = file.name.includes(".") ? file.name.split(".").pop() : "jpg";
-      const path = `${portfolioId}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage.from(bucket).upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (upErr) throw upErr;
+      // Resize to two WebP derivatives (display ≤1600px + thumb ≤400px); the raw
+      // ~4MB file is NEVER stored. path = <uuid>.webp, thumb = <uuid>_thumb.webp.
+      const { display, thumb } = await processPortfolioImage(file);
+      const path = `${portfolioId}/${crypto.randomUUID()}.webp`;
+      const up = async (p: string, blob: Blob) => {
+        const { error } = await supabase.storage.from(bucket).upload(p, blob, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: "image/webp",
+        });
+        if (error) throw error;
+      };
+      await Promise.all([up(path, display), up(deriveThumbPath(path), thumb)]);
       const { error: rowErr } = await supabase.from("portfolio_images").insert({
         portfolio_id: portfolioId,
         path,
@@ -390,7 +421,10 @@ type ImageRef = Pick<PortfolioImage, "id" | "path" | "visibility">;
 
 /** Delete one image: remove the storage object (correct bucket) + the row. */
 export async function deletePortfolioImage(img: ImageRef): Promise<void> {
-  await supabase.storage.from(imageBucket(img.visibility)).remove([img.path]);
+  // remove BOTH the display and the thumb object (thumb may be absent for legacy)
+  await supabase.storage
+    .from(imageBucket(img.visibility))
+    .remove([img.path, deriveThumbPath(img.path)]);
   const { error } = await supabase.from("portfolio_images").delete().eq("id", img.id);
   if (error) throw error;
 }
@@ -422,32 +456,30 @@ export async function reorderImages(items: { id: string; sort_order: number }[])
  * private bucket (fetch current URL → re-upload to target → delete source),
  * then updates the row. A locked photo can't be the cover (cleared).
  */
-export async function setImageVisibility(
-  img: ImageRef & { url: string },
-  target: ImageVisibility,
-): Promise<void> {
+export async function setImageVisibility(img: ImageRef, target: ImageVisibility): Promise<void> {
   if (img.visibility === target) return;
   const fromBucket = imageBucket(img.visibility);
   const toBucket = imageBucket(target);
 
-  const res = await fetch(img.url);
-  if (!res.ok) throw new Error("Görsel taşınamadı (kaynak okunamadı)");
-  const blob = await res.blob();
-
-  const { error: upErr } = await supabase.storage.from(toBucket).upload(img.path, blob, {
-    cacheControl: "3600",
-    upsert: true,
-    contentType: blob.type || "image/jpeg",
-  });
-  if (upErr) throw upErr;
+  // Move BOTH the display and the thumb object. download() works for public AND
+  // private buckets; a legacy image with no thumb is skipped silently.
+  for (const path of [img.path, deriveThumbPath(img.path)]) {
+    const { data: blob, error: dErr } = await supabase.storage.from(fromBucket).download(path);
+    if (dErr || !blob) continue;
+    const { error: upErr } = await supabase.storage.from(toBucket).upload(path, blob, {
+      cacheControl: "3600",
+      upsert: true,
+      contentType: blob.type || "image/webp",
+    });
+    if (upErr) throw upErr;
+    await supabase.storage.from(fromBucket).remove([path]);
+  }
 
   const { error: rowErr } = await supabase
     .from("portfolio_images")
     .update({ visibility: target, ...(target === "locked" ? { is_cover: false } : {}) })
     .eq("id", img.id);
   if (rowErr) throw rowErr;
-
-  await supabase.storage.from(fromBucket).remove([img.path]);
 }
 
 // ---------------------------------------------------------------------------

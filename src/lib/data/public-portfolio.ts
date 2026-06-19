@@ -96,6 +96,11 @@ export function publicTeaserImageUrl(path: string): string {
   return supabase.storage.from(PUBLIC_IMAGES_BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
+/** Public bucket URL for the THUMB of a teaser image path (cards/gallery thumbs). */
+export function publicTeaserThumbUrl(path: string): string {
+  return publicTeaserImageUrl(path.replace(/(\.[^./]+)$/, "_thumb$1"));
+}
+
 /** Anon teaser for /p/$slug. Returns null if not found / not active. */
 export async function getPublicPortfolio(slug: string): Promise<PublicPortfolio | null> {
   const { data, error } = await supabase.rpc("get_public_portfolio", { _slug: slug });

@@ -16,8 +16,10 @@ import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 import {
   getPublicPortfolio,
   publicTeaserImageUrl,
+  publicTeaserThumbUrl,
   type PublicPortfolio,
 } from "@/lib/data/public-portfolio";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 
@@ -148,12 +150,10 @@ function Teaser({
           {data.images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto p-2">
               {data.images.map((img, idx) => (
-                <img
+                <ThumbImage
                   key={img.path}
-                  src={publicTeaserImageUrl(img.path)}
-                  alt=""
-                  loading="lazy"
-                  decoding="async"
+                  thumb={publicTeaserThumbUrl(img.path)}
+                  full={publicTeaserImageUrl(img.path)}
                   onClick={() => onOpenImage(idx)}
                   className="h-16 w-24 shrink-0 cursor-zoom-in rounded-md object-cover"
                 />
