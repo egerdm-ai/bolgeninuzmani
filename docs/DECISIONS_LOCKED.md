@@ -203,3 +203,28 @@ UI'ı ertelendi (başta Supabase dashboard yeter).
     altın kalkan ikonu + net CTA. Galeri = büyük hero (fotoğraf yıldız). Emlakçı kartı
     detayda görünür (güven). Bol boşluk, tipografi hiyerarşisi net.
   - Renk dışındaki her şey (layout/boşluk/bileşen) iki modda ortak; sadece token değerleri değişir.
+
+---
+
+## Portföy modu, no, mesajlaşma, alan seti (2026-06-19)
+
+- **D36 — Portföy modu: `controlled` vs `call_only`.**
+  - `controlled` (kontrollü paylaşım): kilitli alanlar dolu → Detay Talebi → onay → açılır (mevcut akış).
+  - `call_only` (kapalı portföy / sadece ara): kilitli alan YOK, Detay Talebi akışı YOK.
+    Teaser'da "Bu kapalı bir portföydür, detaylar için arayın" + emlakçının telefonu (Ara butonu).
+  - Belirleme: **varsayılan otomatik** (kilitli alan doldurulmamışsa call_only sayılır)
+    AMA emlakçı oluştururken/düzenlerken **elle de seçebilir**. portfolios'a `mode` kolonu.
+- **D37 — Kilitli içerik şeffaflığı (değer değil, varlık görünür).**
+  - Teaser/detayda **kaç kilitli foto** olduğu görünür (örn. "🔒 3 kilitli fotoğraf").
+  - **Hangi bilgilerin kilitli olduğu** etiket olarak görünür (tam adres, malik, tapu/belge,
+    özel notlar) — değerleri değil. Talep eden ne kazanacağını bilir (güven).
+- **D38 — Talep/cevap mesajlaşması.**
+  - Talep gönderirken mesaj (mevcut, opsiyonel).
+  - Owner onayl/redde **cevap mesajı** yazabilir (OPSİYONEL). Talep eden bu cevabı görür.
+  - detail_requests'e `response_message` kolonu (+ ileride basit bir mesaj görünümü).
+- **D39 — Portföy numarası.** Her portföye insan-okur benzersiz no (örn. `BU-10472`).
+  Sahibinden "İlan No" muadili; paylaşım/arama/referans için. portfolios'a `ref_no`.
+- **D40 — Standart alan seti (Sahibinden/Emlakjet tarzı), kategoriye göre.**
+  Konut + Ticari/İşyeri + Arsa için emlakçıların beklediği standart öznitelikler,
+  attribute registry'ye (D33) işlenir; her kategori kendi alanlarını gösterir.
+  Public/locked ayrımı D33 kuralına tabi (teşhis edici olanlar locked).
