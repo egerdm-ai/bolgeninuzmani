@@ -1,17 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ShieldCheck, MapPin, Eye, Send, FolderLock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Pencil, Eye, Loader2, X } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { SurfaceCard, KpiCard } from "@/components/vault/cards";
-import { BrokerAvatar } from "@/components/vault/broker-avatar";
-import { MembershipBadge } from "@/components/vault/badges";
+import { SurfaceCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
 import { ProfileForm } from "@/components/profile/profile-form";
+import { ProfessionalProfileView } from "@/components/profile/professional-profile-view";
+import { toProfessionalVM, type ProfessionalVM } from "@/lib/profile-vm";
 import { useAuth } from "@/lib/auth/auth-context";
-import { dashboardKpis, myPortfolios, propertyImages } from "@/lib/mock/data";
-import { PortfolioCard } from "@/components/vault/portfolio-card";
-import { useSaved } from "@/lib/saved-store";
-import { formatNumber } from "@/lib/format";
+import { getPublicProfile, getPublicAgentPortfolios } from "@/lib/data/public-portfolio";
 
 export const Route = createFileRoute("/dashboard/profile")({
   component: Profile,
@@ -19,9 +17,26 @@ export const Route = createFileRoute("/dashboard/profile")({
 
 function Profile() {
   const { profile } = useAuth();
-  const { isSaved, toggleSave } = useSaved();
-  // TODO[M2]: KPIs + published portfolios are still mock; wire to real portfolios.
-  const active = myPortfolios.filter((p) => p.status === "active").slice(0, 3);
+  const username = profile?.username ?? null;
+  const [vm, setVm] = useState<ProfessionalVM | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    if (!username) return;
+    let active = true;
+    setLoading(true);
+    Promise.all([getPublicProfile(username), getPublicAgentPortfolios(username).catch(() => [])])
+      .then(([p, ports]) => {
+        if (!active) return;
+        setVm(p ? toProfessionalVM(p, ports) : null);
+        setLoading(false);
+      })
+      .catch(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [username]);
 
   if (!profile) return null;
 
@@ -29,83 +44,54 @@ function Profile() {
     <PageContainer className="space-y-6">
       <PageHeader title="Profilim" subtitle="Profesyonel profilinizi yönetin." />
 
-      {/* Cover + identity (real profile) */}
-      <SurfaceCard className="overflow-hidden p-0">
-        <div className="relative h-40">
-          <img src={propertyImages.villa2} alt="" className="size-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
+      {loading || !vm ? (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="size-6 animate-spin text-gold" />
         </div>
-        <div className="flex flex-col gap-4 px-6 pb-6 sm:flex-row sm:items-end">
-          <div className="-mt-12">
-            <BrokerAvatar
-              name={profile.full_name}
-              src={profile.avatar_url ?? undefined}
-              size="xl"
-              className="ring-4 ring-surface"
-            />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h2 className="font-display text-2xl font-semibold text-foreground">
-                {profile.full_name}
-              </h2>
-              <ShieldCheck className="size-5 text-gold" />
-              <MembershipBadge tier={profile.membership_tier} />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {[profile.title, profile.company_name].filter(Boolean).join(" · ") || "—"}
-            </p>
-            {profile.location && (
-              <p className="flex items-center gap-1 text-xs text-gold">
-                <MapPin className="size-3.5" /> {profile.location}
-              </p>
-            )}
-          </div>
-          {/* Public profile preview (Slice 3: /v/$username via get_public_profile RPC). */}
-          <Button asChild variant="outline">
-            <Link to="/v/$username" params={{ username: profile.username }}>
-              Profili Önizle
-            </Link>
-          </Button>
-        </div>
-      </SurfaceCard>
+      ) : (
+        <>
+          <ProfessionalProfileView
+            vm={vm}
+            actions={
+              <>
+                <Button
+                  variant="outline"
+                  className="gap-1.5"
+                  onClick={() => setEditing((e) => !e)}
+                  aria-expanded={editing}
+                >
+                  <Pencil className="size-4" /> Düzenle
+                </Button>
+                {/* The ONLY path out to the public view — explicit preview. */}
+                <Button asChild variant="ghost" className="gap-1.5">
+                  <Link to="/v/$username" params={{ username: vm.username }}>
+                    <Eye className="size-4" /> Profili Önizle
+                  </Link>
+                </Button>
+              </>
+            }
+          />
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <KpiCard
-          label="Aktif Portföy"
-          value={formatNumber(dashboardKpis.activePortfolios)}
-          icon={FolderLock}
-        />
-        <KpiCard
-          label="Toplam Görüntülenme"
-          value={formatNumber(dashboardKpis.totalViews)}
-          icon={Eye}
-        />
-        <KpiCard
-          label="Detay Talepleri"
-          value={formatNumber(dashboardKpis.detailRequests)}
-          icon={Send}
-        />
-      </div>
-
-      {/* Edit form (real — profiles_update_self) */}
-      <SurfaceCard>
-        <ProfileForm />
-      </SurfaceCard>
-
-      <section className="space-y-3">
-        <h2 className="font-display text-xl font-semibold text-foreground">Yayındaki Portföyler</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {active.map((p) => (
-            <PortfolioCard
-              key={p.id}
-              portfolio={p}
-              saved={isSaved(p.id)}
-              onToggleSave={toggleSave}
-            />
-          ))}
-        </div>
-      </section>
+          {editing && (
+            <SurfaceCard>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-display text-lg font-semibold text-foreground">
+                  Bilgileri Düzenle
+                </h2>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditing(false)}
+                  aria-label="Kapat"
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+              <ProfileForm />
+            </SurfaceCard>
+          )}
+        </>
+      )}
     </PageContainer>
   );
 }
