@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  PUBLIC_ATTRIBUTES,
   LOCKED_ATTRIBUTES,
+  attributesForCategory,
   type AttributeDef,
 } from "@/lib/portfolio-attributes";
 import {
@@ -182,6 +182,12 @@ export function PortfolioFormFields({
     images.some((i) => i.visibility === "locked");
   const callOnly = teaser.mode === "call_only";
 
+  // D40: only the selected category's standard fields (public → Detaylar,
+  // locked → Kilitli Bilgiler). oda/m²/features stay first-class columns above.
+  const catAttrs = attributesForCategory(teaser.category);
+  const catPublicAttrs = catAttrs.filter((a) => a.visibility === "public");
+  const catLockedAttrs = catAttrs.filter((a) => a.visibility === "locked");
+
   return (
     <>
       <SurfaceCard className="space-y-4">
@@ -335,7 +341,7 @@ export function PortfolioFormFields({
             placeholder="Havuz, Deniz manzarası, Otopark"
           />
         </Field>
-        <AttrGrid defs={PUBLIC_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
+        <AttrGrid defs={catPublicAttrs} attrs={attrs} onChange={setAttr} />
       </SurfaceCard>
 
       {!hideImages && (
@@ -487,7 +493,7 @@ export function PortfolioFormFields({
               onChange={(e) => sp("private_notes")(e.target.value)}
             />
           </Field>
-          <AttrGrid defs={LOCKED_ATTRIBUTES} attrs={attrs} onChange={setAttr} />
+          <AttrGrid defs={catLockedAttrs} attrs={attrs} onChange={setAttr} />
         </SurfaceCard>
       )}
     </>
@@ -575,6 +581,30 @@ function AttrInput({
           ))}
         </SelectContent>
       </Select>
+    );
+  }
+  if (def.type === "multiselect") {
+    const selected = typeof value === "string" && value ? value.split(",") : [];
+    const toggle = (v: string) => {
+      const next = selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v];
+      onChange(next.join(","));
+    };
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {def.options?.map((o) => {
+          const on = selected.includes(o.value);
+          return (
+            <button
+              key={o.value}
+              type="button"
+              onClick={() => toggle(o.value)}
+              className={`rounded-md px-2 py-1 text-xs font-medium transition-colors ${on ? "bg-gold/20 text-gold ring-1 ring-inset ring-gold/40" : "bg-surface-2 text-muted-foreground hover:text-foreground"}`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
     );
   }
   return (
