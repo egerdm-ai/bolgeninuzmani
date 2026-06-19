@@ -26,10 +26,14 @@ function socialLinksFor(pro: Professional) {
     {
       label: "Website",
       icon: Globe,
-      href: `https://${pro.username.replace(/-/g, "")}.vault.estate`,
+      href: `https://${pro.username.replace(/-/g, "")}.bolgeninuzmani.com`,
     },
     { label: "WhatsApp Katalog", icon: MessageCircle, href: `https://wa.me/c/${pro.username}` },
-    { label: "Dijital Kart", icon: CreditCard, href: `https://vault.estate/card/${pro.username}` },
+    {
+      label: "Dijital Kart",
+      icon: CreditCard,
+      href: `https://bolgeninuzmani.com/card/${pro.username}`,
+    },
   ];
 }
 

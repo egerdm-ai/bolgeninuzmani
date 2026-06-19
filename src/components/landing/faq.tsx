@@ -32,7 +32,7 @@ const faqs = [
   },
   {
     q: "Öne Çıkarma seçenekleri nasıl çalışır?",
-    a: "İlanlarınızı, profilinizi ve arayışlarınızı ana sayfa, şehir ve bölge vitrinlerinde öne çıkarabilir; AI eşleşme önceliği ve aciliyet rozeti gibi ek görünürlük avantajları kullanabilirsiniz.",
+    a: "Portföylerinizi, profilinizi ve arayışlarınızı ana sayfa, şehir ve bölge vitrinlerinde öne çıkarabilir; AI eşleşme önceliği ve aciliyet rozeti gibi ek görünürlük avantajları kullanabilirsiniz.",
   },
   {
     q: "AI Asistan hangi bilgileri kullanır?",

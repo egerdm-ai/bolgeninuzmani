@@ -882,7 +882,7 @@ function ExpertsSection() {
                 </span>
               </div>
               <div className="mt-5 grid grid-cols-3 border-t border-border/60 text-center">
-                <Stat value={e.listings} label="İlan" />
+                <Stat value={e.listings} label="Portföy" />
                 <Stat value={e.searches} label="Arayış" className="border-x border-border/60" />
                 <Stat value={e.response} label="Yanıt" />
               </div>
@@ -969,11 +969,11 @@ const tiers = [
     included: [
       "Profil oluşturma",
       "Marketplace erişimi",
-      "Tüm ilanları görüntüleme",
+      "Tüm portföyleri görüntüleme",
       "Detay Talebi gönderme",
       "Mesajlaşma",
       "Favoriler",
-      "1 aktif ilan",
+      "1 aktif portföy",
       "3 aktif arayış",
       "Temel filtreler",
       "Basic profil görünürlüğü",
@@ -981,7 +981,7 @@ const tiers = [
     excluded: [
       "AI Asistan",
       "PDF Portföy Oluşturucu",
-      "Yeni ilan eşleşme bildirimi",
+      "Yeni portföy eşleşme bildirimi",
       "Profil Boost",
       "Arayış Boost",
       "Request Boost",
@@ -998,13 +998,13 @@ const tiers = [
     featured: false,
     included: [
       "Basic'teki her şey",
-      "3 aktif ilan",
+      "3 aktif portföy",
       "15 aktif arayış",
       "AI Asistan",
       "PDF Portföy Oluşturucu",
-      "Yeni uygun ilan bildirimleri",
+      "Yeni uygun portföy bildirimleri",
       "Gelişmiş filtreler",
-      "İlan performans raporları",
+      "Portföy performans raporları",
       "Komisyon paylaşımı alanları",
       "Öncelikli destek",
     ],
@@ -1028,7 +1028,7 @@ const tiers = [
     featured: true,
     included: [
       "Pro'daki her şey",
-      "7 aktif ilan",
+      "7 aktif portföy",
       "Sınırsız arayış",
       "Elite Member rozeti",
       "Profil Boost",
@@ -1150,7 +1150,7 @@ function BoostSection() {
         <SectionHeader
           eyebrow="Öne Çıkarma"
           title="Görünürlüğünüzü Artırın"
-          desc="İlanlarınızı, profilinizi ve arayışlarınızı doğru profesyonellerin karşısına daha hızlı çıkarın."
+          desc="Portföylerinizi, profilinizi ve arayışlarınızı doğru profesyonellerin karşısına daha hızlı çıkarın."
           className="mx-auto text-center"
         />
         <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

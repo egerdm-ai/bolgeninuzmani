@@ -53,7 +53,7 @@ export function ShareStudioPreview() {
               <div className="relative h-20">
                 <img src={propertyImages.villa1} alt="Villa" className="size-full object-cover" />
                 <span className="absolute left-1.5 top-1.5 inline-flex items-center gap-1 rounded border border-gold/30 bg-background/80 px-1.5 py-0.5 text-[8.5px] font-medium text-gold backdrop-blur">
-                  <Lock className="size-2" /> Kapalı İlan
+                  <Lock className="size-2" /> Kapalı Portföy
                 </span>
               </div>
               <div className="space-y-1 p-2">

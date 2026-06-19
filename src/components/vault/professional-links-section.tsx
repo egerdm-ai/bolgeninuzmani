@@ -67,7 +67,7 @@ export function ProfessionalLinksSection({ professional }: { professional: Profe
       label: "Website",
       description: "Kişisel danışman sitesi",
       icon: Globe,
-      href: `https://${professional.username.replace(/-/g, "")}.vault.estate`,
+      href: `https://${professional.username.replace(/-/g, "")}.bolgeninuzmani.com`,
     },
     {
       label: "WhatsApp Katalog",
@@ -79,7 +79,7 @@ export function ProfessionalLinksSection({ professional }: { professional: Profe
       label: "Dijital Kartvizit",
       description: "Tek dokunuşla iletişim",
       icon: CreditCard,
-      href: `https://vault.estate/card/${professional.username}`,
+      href: `https://bolgeninuzmani.com/card/${professional.username}`,
     },
     {
       label: "PDF Portföy Sunumu",

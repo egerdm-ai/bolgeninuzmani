@@ -65,10 +65,15 @@ for (const img of rows) {
   await sb.storage
     .from(bucket)
     .upload(thumbPath(newPath), thumb, { contentType: "image/webp", upsert: true });
-  const { error: uErr } = await sb.from("portfolio_images").update({ path: newPath }).eq("id", img.id);
+  const { error: uErr } = await sb
+    .from("portfolio_images")
+    .update({ path: newPath })
+    .eq("id", img.id);
   if (uErr) throw uErr;
   if (newPath !== img.path) await sb.storage.from(bucket).remove([img.path]);
   done++;
-  console.log(`ok ${img.id}: ${img.path} → ${newPath} (display ${Math.round(display.length / 1024)}KB, thumb ${Math.round(thumb.length / 1024)}KB)`);
+  console.log(
+    `ok ${img.id}: ${img.path} → ${newPath} (display ${Math.round(display.length / 1024)}KB, thumb ${Math.round(thumb.length / 1024)}KB)`,
+  );
 }
 console.log(`\nBitti — ${done} dönüştürüldü, ${skipped} zaten webp.`);

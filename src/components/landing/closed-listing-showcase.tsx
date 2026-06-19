@@ -16,7 +16,7 @@ import listingHero from "@/assets/listing-hero.jpg";
 import { GlassCard } from "./primitives";
 
 /**
- * ClosedListingShowcase — premium "kapalı ilan" portfolio detail mockup.
+ * ClosedListingShowcase — premium "kapalı portföy" portfolio detail mockup.
  * Demonstrates controlled visibility: teaser info open to the network,
  * sensitive details locked behind an approved detail request.
  */
@@ -38,7 +38,7 @@ export function ClosedListingShowcase() {
         {/* top badges */}
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-3">
           <span className="inline-flex items-center gap-1 rounded-md border border-gold/40 bg-background/70 px-2 py-1 text-[10.5px] font-medium text-gold backdrop-blur">
-            <Lock className="size-3" /> Kapalı İlan
+            <Lock className="size-3" /> Kapalı Portföy
           </span>
           <div className="flex items-center gap-1.5">
             <button className="flex size-7 items-center justify-center rounded-lg border border-border-strong bg-background/70 text-foreground backdrop-blur">
