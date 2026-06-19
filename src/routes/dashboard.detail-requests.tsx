@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Inbox, Send, Check, X, Clock, Loader2, MapPin, ShieldCheck } from "lucide-react";
+import { Inbox, Send, Check, X, Clock, Loader2, MapPin, ShieldCheck, KeyRound } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { SurfaceCard } from "@/components/vault/cards";
+import { SurfaceCard, KpiCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -95,6 +95,8 @@ function DetailRequestsPage() {
   }
 
   const pendingCount = inbox?.filter((r) => r.status === "pending").length ?? 0;
+  const grantedCount = inbox?.filter((r) => r.status === "approved").length ?? 0;
+  const ready = inbox !== null && sent !== null;
 
   return (
     <PageContainer className="space-y-6">
@@ -102,6 +104,15 @@ function DetailRequestsPage() {
         title="Detay Talepleri"
         subtitle="Portföylerinize gelen erişim taleplerini yönetin; gönderdiğiniz talepleri takip edin."
       />
+
+      {ready && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard label="Gelen Talep" value={String(inbox!.length)} icon={Inbox} />
+          <KpiCard label="Bekleyen" value={String(pendingCount)} icon={Clock} />
+          <KpiCard label="Verilen Erişim" value={String(grantedCount)} icon={KeyRound} />
+          <KpiCard label="Gönderdiğim" value={String(sent!.length)} icon={Send} />
+        </div>
+      )}
 
       <div className="flex gap-1 rounded-xl border border-border bg-surface-2 p-1">
         <TabButton active={tab === "inbox"} onClick={() => setTab("inbox")} icon={Inbox}>
