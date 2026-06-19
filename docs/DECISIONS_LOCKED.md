@@ -228,3 +228,20 @@ UI'ı ertelendi (başta Supabase dashboard yeter).
   Konut + Ticari/İşyeri + Arsa için emlakçıların beklediği standart öznitelikler,
   attribute registry'ye (D33) işlenir; her kategori kendi alanlarını gösterir.
   Public/locked ayrımı D33 kuralına tabi (teşhis edici olanlar locked).
+
+---
+
+## Foto yönetimi + portföy detay layout referansı (2026-06-19)
+
+- **D41 — Foto yükleme inline yönetimi.** Fotoğraflar seçilir seçilmez, grid'in
+  üzerinde her foto için: aç/kilitle toggle (D34) + sürükle-sırala (sort_order) +
+  kapak seç (is_cover). Ayrı bir ekran/adım değil; seçim anında aynı yerde.
+- **D42 — Portföy detay layout, Lovable prototipi referans alınır** (yapı/bölüm
+  düzeni), AMA D35 paleti (navy+altın, dark+light) + güncel terminoloji (Portföy,
+  Bölgenin Uzmanı) + gerçek veri ile. Referans bölümler:
+  sağ sticky panel (fiyat + Kaydet/Paylaş → Kilitli Bilgiler kartı [etiket görünür,
+  değer gizli — D37] → Detay Talebi CTA), emlakçı kartı (avatar+doğrulanmış+rozet+
+  uzmanlık+sayılar+Profili Gör/Diğer Portföyleri), hızlı bilgi şeridi, yaklaşık
+  konum dairesi, benzer portföyler grid'i. "Piyasa Bağlamı" kutusu (benzer fiyat
+  aralığı/talep yoğunluğu) — opsiyonel, sonra. call_only modunda Kilitli Bilgiler
+  kartı yerine "Detaylar için arayın" + iletişim.
