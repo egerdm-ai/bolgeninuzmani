@@ -115,46 +115,47 @@ function PublicProfilePage() {
           </div>
         ) : (
           <>
-            {/* Banner + avatar overlap */}
+            {/* Banner — gold-washed gradient empty-state (premium in both themes) */}
             <div className="relative mt-6 h-40 overflow-hidden rounded-bu-xl bg-gradient-surface ring-1 ring-bu-border">
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-bu-gold/[0.04] to-bu-gold/10" />
               <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-bu-gold/0 via-bu-gold to-bu-gold/0" />
             </div>
-            <div className="-mt-12 px-2 sm:px-6">
-              <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+
+            {/* Identity — avatar overlaps banner; name sits BELOW (no overlap) */}
+            <div className="px-2 sm:px-6">
+              <div className="-mt-14">
                 {data.avatar_url ? (
                   <img
                     src={data.avatar_url}
                     alt={data.full_name}
-                    className="size-24 rounded-bu-xl border-4 border-bu-bg object-cover shadow-bu-raised"
+                    className="size-28 rounded-bu-xl bg-bu-card-raised object-cover shadow-bu-raised ring-4 ring-bu-bg"
                   />
                 ) : (
-                  <span className="flex size-24 items-center justify-center rounded-bu-xl border-4 border-bu-bg bg-bu-card-raised text-3xl font-semibold text-bu-gold shadow-bu-raised">
+                  <span className="flex size-28 items-center justify-center rounded-bu-xl bg-bu-card-raised text-4xl font-bold text-bu-gold shadow-bu-raised ring-4 ring-bu-bg">
                     {data.full_name.slice(0, 1)}
                   </span>
                 )}
-                <div className="min-w-0 flex-1 pb-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="font-display text-3xl font-bold text-bu-text">
-                      {data.full_name}
-                    </h1>
-                    <span className={s.verified}>
-                      <ShieldCheck className="size-3" /> Doğrulanmış
-                    </span>
-                    <MembershipBadge tier={data.membership_tier} />
-                  </div>
-                  <p className="mt-1 text-sm text-bu-text-2">
-                    {[data.title, data.company_name].filter(Boolean).join(" · ") || "Emlak Uzmanı"}
-                  </p>
-                  {data.location && (
-                    <p className="mt-0.5 flex items-center gap-1 text-xs text-bu-gold">
-                      <MapPin className="size-3.5" /> {data.location}
-                    </p>
-                  )}
+              </div>
+              <div className="mt-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="font-display text-3xl font-bold text-bu-text">{data.full_name}</h1>
+                  <span className={s.verified}>
+                    <ShieldCheck className="size-3" /> Doğrulanmış
+                  </span>
+                  <MembershipBadge tier={data.membership_tier} />
                 </div>
+                <p className="mt-1 text-sm text-bu-text-2">
+                  {[data.title, data.company_name].filter(Boolean).join(" · ") || "Emlak Uzmanı"}
+                </p>
+                {data.location && (
+                  <p className="mt-0.5 flex items-center gap-1 text-xs text-bu-gold">
+                    <MapPin className="size-3.5" /> {data.location}
+                  </p>
+                )}
               </div>
 
               {/* Stat cards */}
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-md">
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:max-w-md">
                 <StatCard icon={FolderLock} value={portfolios.length} label="Aktif Portföy" />
                 <StatCard
                   icon={Compass}
