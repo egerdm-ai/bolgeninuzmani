@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { AIButton } from "@/components/vault/ai-button";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useNotifications } from "@/lib/notification-store";
 import { cn } from "@/lib/utils";
 import {
@@ -55,6 +56,7 @@ export function Topbar({
       </div>
 
       <div className="ml-auto flex items-center gap-2">
+        <ThemeToggle />
         <AIButton size="default" className="hidden md:inline-flex" />
         <Button
           asChild
