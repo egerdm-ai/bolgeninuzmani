@@ -8,8 +8,10 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  ShieldCheck,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
+import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -328,43 +330,63 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function TeaserCard({ p }: { p: PortfolioWithCover }) {
   return (
-    <Link
-      to="/dashboard/portfolios/$id"
-      params={{ id: p.id }}
+    <div
       className={cn(
-        "group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong",
+        "group overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-border-strong",
       )}
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
-        {p.cover_url ? (
-          <ThumbImage
-            thumb={p.cover_url}
-            full={p.cover_url_full}
-            alt={p.title}
-            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center text-muted-foreground">
-            <ImageOff className="size-7" />
-          </div>
-        )}
-        <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
-      </div>
-      <div className="p-4">
-        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-          <span>{CATEGORY_LABELS[p.category]}</span>
-          <span>·</span>
-          <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
+      <Link to="/dashboard/portfolios/$id" params={{ id: p.id }} className="block">
+        <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
+          {p.cover_url ? (
+            <ThumbImage
+              thumb={p.cover_url}
+              full={p.cover_url_full}
+              alt={p.title}
+              className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center text-muted-foreground">
+              <ImageOff className="size-7" />
+            </div>
+          )}
+          <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
         </div>
-        <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">{p.title}</h3>
-        <p className="text-xs text-muted-foreground">
-          {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—"}
-        </p>
-        <p className="mt-2 font-display text-lg font-semibold text-gold">
-          {formatPortfolioPrice(p.price, p.currency)}
-        </p>
-        <RefNoText value={p.ref_no} className="mt-1 block" />
-      </div>
-    </Link>
+        <div className="p-4">
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+            <span>{CATEGORY_LABELS[p.category]}</span>
+            <span>·</span>
+            <span>{TRANSACTION_LABELS[p.transaction_type]}</span>
+          </div>
+          <h3 className="mt-1 line-clamp-1 font-semibold text-foreground">{p.title}</h3>
+          <p className="text-xs text-muted-foreground">
+            {[p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—"}
+          </p>
+          <p className="mt-2 font-display text-lg font-semibold text-gold">
+            {formatPortfolioPrice(p.price, p.currency)}
+          </p>
+          <RefNoText value={p.ref_no} className="mt-1 block" />
+        </div>
+      </Link>
+      {p.agent && (
+        <Link
+          to="/v/$username"
+          params={{ username: p.agent.username }}
+          className="flex items-center gap-2 border-t border-border px-4 py-2.5 hover:bg-surface-2"
+        >
+          <BrokerAvatar name={p.agent.full_name} src={p.agent.avatar_url ?? undefined} size="sm" />
+          <span className="flex min-w-0 items-center gap-1">
+            <span className="truncate text-xs font-medium text-foreground">
+              {p.agent.full_name}
+            </span>
+            <ShieldCheck className="size-3 shrink-0 text-gold" aria-label="Doğrulanmış" />
+          </span>
+          {p.agent.company_name && (
+            <span className="ml-auto truncate text-[11px] text-muted-foreground">
+              {p.agent.company_name}
+            </span>
+          )}
+        </Link>
+      )}
+    </div>
   );
 }

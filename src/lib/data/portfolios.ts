@@ -75,9 +75,18 @@ export type PortfolioPrivateInput = {
   private_notes?: string | null;
 };
 
+/** Owner public summary for Keşfet cards (RLS-safe: verified-network profiles). */
+export type NetworkAgent = {
+  username: string;
+  full_name: string;
+  avatar_url: string | null;
+  company_name: string | null;
+};
+
 export type PortfolioWithCover = Portfolio & {
   cover_url: string | null; // thumb (small) — cards/lists
   cover_url_full: string | null; // display — onError fallback for legacy (pre-thumb) images
+  agent?: NetworkAgent | null; // populated by listNetworkPortfolios (Keşfet); undefined elsewhere
 };
 
 export type PortfolioFull = {
@@ -263,7 +272,11 @@ export async function listNetworkPortfolios(
   let query = supabase
     .from("portfolios")
     // estimated: exact for small tables, planner estimate at scale (cheap COUNT).
-    .select("*, portfolio_images(path, is_cover, sort_order, visibility)", { count: "estimated" })
+    // owner embed in the SAME query (no N+1) — verified-network profiles, RLS-safe.
+    .select(
+      "*, portfolio_images(path, is_cover, sort_order, visibility), owner:profiles!portfolios_owner_id_fkey(username, full_name, avatar_url, company_name)",
+      { count: "estimated" },
+    )
     .eq("status", "active")
     .neq("owner_id", viewerId);
 
@@ -295,11 +308,14 @@ export async function listNetworkPortfolios(
       PortfolioImage,
       "path" | "is_cover" | "sort_order" | "visibility"
     >[];
-    const { portfolio_images: _drop, ...portfolio } = row as typeof row & {
-      portfolio_images: unknown;
-    };
+    const {
+      portfolio_images: _drop,
+      owner: _owner,
+      ...portfolio
+    } = row as typeof row & { portfolio_images: unknown; owner: unknown };
     void _drop;
-    return { ...(portfolio as Portfolio), ...coverUrlsFromJoin(images) };
+    const agent = (_owner ?? null) as NetworkAgent | null;
+    return { ...(portfolio as Portfolio), ...coverUrlsFromJoin(images), agent };
   });
 
   return { items, total: count ?? 0 };
