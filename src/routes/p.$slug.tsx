@@ -155,6 +155,9 @@ function Teaser({ data }: { data: PublicPortfolio }) {
           neighborhood={data.neighborhood}
           district={data.district}
           city={data.city}
+          slug={data.slug}
+          approxLat={data.approx_lat}
+          approxLng={data.approx_lng}
         />
       </div>
 

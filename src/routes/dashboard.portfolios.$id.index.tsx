@@ -231,7 +231,14 @@ function OwnerPortfolioDetail() {
             features={p.features}
             attributes={p.attributes as Record<string, unknown>}
           />
-          <ApproxLocationBox neighborhood={p.neighborhood} district={p.district} city={p.city} />
+          <ApproxLocationBox
+            neighborhood={p.neighborhood}
+            district={p.district}
+            city={p.city}
+            slug={p.slug}
+            approxLat={p.approx_lat}
+            approxLng={p.approx_lng}
+          />
         </div>
 
         {/* Right sticky panel */}

@@ -18,6 +18,8 @@ export const featureFlags = {
   aiImport: false,
   /** Bölge uzmanı dizini: /dashboard/regions. */
   regions: false,
+  /** Harita (MapLibre, approx-only): Keşfet + portföy detay yaklaşık konum. */
+  harita: true,
   /**
    * Profesyonel DİZİNİ (index) — /dashboard/professionals (bölge uzmanı dizini).
    * Individual profiles (/dashboard/professionals/$id) stay reachable as

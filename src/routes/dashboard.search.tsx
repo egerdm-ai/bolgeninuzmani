@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
@@ -22,7 +22,9 @@ import {
 } from "@/lib/data/portfolios";
 import { CATEGORY_LABELS, TRANSACTION_LABELS } from "@/lib/portfolio-labels";
 import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
+import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
 import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
+import { featureFlags } from "@/lib/feature-flags";
 
 const toCard = (p: PortfolioWithCover): TeaserCardData => ({
   id: p.id,
@@ -68,6 +70,7 @@ function useDebounced<T>(value: T, ms: number): T {
 function Kesfet() {
   const { user } = useAuth();
   const savedState = useSavedPortfolios();
+  const navigate = useNavigate();
   // Typed fields debounce; selects apply immediately.
   const [q, setQ] = useState("");
   const [priceMin, setPriceMin] = useState("");
@@ -294,16 +297,46 @@ function Kesfet() {
         </div>
       ) : (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {result.items.map((p) => (
-              <PortfolioTeaserCard
-                key={p.id}
-                context="app"
-                p={toCard(p)}
-                saved={savedState.isSaved(p.id)}
-                onToggleSave={savedState.enabled ? savedState.toggle : undefined}
-              />
-            ))}
+          <div
+            className={
+              featureFlags.harita ? "grid gap-6 lg:grid-cols-[1fr_minmax(0,400px)]" : undefined
+            }
+          >
+            <div className="grid gap-5 sm:grid-cols-2">
+              {result.items.map((p) => (
+                <PortfolioTeaserCard
+                  key={p.id}
+                  context="app"
+                  p={toCard(p)}
+                  saved={savedState.isSaved(p.id)}
+                  onToggleSave={savedState.enabled ? savedState.toggle : undefined}
+                />
+              ))}
+            </div>
+            {featureFlags.harita &&
+              (() => {
+                // APPROX pins only (D30) — exact_lat/exact_lng never reach the map.
+                const pts: MapPoint[] = result.items
+                  .filter((p) => p.approx_lat != null && p.approx_lng != null)
+                  .map((p) => ({
+                    id: p.id,
+                    slug: p.slug,
+                    lat: p.approx_lat as number,
+                    lng: p.approx_lng as number,
+                    title: p.title,
+                  }));
+                return pts.length === 0 ? null : (
+                  <aside className="hidden lg:block">
+                    <PortfolioMap
+                      className="sticky top-20 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-border"
+                      points={pts}
+                      onSelect={(pt) =>
+                        navigate({ to: "/dashboard/portfolios/$id", params: { id: pt.id } })
+                      }
+                    />
+                  </aside>
+                );
+              })()}
           </div>
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-3">

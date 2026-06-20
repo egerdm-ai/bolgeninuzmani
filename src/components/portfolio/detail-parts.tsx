@@ -27,6 +27,8 @@ import { s } from "@/lib/styles";
 import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
 import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
+import { PortfolioMap } from "@/components/portfolio/portfolio-map";
+import { featureFlags } from "@/lib/feature-flags";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { attributesForCategory, attributeDef } from "@/lib/portfolio-attributes";
 import type { Database } from "@/lib/database.types";
@@ -322,29 +324,54 @@ export function AttributesSection({
   );
 }
 
-/* ── 5. APPROX LOCATION (§2.5) — exact NEVER shown ── */
+/* ── 5. APPROX LOCATION (§2.5) — exact NEVER shown; map uses approx_lat/lng only ── */
 export function ApproxLocationBox({
   neighborhood,
   district,
   city,
+  slug,
+  approxLat,
+  approxLng,
 }: {
   neighborhood: string | null;
   district: string | null;
   city: string | null;
+  /** for the map pin link (teaser). */
+  slug?: string;
+  /** APPROX coords (D30). When present + harita flag on → real MapLibre pin. */
+  approxLat?: number | null;
+  approxLng?: number | null;
 }) {
+  const hasPin =
+    featureFlags.harita && typeof approxLat === "number" && typeof approxLng === "number";
   return (
     <section className="border-t border-bu-border pt-8">
       <h2 className={s.sectionTitle}>Konum</h2>
       <p className="mt-1 text-xs text-bu-text-3">
         Yaklaşık konum gösterilmektedir. Tam adres, detay talebi onaylandıktan sonra paylaşılır.
       </p>
-      <div className="mt-4 flex h-48 items-center justify-center rounded-bu-lg border border-bu-border bg-bu-card shadow-bu-card">
-        <div className="text-center">
-          <MapPin className="mx-auto mb-2 size-8 text-bu-gold" />
-          <p className="text-sm text-bu-text-2">~{fmtLocation(neighborhood, district, city)}</p>
-          <p className="mt-1 text-xs text-bu-text-3">Harita yakında</p>
+      {hasPin ? (
+        <PortfolioMap
+          className="mt-4 h-64 overflow-hidden rounded-bu-lg border border-bu-border shadow-bu-card"
+          points={[
+            {
+              id: slug ?? "p",
+              slug: slug ?? "",
+              lat: approxLat as number,
+              lng: approxLng as number,
+              title: fmtLocation(neighborhood, district, city),
+            },
+          ]}
+        />
+      ) : (
+        <div className="mt-4 flex h-48 items-center justify-center rounded-bu-lg border border-bu-border bg-bu-card shadow-bu-card">
+          <div className="text-center">
+            <MapPin className="mx-auto mb-2 size-8 text-bu-gold" />
+            <p className="text-sm text-bu-text-2">~{fmtLocation(neighborhood, district, city)}</p>
+            <p className="mt-1 text-xs text-bu-text-3">Harita yakında</p>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

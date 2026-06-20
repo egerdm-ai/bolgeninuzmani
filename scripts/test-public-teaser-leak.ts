@@ -189,6 +189,15 @@ assertNoForbidden(
   stripTsComments(readFileSync(join(root, "src/lib/data/regions.ts"), "utf8")),
 );
 
+// 15) B10 Harita — the map component + detail surface must use APPROX coords only;
+//     exact_lat/exact_lng are in FORBIDDEN, so this proves they never reach the map.
+for (const rel of [
+  "src/components/portfolio/portfolio-map.tsx",
+  "src/components/portfolio/detail-parts.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+
 console.log(
-  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + B9 + B11 + M3 inbox: no locked field leaks ✓",
+  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + B9 + Harita + B11 + M3 inbox: no locked field leaks ✓",
 );
