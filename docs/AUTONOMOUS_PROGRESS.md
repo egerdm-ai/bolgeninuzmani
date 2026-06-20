@@ -27,7 +27,7 @@
 | B8 | Eşleşme | ✅ uçtan uca bağlı | `20260620120000_b8_match_search` (UYGULANDI) | RPC push edildi + tipler regen. `lib/data/matches.ts` gerçek `supabase.rpc('match_search')` (teaser+score+agent). `components/search/match-results.tsx` → arayış detayında "Eşleşen Portföyler" (auto, teaser-card + uyum skoru). `dashboard.matches` gerçek özet. `featureFlags.matches=true` + sidebar "Eşleşmeler". Leak'e eklendi (teaser-only). |
 | B9 | Bölgeler | 📝 spec (RETURN) | — | portfolios'tan türetme (yeni tablo gerekmez): definer RPC `get_region_summary()` (verified-only, district+count). Tasarım RETURN'de. |
 | B10 | Harita | 📝 spec (RETURN) | migration GEREKMEZ | MapLibre (D3) + approx_lat/lng (D30, zaten var); exact ASLA. Frontend bileşen işi; tasarım RETURN'de. |
-| B11 | Bildirim/Takip/Kaydet | 🟡 migration TASLAK | `20260619141000_b11_follows_saved_notifications_DRAFT.sql` | 3 owner-scoped tablo; notifications client-insert YOK (server-yazımlı). Sayfa bağlama = push sonrası. |
+| B11 | Bildirim/Takip/Kaydet | ✅ uçtan uca (writer TASLAK) | tablolar UYGULANDI; `20260620150000_b11_notify_writer_DRAFT.sql` (TASLAK) | Tablolar canlı + tipler regen. `lib/data/{follows,saved,notifications}` + `use-saved-portfolios`/`use-notifications` hook'ları. **Takip Et** (profil, kendinde gizli), **Kaydet** (teaser-card bookmark + Keşfet + Favoriler), **Bildirim okuma** (topbar dropdown + sayfa + sidebar rozeti) gerçek. `featureFlags.follow=true`. **notify-writer** (detail_requests trigger → bildirim) TASLAK — push edilince bildirimler gerçekten düşer. Leak'e eklendi. |
 
 ### Taslak migration'lar (UYGULANMADI)
 - `20260619140000_b7_searches_DRAFT.sql`
