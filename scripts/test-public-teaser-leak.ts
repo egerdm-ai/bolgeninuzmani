@@ -188,6 +188,8 @@ for (const rel of [
   "src/lib/data/regions.ts",
   "src/routes/dashboard.regions.index.tsx",
   "src/routes/dashboard.regions.$slug.tsx",
+  // Geo dataset loader (public il/ilçe/mahalle + centroids — D30 approx only).
+  "src/lib/geo/index.ts",
 ]) {
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
