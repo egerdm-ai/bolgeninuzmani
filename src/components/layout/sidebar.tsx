@@ -13,8 +13,11 @@ import {
   ChevronDown,
   Bell,
   Compass,
+  Target,
+  Radar,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { featureFlags } from "@/lib/feature-flags";
 import { useAuth } from "@/lib/auth/auth-context";
 import { pendingInboxCount } from "@/lib/data/access";
 import { appNotifications } from "@/lib/mock/notifications";
@@ -32,17 +35,33 @@ const primaryNav = [
 // NOTE: Bölgeler (regions), Arayışlar (searches) and Profesyoneller (professionals)
 // are quarantined (deferred — D18). Routes still exist behind feature flags; see
 // docs/route-quarantine.md.
-const discoverChildren = [{ label: "Portföyler", to: "/dashboard/search", icon: Search }] as const;
+type NavItem = {
+  label: string;
+  to: string;
+  icon: typeof Search;
+  count?: number;
+  exact?: boolean;
+};
+
+// Keşfet (discovery) — Portföyler + (Arayış açıkken) Ağ Arayışları.
+const discoverChildren: NavItem[] = [
+  { label: "Portföyler", to: "/dashboard/search", icon: Search },
+  ...(featureFlags.arayis
+    ? [{ label: "Ağ Arayışları", to: "/dashboard/searches", icon: Radar }]
+    : []),
+];
 
 // Main workspace — items that belong to the current user.
-// NOTE: Arayışlarım (/dashboard/my-searches), Eşleşmeler (/dashboard/matches) and
-// Asistan (/dashboard/assistant) are quarantined (deferred — D18); see
-// docs/route-quarantine.md.
-const workNav = [
+// NOTE: Eşleşmeler (/dashboard/matches) and Asistan (/dashboard/assistant) are
+// quarantined (deferred — D18); see docs/route-quarantine.md.
+const workNav: NavItem[] = [
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
+  ...(featureFlags.arayis
+    ? [{ label: "Arayışlarım", to: "/dashboard/my-searches", icon: Target }]
+    : []),
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
-] as const;
+];
 
 const accountNav = [
   { label: "Profilim", to: "/dashboard/profile", icon: UserRound },
