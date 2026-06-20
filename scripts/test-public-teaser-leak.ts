@@ -138,6 +138,21 @@ for (const rel of [
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
 
+// 12) B8 Eşleşme surface — match_search RPC body (DRAFT migration) returns a TEASER
+//     allow-list only; the matches data layer names no locked token either.
+const b8mig = readdirSync(migDir).find((f) => f.includes("b8_match_search"));
+if (b8mig) {
+  const m8 = readFileSync(join(migDir, b8mig), "utf8");
+  const s8 = m8.indexOf("create or replace function public.match_search");
+  const e8 = m8.indexOf("$$;", s8);
+  assert.ok(s8 >= 0 && e8 > s8, "could not locate match_search body");
+  assertNoForbidden("match_search body (DRAFT)", stripSqlComments(m8.slice(s8, e8)));
+}
+assertNoForbidden(
+  "src/lib/data/matches.ts",
+  stripTsComments(readFileSync(join(root, "src/lib/data/matches.ts"), "utf8")),
+);
+
 console.log(
-  "\npublic teaser + Keşfet + agent profile + profile + Arayış + M3 inbox: no locked field leaks ✓",
+  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + M3 inbox: no locked field leaks ✓",
 );
