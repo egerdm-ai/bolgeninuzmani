@@ -641,6 +641,7 @@ export type Database = {
       };
       is_admin: { Args: { _user_id?: string }; Returns: boolean };
       is_verified: { Args: { _user_id?: string }; Returns: boolean };
+      match_search: { Args: { _search_id: string }; Returns: Json };
       owns_portfolio: {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;

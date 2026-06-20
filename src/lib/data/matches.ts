@@ -1,17 +1,12 @@
+import { supabase } from "@/lib/supabase/client";
 import type { Database } from "@/lib/database.types";
 
-// B8 Eşleşme data layer — SKELETON. The match_search RPC is drafted but NOT yet
-// applied (see supabase/migrations/20260620120000_b8_match_search_DRAFT.sql), so the
-// generated Database types do NOT contain it. To avoid a type-unsafe cast, the
-// fetch is a stub returning [] for now. featureFlags.matches stays OFF.
-//
-// AFTER Ege pushes the migration + regenerates types, replace the stub body with:
-//   const { data, error } = await supabase.rpc("match_search", { _search_id: searchId });
-//   if (error) throw error;
-//   return (data as unknown as MatchResult[]) ?? [];
-// (and add searches/matches surfaces to the leak test if not already). The RPC
-// returns TEASER-only cards (allow-list = get_public_agent_portfolios) + agent mini
-// + score; never any D13 locked field.
+// B8 Eşleşme data layer. match_search is a SECURITY DEFINER RPC (applied) that
+// returns a TEASER-only allow-list (same columns as get_public_agent_portfolios) +
+// agent mini + a score. It NEVER returns a D13 locked field (no exact_address /
+// malik / private_* / documents / locked images). The RPC types as Json (jsonb), so
+// we cast the validated payload to MatchResult[] — the RPC's allow-list is the real
+// contract (same pattern as public-portfolio.ts).
 
 type Category = Database["public"]["Enums"]["portfolio_category"];
 type Txn = Database["public"]["Enums"]["transaction_type"];
@@ -42,12 +37,9 @@ export type MatchResult = {
   agent: { username: string; full_name: string; avatar_url: string | null } | null;
 };
 
-/**
- * Matches for a search. STUB until match_search RPC is pushed + types regenerated
- * (then this becomes a typed supabase.rpc call — see header). Returns [] for now;
- * the matches page stays behind featureFlags.matches (OFF).
- */
-export async function matchSearch(_searchId: string): Promise<MatchResult[]> {
-  // TODO(B8): wire to supabase.rpc("match_search", { _search_id }) post-push.
-  return [];
+/** TEASER-only matches for a search (verified caller + own/active search; RLS-safe). */
+export async function matchSearch(searchId: string): Promise<MatchResult[]> {
+  const { data, error } = await supabase.rpc("match_search", { _search_id: searchId });
+  if (error) throw error;
+  return (data as unknown as MatchResult[] | null) ?? [];
 }
