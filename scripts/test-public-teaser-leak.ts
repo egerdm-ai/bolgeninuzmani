@@ -174,6 +174,21 @@ if (nwMig) {
   );
 }
 
+// 14) B9 Bölgeler — region summary RPC body (DRAFT) returns region name + count only;
+//     the regions data layer names no locked token.
+const b9mig = readdirSync(migDir).find((f) => f.includes("b9_region_summary"));
+if (b9mig) {
+  const m9 = readFileSync(join(migDir, b9mig), "utf8");
+  const s9 = m9.indexOf("create or replace function public.get_region_summary");
+  const e9 = m9.indexOf("$$;", s9);
+  assert.ok(s9 >= 0 && e9 > s9, "could not locate get_region_summary body");
+  assertNoForbidden("get_region_summary body (DRAFT)", stripSqlComments(m9.slice(s9, e9)));
+}
+assertNoForbidden(
+  "src/lib/data/regions.ts",
+  stripTsComments(readFileSync(join(root, "src/lib/data/regions.ts"), "utf8")),
+);
+
 console.log(
-  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + B11 + M3 inbox: no locked field leaks ✓",
+  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + B9 + B11 + M3 inbox: no locked field leaks ✓",
 );
