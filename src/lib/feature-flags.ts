@@ -9,7 +9,7 @@ export const featureFlags = {
   /** Arayış: /dashboard/searches (network) + /dashboard/my-searches (own). */
   arayis: true,
   /** Eşleşmeler: /dashboard/matches. */
-  matches: false,
+  matches: true,
   /** Takip/Kaydedilenler: /dashboard/favorites + follow affordances. */
   follow: false,
   /** AI Asistan: /dashboard/assistant (retired /dashboard/concierge merges here). */

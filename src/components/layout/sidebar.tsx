@@ -15,6 +15,7 @@ import {
   Compass,
   Target,
   Radar,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { featureFlags } from "@/lib/feature-flags";
@@ -58,6 +59,9 @@ const workNav: NavItem[] = [
   { label: "Portföylerim", to: "/dashboard/portfolios", icon: FolderLock },
   ...(featureFlags.arayis
     ? [{ label: "Arayışlarım", to: "/dashboard/my-searches", icon: Target }]
+    : []),
+  ...(featureFlags.matches
+    ? [{ label: "Eşleşmeler", to: "/dashboard/matches", icon: Sparkles }]
     : []),
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },

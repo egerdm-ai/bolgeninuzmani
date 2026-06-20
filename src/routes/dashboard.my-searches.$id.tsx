@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SurfaceCard } from "@/components/vault/cards";
 import { SearchCard } from "@/components/search/search-card";
 import { SearchForm } from "@/components/search/search-form";
+import { MatchResults } from "@/components/search/match-results";
 import { featureFlags } from "@/lib/feature-flags";
 import {
   getMySearch,
@@ -123,6 +124,8 @@ function MySearchDetail() {
           <div className="max-w-xl">
             <SearchCard search={search} context="mine" />
           </div>
+
+          <MatchResults searchId={search.id} />
         </>
       )}
     </PageContainer>

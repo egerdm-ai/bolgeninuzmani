@@ -148,10 +148,13 @@ if (b8mig) {
   assert.ok(s8 >= 0 && e8 > s8, "could not locate match_search body");
   assertNoForbidden("match_search body (DRAFT)", stripSqlComments(m8.slice(s8, e8)));
 }
-assertNoForbidden(
+for (const rel of [
   "src/lib/data/matches.ts",
-  stripTsComments(readFileSync(join(root, "src/lib/data/matches.ts"), "utf8")),
-);
+  "src/components/search/match-results.tsx",
+  "src/routes/dashboard.matches.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
 
 console.log(
   "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + M3 inbox: no locked field leaks ✓",
