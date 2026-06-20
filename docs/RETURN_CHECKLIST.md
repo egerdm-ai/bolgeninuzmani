@@ -30,9 +30,17 @@ Kalıp: `lib/data/<x>.ts` (CRUD) → adapter (gerçek→Lovable bileşeni şekli
 - **B11:** `lib/data/{follows,saved,notifications}.ts`. `follow-store`/`saved-store`/`notification-store` (şu an localStorage/mock) → gerçek tablolar. Topbar bildirim dropdown + `dashboard.notifications` + `dashboard.favorites` bağla. Bildirim YAZIMI için trigger/definer RPC ekle (talep onayı→bildirim vb.).
 
 ## 4. Kalan B — şema önce yaz, sonra bağla
-### B8 — Eşleşme (Arayış ↔ Portföy)
-- searches push'undan SONRA. Tasarım: definer RPC `match_search(search_id) → portfolios[]` (verified-only). Kesişim: `transaction_type` + `category` + bütçe aralığı (`price between budget_min/max`) + bölge (city/district) + oda. **YALNIZCA teaser alanlar** (asla locked) döner — get_public_agent_portfolios allow-list'ini örnek al.
-- Lovable: `matches`, `match-explanation-card`, `portfolio-match-panel` bileşenleri bağla. Leak'e ekle.
+### B8 — Eşleşme (Arayış ↔ Portföy) — TASLAK HAZIR
+- **Migration TASLAK yazıldı:** `supabase/migrations/20260620120000_b8_match_search_DRAFT.sql`
+  (`match_search(_search_id)` definer RPC; teaser-only allow-list + agent mini + score;
+  verified + own/active search; budget/region/rooms kesişimi; own portföyler hariç).
+  → İncele → `supabase db push` → tip regen (RPC `Database['public']['Functions']`'a gelir).
+- **Sonra:** `src/lib/data/matches.ts`'teki `matchSearch` stub'ını gerçek çağrıyla değiştir
+  (dosya başındaki nota göre: `supabase.rpc("match_search", { _search_id })`). Cast'i kaldır.
+- **Sayfa:** `dashboard.matches` + Lovable `match-explanation-card`/`portfolio-match-panel`'i
+  bağla (kart = teaser-card kullanılabilir; arayış seçici + eşleşme listesi). `featureFlags.matches=true`.
+- my-searches.$id'e "Eşleşmeleri Gör" → matches (search seçili) bağlanabilir.
+- Leak: `matches.ts` + match RPC gövdesi zaten leak testinde; sayfayı da ekle.
 
 ### B9 — Bölgeler
 - Yeni tablo gerekmez. Definer RPC `get_region_summary() → {district, active_count}[]` (verified-only), `portfolios where status='active'` üzerinden `count group by district`. Locked alan yok.
