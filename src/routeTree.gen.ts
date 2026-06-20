@@ -21,7 +21,6 @@ import { Route as DashboardSearchRouteImport } from './routes/dashboard.search'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard.profile'
 import { Route as DashboardNotificationsRouteImport } from './routes/dashboard.notifications'
 import { Route as DashboardMatchesRouteImport } from './routes/dashboard.matches'
-import { Route as DashboardGeoDemoRouteImport } from './routes/dashboard.geo-demo'
 import { Route as DashboardFavoritesRouteImport } from './routes/dashboard.favorites'
 import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.detail-requests'
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
@@ -100,11 +99,6 @@ const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
 const DashboardMatchesRoute = DashboardMatchesRouteImport.update({
   id: '/matches',
   path: '/matches',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardGeoDemoRoute = DashboardGeoDemoRouteImport.update({
-  id: '/geo-demo',
-  path: '/geo-demo',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardFavoritesRoute = DashboardFavoritesRouteImport.update({
@@ -220,7 +214,6 @@ export interface FileRoutesByFullPath {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
-  '/dashboard/geo-demo': typeof DashboardGeoDemoRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -253,7 +246,6 @@ export interface FileRoutesByTo {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
-  '/dashboard/geo-demo': typeof DashboardGeoDemoRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -288,7 +280,6 @@ export interface FileRoutesById {
   '/dashboard/concierge': typeof DashboardConciergeRoute
   '/dashboard/detail-requests': typeof DashboardDetailRequestsRoute
   '/dashboard/favorites': typeof DashboardFavoritesRoute
-  '/dashboard/geo-demo': typeof DashboardGeoDemoRoute
   '/dashboard/matches': typeof DashboardMatchesRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/profile': typeof DashboardProfileRoute
@@ -324,7 +315,6 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
-    | '/dashboard/geo-demo'
     | '/dashboard/matches'
     | '/dashboard/notifications'
     | '/dashboard/profile'
@@ -357,7 +347,6 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
-    | '/dashboard/geo-demo'
     | '/dashboard/matches'
     | '/dashboard/notifications'
     | '/dashboard/profile'
@@ -391,7 +380,6 @@ export interface FileRouteTypes {
     | '/dashboard/concierge'
     | '/dashboard/detail-requests'
     | '/dashboard/favorites'
-    | '/dashboard/geo-demo'
     | '/dashboard/matches'
     | '/dashboard/notifications'
     | '/dashboard/profile'
@@ -509,13 +497,6 @@ declare module '@tanstack/react-router' {
       path: '/matches'
       fullPath: '/dashboard/matches'
       preLoaderRoute: typeof DashboardMatchesRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/geo-demo': {
-      id: '/dashboard/geo-demo'
-      path: '/geo-demo'
-      fullPath: '/dashboard/geo-demo'
-      preLoaderRoute: typeof DashboardGeoDemoRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/favorites': {
@@ -660,7 +641,6 @@ interface DashboardRouteChildren {
   DashboardConciergeRoute: typeof DashboardConciergeRoute
   DashboardDetailRequestsRoute: typeof DashboardDetailRequestsRoute
   DashboardFavoritesRoute: typeof DashboardFavoritesRoute
-  DashboardGeoDemoRoute: typeof DashboardGeoDemoRoute
   DashboardMatchesRoute: typeof DashboardMatchesRoute
   DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
@@ -689,7 +669,6 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardConciergeRoute: DashboardConciergeRoute,
   DashboardDetailRequestsRoute: DashboardDetailRequestsRoute,
   DashboardFavoritesRoute: DashboardFavoritesRoute,
-  DashboardGeoDemoRoute: DashboardGeoDemoRoute,
   DashboardMatchesRoute: DashboardMatchesRoute,
   DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardProfileRoute: DashboardProfileRoute,

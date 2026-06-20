@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Constants } from "@/lib/database.types";
 import { CATEGORY_LABELS, TRANSACTION_LABELS } from "@/lib/portfolio-labels";
+import { RegionSelect } from "@/components/geo/region-select";
 import type { SearchInput } from "@/lib/data/searches";
 import type { Search } from "@/lib/data/searches";
 
@@ -119,25 +120,18 @@ export function SearchForm({
         </Field>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Şehir">
-          <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="İstanbul" />
-        </Field>
-        <Field label="İlçe">
-          <Input
-            value={district}
-            onChange={(e) => setDistrict(e.target.value)}
-            placeholder="Sarıyer"
-          />
-        </Field>
-        <Field label="Mahalle">
-          <Input
-            value={neighborhood}
-            onChange={(e) => setNeighborhood(e.target.value)}
-            placeholder="Bebek"
-          />
-        </Field>
-      </div>
+      <RegionSelect
+        value={{
+          city: city || null,
+          district: district || null,
+          neighborhood: neighborhood || null,
+        }}
+        onChange={(v) => {
+          setCity(v.city ?? "");
+          setDistrict(v.district ?? "");
+          setNeighborhood(v.neighborhood ?? "");
+        }}
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Min. Bütçe">

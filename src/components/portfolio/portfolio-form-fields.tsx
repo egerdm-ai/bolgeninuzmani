@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, CURRENCY_OPTIONS } from "@/lib/portfolio-labels";
+import { RegionSelect } from "@/components/geo/region-select";
 import type {
   PortfolioCategory,
   TransactionType,
@@ -295,20 +296,21 @@ export function PortfolioFormFields({
 
       <SurfaceCard className="space-y-4">
         <SectionTitle icon={MapPin} title="Konum & Fiyat" />
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Şehir">
-            <Input value={teaser.city} onChange={(e) => sf("city")(e.target.value)} />
-          </Field>
-          <Field label="İlçe">
-            <Input value={teaser.district} onChange={(e) => sf("district")(e.target.value)} />
-          </Field>
-          <Field label="Mahalle">
-            <Input
-              value={teaser.neighborhood}
-              onChange={(e) => sf("neighborhood")(e.target.value)}
-            />
-          </Field>
-        </div>
+        <RegionSelect
+          value={{
+            city: teaser.city || null,
+            district: teaser.district || null,
+            neighborhood: teaser.neighborhood || null,
+          }}
+          onChange={(v) =>
+            setTeaser({
+              ...teaser,
+              city: v.city ?? "",
+              district: v.district ?? "",
+              neighborhood: v.neighborhood ?? "",
+            })
+          }
+        />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Fiyat">
             <Input
