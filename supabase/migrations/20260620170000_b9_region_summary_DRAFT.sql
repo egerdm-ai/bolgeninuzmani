@@ -31,10 +31,17 @@ stable
 security definer
 set search_path = public, pg_temp
 as $$
-  select coalesce(jsonb_agg(row order by active_count desc, district nulls last), '[]'::jsonb)
+  -- Group per region in a subquery and EXPOSE district + active_count as columns,
+  -- so the outer jsonb_agg ORDER BY can reference them (the original scope error).
+  -- The outer query has no GROUP BY → jsonb_agg folds all region rows into ONE array.
+  select coalesce(
+    jsonb_agg(t.row order by t.active_count desc, t.district nulls last),
+    '[]'::jsonb
+  )
   from (
     select
-      count(*)::int as active_count,
+      p.district          as district,
+      count(*)::int       as active_count,
       jsonb_build_object(
         'city',         p.city,
         'district',     p.district,
