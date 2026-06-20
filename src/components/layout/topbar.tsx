@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { AIButton } from "@/components/vault/ai-button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { useNotifications } from "@/lib/notification-store";
+import { useNotifications } from "@/lib/use-notifications";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -98,7 +98,7 @@ export function Topbar({
                   className="cursor-pointer flex-col items-start gap-0.5 px-3 py-2"
                   onSelect={() => {
                     markRead(n.id);
-                    navigate(n.link as never);
+                    if (n.link) navigate(n.link as never);
                   }}
                 >
                   <span className="flex w-full items-center gap-2">
@@ -112,8 +112,15 @@ export function Topbar({
                       {n.title}
                     </span>
                   </span>
-                  <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
-                  <span className="text-[10px] text-muted-foreground">{n.time}</span>
+                  {n.body && (
+                    <span className="line-clamp-2 text-[11px] text-muted-foreground">{n.body}</span>
+                  )}
+                  <span className="text-[10px] text-muted-foreground">
+                    {new Date(n.created_at).toLocaleDateString("tr-TR", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
                 </DropdownMenuItem>
               ))}
             </div>

@@ -22,12 +22,9 @@ import { cn } from "@/lib/utils";
 import { featureFlags } from "@/lib/feature-flags";
 import { useAuth } from "@/lib/auth/auth-context";
 import { pendingInboxCount } from "@/lib/data/access";
-import { appNotifications } from "@/lib/mock/notifications";
+import { useNotifications } from "@/lib/use-notifications";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { MembershipBadge } from "@/components/vault/badges";
-
-// Notifications are still mock (M5); detail-request count is real (see component).
-const unreadNotifications = appNotifications.filter((n) => !n.read).length;
 
 const primaryNav = [
   { label: "Ana Sayfa", to: "/dashboard", icon: LayoutDashboard, exact: true },
@@ -68,7 +65,7 @@ const workNav: NavItem[] = [
     ? [{ label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark }]
     : []),
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox },
-  { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
+  { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell },
 ];
 
 const accountNav = [
@@ -79,6 +76,7 @@ const accountNav = [
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { profile, user } = useAuth();
+  const { unreadCount: notifUnread } = useNotifications();
   const [pendingRequests, setPendingRequests] = useState(0);
 
   useEffect(() => {
@@ -183,7 +181,9 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
               item={
                 item.to === "/dashboard/detail-requests"
                   ? { ...item, count: pendingRequests }
-                  : item
+                  : item.to === "/dashboard/notifications"
+                    ? { ...item, count: notifUnread }
+                    : item
               }
               active={isActive(item.to)}
               collapsed={collapsed}
