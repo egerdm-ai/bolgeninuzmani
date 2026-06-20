@@ -1,15 +1,21 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { featureFlags } from "@/lib/feature-flags";
-import { useMemo, useState } from "react";
-import { Plus, Search, Sparkles, CheckCircle2, Clock, Bell } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Plus, Search as SearchIcon, FolderLock, PauseCircle, Loader2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { KpiCard, EmptyStateCard } from "@/components/vault/cards";
-import { BuyerSearchCard } from "@/components/vault/buyer-search-card";
-import { useMySearches } from "@/lib/my-searches-store";
+import { SearchCard } from "@/components/search/search-card";
 import { cn } from "@/lib/utils";
-import type { BuyerSearch } from "@/lib/mock/types";
+import { featureFlags } from "@/lib/feature-flags";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  listMySearches,
+  setSearchStatus,
+  type Search,
+  type SearchStatus,
+} from "@/lib/data/searches";
 
 export const Route = createFileRoute("/dashboard/my-searches/")({
   beforeLoad: () => {
@@ -18,62 +24,65 @@ export const Route = createFileRoute("/dashboard/my-searches/")({
   component: MySearches,
 });
 
-type ChipKey = "all" | "active" | "matched" | "awaiting" | "closed" | "notify";
+type ChipKey = "all" | "active" | "closed";
 const chips: { key: ChipKey; label: string }[] = [
   { key: "all", label: "Tümü" },
   { key: "active", label: "Aktif" },
-  { key: "matched", label: "Yeni Eşleşme" },
-  { key: "awaiting", label: "Yanıt Bekliyor" },
   { key: "closed", label: "Pasif" },
-  { key: "notify", label: "Bildirim Açık" },
 ];
-
-type SortKey = "lastMatch" | "newest" | "mostMatched" | "budget";
-const sorts: { key: SortKey; label: string }[] = [
-  { key: "lastMatch", label: "Son Eşleşme" },
-  { key: "newest", label: "En Yeni" },
-  { key: "mostMatched", label: "En Çok Eşleşen" },
-  { key: "budget", label: "Bütçe" },
-];
-
 const lc = (s: string) => s.toLocaleLowerCase("tr-TR");
 
-function matchesChip(b: BuyerSearch, chip: ChipKey): boolean {
-  if (chip === "all") return true;
-  if (chip === "notify") return (b.notify ?? "instant") !== "off";
-  return b.status === chip;
-}
-
 function MySearches() {
-  const { searches } = useMySearches();
+  const { user } = useAuth();
+  const [searches, setSearches] = useState<Search[] | null>(null);
   const [query, setQuery] = useState("");
   const [chip, setChip] = useState<ChipKey>("all");
-  const [sort, setSort] = useState<SortKey>("lastMatch");
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useMemo(
+    () => async () => {
+      if (!user) return;
+      const rows = await listMySearches(user.id).catch(() => []);
+      setSearches(rows);
+    },
+    [user],
+  );
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  async function onSetStatus(id: string, status: SearchStatus) {
+    setBusyId(id);
+    try {
+      await setSearchStatus(id, status);
+      await load();
+      toast.success(status === "closed" ? "Arayış pasifleştirildi." : "Arayış aktifleştirildi.");
+    } catch (e) {
+      toast.error("İşlem başarısız", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   const list = useMemo(() => {
+    if (!searches) return [];
     const q = lc(query.trim());
-    let arr = searches.filter((b) => matchesChip(b, chip));
-    if (q) {
-      arr = arr.filter((b) =>
-        lc(`${b.title} ${b.clientLabel ?? ""} ${b.region} ${b.notes ?? ""}`).includes(q),
-      );
-    }
-    const sorted = [...arr];
-    if (sort === "mostMatched") sorted.sort((a, b) => b.matchCount - a.matchCount);
-    else if (sort === "budget") sorted.sort((a, b) => b.budgetMax - a.budgetMax);
-    return sorted;
-  }, [searches, query, chip, sort]);
+    return searches.filter((s) => {
+      if (chip !== "all" && s.status !== chip) return false;
+      if (q && !lc(`${s.title} ${s.city ?? ""} ${s.district ?? ""} ${s.notes ?? ""}`).includes(q))
+        return false;
+      return true;
+    });
+  }, [searches, query, chip]);
 
-  const matched = searches.filter((b) => b.status === "matched").length;
-  const awaiting = searches.filter((b) => b.status === "awaiting").length;
-  const totalMatches = searches.reduce((s, b) => s + b.matchCount, 0);
-  const active = searches.filter((b) => b.status !== "closed").length;
+  const activeCount = searches?.filter((s) => s.status === "active").length ?? 0;
+  const closedCount = searches?.filter((s) => s.status === "closed").length ?? 0;
 
   return (
     <PageContainer className="space-y-7">
       <PageHeader
         title="Arayışlarım"
-        subtitle="Müşterileriniz için kaydettiğiniz arayışları takip edin; yeni portföyler eşleştiğinde bildirim alın."
+        subtitle="Müşterileriniz için oluşturduğunuz arayışları yönetin; ağda paylaşın."
         actions={
           <Button
             asChild
@@ -86,69 +95,48 @@ function MySearches() {
         }
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <KpiCard label="Aktif Arayış" value={String(active)} icon={Search} />
-        <KpiCard label="Yeni Eşleşme" value={String(matched)} icon={CheckCircle2} />
-        <KpiCard label="Yanıt Bekleyen" value={String(awaiting)} icon={Clock} />
-        <KpiCard label="Toplam Eşleşme" value={String(totalMatches)} icon={Sparkles} />
+      <div className="grid gap-3 sm:grid-cols-3">
+        <KpiCard label="Aktif Arayış" value={String(activeCount)} icon={SearchIcon} />
+        <KpiCard label="Pasif" value={String(closedCount)} icon={PauseCircle} />
+        <KpiCard label="Toplam" value={String(searches?.length ?? 0)} icon={FolderLock} />
       </div>
 
-      {/* Search */}
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Arayış adı, müşteri notu veya bölge ara..."
+          placeholder="Arayış adı, bölge veya not ara..."
           className="h-11 w-full rounded-xl border border-border bg-surface-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-gold/40"
         />
       </div>
 
-      {/* Filter chips */}
       <div className="flex flex-wrap gap-2">
         {chips.map((c) => (
           <button
             key={c.key}
             onClick={() => setChip(c.key)}
             className={cn(
-              "inline-flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
+              "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-colors",
               chip === c.key
                 ? "border-gold/40 bg-gold/10 text-gold"
                 : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
             )}
           >
-            {c.key === "notify" && <Bell className="size-3" />}
             {c.label}
           </button>
         ))}
       </div>
 
-      {/* Sort */}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Sırala
-        </span>
-        {sorts.map((s) => (
-          <button
-            key={s.key}
-            onClick={() => setSort(s.key)}
-            className={cn(
-              "rounded-lg border px-3 py-1 text-xs font-medium transition-colors",
-              sort === s.key
-                ? "border-gold/40 bg-gold/10 text-gold"
-                : "border-border bg-surface-3 text-secondary-foreground hover:text-foreground",
-            )}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
-
-      {list.length === 0 ? (
+      {searches === null ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+          <Loader2 className="size-6 animate-spin text-gold" />
+        </div>
+      ) : list.length === 0 ? (
         <EmptyStateCard
-          icon={Search}
+          icon={SearchIcon}
           title="Henüz arayış yok"
-          description="Müşteriniz için bir arayış oluşturun; uygun portföyler eşleştiğinde bildirim alın."
+          description="Müşteriniz için bir arayış oluşturun; ağdaki emlakçılar uygun portföyleriyle ulaşabilsin."
           action={
             <Button
               asChild
@@ -163,7 +151,13 @@ function MySearches() {
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {list.map((s) => (
-            <BuyerSearchCard key={s.id} search={s} />
+            <SearchCard
+              key={s.id}
+              search={s}
+              context="mine"
+              onSetStatus={onSetStatus}
+              busy={busyId === s.id}
+            />
           ))}
         </div>
       )}

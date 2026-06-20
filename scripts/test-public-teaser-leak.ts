@@ -126,6 +126,18 @@ for (const rel of [
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
 
+// 11) Arayış (B7) surface — searches is member-only with NO D13 locked fields; the
+//     data layer + card/form + pages must never name a locked token.
+for (const rel of [
+  "src/lib/data/searches.ts",
+  "src/components/search/search-card.tsx",
+  "src/components/search/search-form.tsx",
+  "src/routes/dashboard.my-searches.index.tsx",
+  "src/routes/dashboard.searches.index.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+
 console.log(
-  "\npublic teaser + Keşfet + agent profile + profile surface + M3 inbox: no locked field leaks ✓",
+  "\npublic teaser + Keşfet + agent profile + profile + Arayış + M3 inbox: no locked field leaks ✓",
 );

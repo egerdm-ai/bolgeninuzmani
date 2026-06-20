@@ -7,7 +7,7 @@
 // See docs/route-quarantine.md for the full mapping.
 export const featureFlags = {
   /** Arayış: /dashboard/searches (network) + /dashboard/my-searches (own). */
-  arayis: false,
+  arayis: true,
   /** Eşleşmeler: /dashboard/matches. */
   matches: false,
   /** Takip/Kaydedilenler: /dashboard/favorites + follow affordances. */
