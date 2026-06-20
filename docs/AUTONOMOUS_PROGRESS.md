@@ -23,7 +23,7 @@
 
 | # | Özellik | Durum | Migration taslağı | Not |
 |---|---------|-------|-------------------|-----|
-| B7 | Arayış (searches) | 🟡 migration TASLAK | `20260619140000_b7_searches_DRAFT.sql` | Üye-only tablo (is_verified), owner-write, RLS enable+force, anon yok, D13 locked alan yok. Sayfa bağlama (my-searches) = push sonrası. |
+| B7 | Arayış (searches) | ✅ uçtan uca bağlı | `20260619140000_b7_searches` (UYGULANDI) | Migration push edildi + tipler regen. `lib/data/searches.ts` (CRUD + ağ listesi+owner mini) + `components/search/{search-card,search-form}` (vizyonsuz: B8 eşleşme sayacı / B11 bildirim YOK) + my-searches.{index,new,$id} + searches.{index,$id} gerçek veride; `featureFlags.arayis=true`. Leak'e eklendi (20/20). |
 | B8 | Eşleşme | 📝 spec (RETURN) | — | searches↔portfolios kesişimi; teaser-only RPC/view. searches push'undan SONRA yazılmalı. Tasarım RETURN_CHECKLIST'te. |
 | B9 | Bölgeler | 📝 spec (RETURN) | — | portfolios'tan türetme (yeni tablo gerekmez): definer RPC `get_region_summary()` (verified-only, district+count). Tasarım RETURN'de. |
 | B10 | Harita | 📝 spec (RETURN) | migration GEREKMEZ | MapLibre (D3) + approx_lat/lng (D30, zaten var); exact ASLA. Frontend bileşen işi; tasarım RETURN'de. |
