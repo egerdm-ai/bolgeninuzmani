@@ -24,8 +24,9 @@ const toCard = (m: MatchResult): TeaserCardData => ({
 
 /**
  * Auto-loads TEASER matches for a search (match_search RPC) and renders them as the
- * shared PortfolioTeaserCard (→ /p public teaser) with a small "uyum" score pill.
- * Teaser-only — the RPC never returns a locked field.
+ * shared PortfolioTeaserCard with a small "uyum" score pill. Always in-app (the
+ * viewer is a logged-in agent), so cards link to the in-app detail (context "app"),
+ * where the Detay Talebi flow works. Teaser-only — the RPC never returns a locked field.
  */
 export function MatchResults({ searchId }: { searchId: string }) {
   const [matches, setMatches] = useState<MatchResult[] | null>(null);
@@ -76,7 +77,7 @@ export function MatchResults({ searchId }: { searchId: string }) {
                   <Sparkles className="size-3" /> +{m.score} kriter
                 </span>
               )}
-              <PortfolioTeaserCard p={toCard(m)} context="public" />
+              <PortfolioTeaserCard p={toCard(m)} context="app" />
             </div>
           ))}
         </div>

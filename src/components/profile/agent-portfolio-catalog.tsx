@@ -27,7 +27,14 @@ const sortOptions: { value: SortKey; label: string }[] = [
  * the shared PortfolioTeaserCard (context "public"). No mock Portfolio, no locked
  * fields. Region/category chips are derived from the data, not hardcoded.
  */
-export function AgentPortfolioCatalog({ portfolios }: { portfolios: TeaserCardData[] }) {
+export function AgentPortfolioCatalog({
+  portfolios,
+  context = "public",
+}: {
+  portfolios: TeaserCardData[];
+  /** Card link target: "app" (logged-in → in-app detail) or "public" (/p). */
+  context?: "app" | "public";
+}) {
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState<string | null>(null);
   const [category, setCategory] = useState<string | null>(null);
@@ -161,7 +168,7 @@ export function AgentPortfolioCatalog({ portfolios }: { portfolios: TeaserCardDa
       ) : (
         <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((p) => (
-            <PortfolioTeaserCard key={p.id} p={p} context="public" />
+            <PortfolioTeaserCard key={p.id} p={p} context={context} />
           ))}
         </div>
       )}

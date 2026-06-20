@@ -74,7 +74,7 @@ function PublicProfilePage() {
             </Button>
           </div>
         ) : (
-          <ProfessionalProfileView vm={vm} />
+          <ProfessionalProfileView vm={vm} context="public" />
         )}
       </main>
     </div>

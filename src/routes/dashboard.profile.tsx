@@ -52,6 +52,7 @@ function Profile() {
         <>
           <ProfessionalProfileView
             vm={vm}
+            context="app"
             actions={
               <>
                 <Button

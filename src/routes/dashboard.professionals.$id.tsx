@@ -49,7 +49,7 @@ function ProfessionalProfilePage() {
           Profesyonel bulunamadı.
         </div>
       ) : (
-        <ProfessionalProfileView vm={vm} />
+        <ProfessionalProfileView vm={vm} context="app" />
       )}
     </PageContainer>
   );

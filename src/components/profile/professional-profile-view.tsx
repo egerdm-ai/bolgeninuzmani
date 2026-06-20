@@ -22,10 +22,13 @@ import type { ProfessionalVM } from "@/lib/profile-vm";
 export function ProfessionalProfileView({
   vm,
   actions,
+  context = "public",
 }: {
   vm: ProfessionalVM;
   /** Extra hero actions (e.g. own-profile "Düzenle"/"Önizle"). Share is always shown. */
   actions?: ReactNode;
+  /** Portfolio card link target: "app" (in-app pages) or "public" (anon /v). */
+  context?: "app" | "public";
 }) {
   const [tab, setTab] = useState<ProfileTab>("portfolios");
 
@@ -76,7 +79,7 @@ export function ProfessionalProfileView({
             counts={{ portfolios: vm.portfolios.length }}
           />
           {tab === "portfolios" ? (
-            <AgentPortfolioCatalog portfolios={vm.portfolios} />
+            <AgentPortfolioCatalog portfolios={vm.portfolios} context={context} />
           ) : (
             <AboutPanel vm={vm} />
           )}
