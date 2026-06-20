@@ -79,6 +79,18 @@ const chainOf = (id) => {
   return out;
 };
 
+// Clean mahalle names for display: drop a trailing "(MERKEZ)"-style qualifier and
+// Türkçe Title Case ("CAFERAĞA (MERKEZ)" → "Caferağa", "19 MAYIS" → "19 Mayıs").
+const titleTr = (w) =>
+  w ? w.slice(0, 1).toLocaleUpperCase("tr") + w.slice(1).toLocaleLowerCase("tr") : w;
+const cleanName = (s) =>
+  s
+    .replace(/\s*\([^)]*\)\s*$/, "")
+    .trim()
+    .split(/\s+/)
+    .map(titleTr)
+    .join(" ");
+
 const neigh = {}; // `${provSlug}|${distSlug}` -> Set(names)
 for (const [id, r] of rows) {
   const ch = chainOf(id);
@@ -86,7 +98,8 @@ for (const [id, r] of rows) {
   const provName = rows.get(ch[ch.length - 1]).name;
   const distName = rows.get(ch[ch.length - 2]).name;
   const key = `${slug(provName)}|${slug(distName)}`;
-  (neigh[key] ??= new Set()).add(r.name.trim());
+  const name = cleanName(r.name);
+  if (name) (neigh[key] ??= new Set()).add(name);
 }
 const neighbourhoods = {};
 let withMahalle = 0;
