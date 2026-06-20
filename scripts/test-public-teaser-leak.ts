@@ -156,6 +156,24 @@ for (const rel of [
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
 
+// 13) B11 surfaces — follows/saved/notifications data layers + saved favorites page +
+//     notify-writer trigger body. saved reads TEASER columns + PUBLIC cover only.
+for (const rel of [
+  "src/lib/data/follows.ts",
+  "src/lib/data/saved.ts",
+  "src/lib/data/notifications.ts",
+  "src/routes/dashboard.favorites.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+const nwMig = readdirSync(migDir).find((f) => f.includes("b11_notify_writer"));
+if (nwMig) {
+  assertNoForbidden(
+    "notify_on_detail_request body (DRAFT)",
+    stripSqlComments(readFileSync(join(migDir, nwMig), "utf8")),
+  );
+}
+
 console.log(
-  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + M3 inbox: no locked field leaks ✓",
+  "\npublic teaser + Keşfet + agent profile + profile + Arayış + Eşleşme + B11 + M3 inbox: no locked field leaks ✓",
 );
