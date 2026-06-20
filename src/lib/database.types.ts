@@ -102,6 +102,57 @@ export type Database = {
           },
         ];
       };
+      follows: {
+        Row: {
+          created_at: string;
+          follower_id: string;
+          following_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          follower_id: string;
+          following_id: string;
+        };
+        Update: {
+          created_at?: string;
+          follower_id?: string;
+          following_id?: string;
+        };
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          body: string | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          link: Json | null;
+          read: boolean;
+          title: string;
+          user_id: string;
+        };
+        Insert: {
+          body?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          link?: Json | null;
+          read?: boolean;
+          title: string;
+          user_id: string;
+        };
+        Update: {
+          body?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          link?: Json | null;
+          read?: boolean;
+          title?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       portfolio_access_grants: {
         Row: {
           created_at: string;
@@ -427,6 +478,98 @@ export type Database = {
         };
         Relationships: [];
       };
+      saved_portfolios: {
+        Row: {
+          created_at: string;
+          portfolio_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          portfolio_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          portfolio_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "saved_portfolios_portfolio_id_fkey";
+            columns: ["portfolio_id"];
+            isOneToOne: false;
+            referencedRelation: "portfolios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      searches: {
+        Row: {
+          budget_max: number | null;
+          budget_min: number | null;
+          category: Database["public"]["Enums"]["portfolio_category"];
+          city: string | null;
+          created_at: string;
+          currency: Database["public"]["Enums"]["currency"];
+          district: string | null;
+          features: string[];
+          id: string;
+          min_m2: number | null;
+          neighborhood: string | null;
+          notes: string | null;
+          owner_id: string;
+          room_count: string | null;
+          status: Database["public"]["Enums"]["search_status"];
+          title: string;
+          transaction_type: Database["public"]["Enums"]["transaction_type"];
+          updated_at: string;
+          urgency: Database["public"]["Enums"]["search_urgency"];
+        };
+        Insert: {
+          budget_max?: number | null;
+          budget_min?: number | null;
+          category: Database["public"]["Enums"]["portfolio_category"];
+          city?: string | null;
+          created_at?: string;
+          currency?: Database["public"]["Enums"]["currency"];
+          district?: string | null;
+          features?: string[];
+          id?: string;
+          min_m2?: number | null;
+          neighborhood?: string | null;
+          notes?: string | null;
+          owner_id: string;
+          room_count?: string | null;
+          status?: Database["public"]["Enums"]["search_status"];
+          title: string;
+          transaction_type: Database["public"]["Enums"]["transaction_type"];
+          updated_at?: string;
+          urgency?: Database["public"]["Enums"]["search_urgency"];
+        };
+        Update: {
+          budget_max?: number | null;
+          budget_min?: number | null;
+          category?: Database["public"]["Enums"]["portfolio_category"];
+          city?: string | null;
+          created_at?: string;
+          currency?: Database["public"]["Enums"]["currency"];
+          district?: string | null;
+          features?: string[];
+          id?: string;
+          min_m2?: number | null;
+          neighborhood?: string | null;
+          notes?: string | null;
+          owner_id?: string;
+          room_count?: string | null;
+          status?: Database["public"]["Enums"]["search_status"];
+          title?: string;
+          transaction_type?: Database["public"]["Enums"]["transaction_type"];
+          updated_at?: string;
+          urgency?: Database["public"]["Enums"]["search_urgency"];
+        };
+        Relationships: [];
+      };
       user_roles: {
         Row: {
           granted_at: string;
@@ -562,6 +705,8 @@ export type Database = {
       portfolio_mode: "controlled" | "call_only";
       portfolio_status: "draft" | "active" | "passive" | "sold";
       profile_status: "pending" | "verified" | "suspended";
+      search_status: "active" | "matched" | "closed";
+      search_urgency: "low" | "medium" | "high";
       transaction_type: "satilik" | "kiralik";
     };
     CompositeTypes: {
@@ -699,6 +844,8 @@ export const Constants = {
       portfolio_mode: ["controlled", "call_only"],
       portfolio_status: ["draft", "active", "passive", "sold"],
       profile_status: ["pending", "verified", "suspended"],
+      search_status: ["active", "matched", "closed"],
+      search_urgency: ["low", "medium", "high"],
       transaction_type: ["satilik", "kiralik"],
     },
   },
