@@ -628,6 +628,7 @@ export type Database = {
       };
       get_public_portfolio: { Args: { _slug: string }; Returns: Json };
       get_public_profile: { Args: { _username: string }; Returns: Json };
+      get_region_summary: { Args: never; Returns: Json };
       has_portfolio_access: {
         Args: { _portfolio_id: string; _user_id?: string };
         Returns: boolean;
