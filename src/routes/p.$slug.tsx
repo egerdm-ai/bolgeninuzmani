@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { ShieldCheck, ArrowLeft, Phone, MessageCircle, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/lib/utils";
 import { s } from "@/lib/styles";
 import {
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/p/$slug")({
 
 function PublicPortfolioPage() {
   const { slug } = Route.useParams();
+  const { user } = useAuth();
   const [data, setData] = useState<PublicPortfolio | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -70,8 +72,10 @@ function PublicPortfolioPage() {
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            {/* session-aware (post-mount): logged-in agents get a panel link, not a
+                misleading "Üye Girişi" that loops them back to the dashboard. */}
             <Button asChild className="bg-gradient-gold text-bu-text-inv hover:opacity-90">
-              <Link to="/login">Üye Girişi</Link>
+              {user ? <Link to="/dashboard">Panele Dön</Link> : <Link to="/login">Üye Girişi</Link>}
             </Button>
           </div>
         </div>
@@ -100,6 +104,7 @@ function PublicPortfolioPage() {
 }
 
 function Teaser({ data }: { data: PublicPortfolio }) {
+  const { user } = useAuth();
   const callOnly = data.mode === "call_only";
   const images: DetailImage[] = data.images.map((i) => ({
     url: publicTeaserImageUrl(i.path),
@@ -201,8 +206,15 @@ function Teaser({ data }: { data: PublicPortfolio }) {
                 <h3 className="text-sm font-semibold text-bu-text">Kilitli Bilgiler</h3>
               </div>
               <LockedRevealList photoCount={data.locked_photo_count} />
+              {/* logged-in → in-app detail where the Detay Talebi flow works; anon → login */}
               <Button asChild className="w-full bg-gradient-gold text-bu-text-inv hover:opacity-90">
-                <Link to="/login">Detay Talebi için Üye Girişi</Link>
+                {user ? (
+                  <Link to="/dashboard/portfolios/$id" params={{ id: data.id }}>
+                    Detay Talebi (Panelde)
+                  </Link>
+                ) : (
+                  <Link to="/login">Detay Talebi için Üye Girişi</Link>
+                )}
               </Button>
             </div>
           </div>
