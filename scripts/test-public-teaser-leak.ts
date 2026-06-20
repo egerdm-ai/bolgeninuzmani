@@ -184,10 +184,13 @@ if (b9mig) {
   assert.ok(s9 >= 0 && e9 > s9, "could not locate get_region_summary body");
   assertNoForbidden("get_region_summary body (DRAFT)", stripSqlComments(m9.slice(s9, e9)));
 }
-assertNoForbidden(
+for (const rel of [
   "src/lib/data/regions.ts",
-  stripTsComments(readFileSync(join(root, "src/lib/data/regions.ts"), "utf8")),
-);
+  "src/routes/dashboard.regions.index.tsx",
+  "src/routes/dashboard.regions.$slug.tsx",
+]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
 
 // 15) B10 Harita — the map component + detail surface must use APPROX coords only;
 //     exact_lat/exact_lng are in FORBIDDEN, so this proves they never reach the map.

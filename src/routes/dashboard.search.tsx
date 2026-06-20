@@ -48,6 +48,9 @@ const toCard = (p: PortfolioWithCover): TeaserCardData => ({
 });
 
 export const Route = createFileRoute("/dashboard/search")({
+  validateSearch: (s: Record<string, unknown>): { q?: string } => ({
+    q: typeof s.q === "string" && s.q.trim() ? s.q : undefined,
+  }),
   component: Kesfet,
 });
 
@@ -71,8 +74,9 @@ function Kesfet() {
   const { user } = useAuth();
   const savedState = useSavedPortfolios();
   const navigate = useNavigate();
+  const { q: initialQ } = Route.useSearch();
   // Typed fields debounce; selects apply immediately.
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQ ?? "");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [category, setCategory] = useState<string>(ALL);

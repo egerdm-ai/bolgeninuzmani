@@ -17,7 +17,7 @@ export const featureFlags = {
   /** AI içe aktarma: /dashboard/ai-import. */
   aiImport: false,
   /** Bölge uzmanı dizini: /dashboard/regions. */
-  regions: false,
+  regions: true,
   /** Harita (MapLibre, approx-only): Keşfet + portföy detay yaklaşık konum. */
   harita: true,
   /**
