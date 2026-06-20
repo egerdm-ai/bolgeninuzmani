@@ -37,6 +37,11 @@ function NewPortfolio() {
       toast.error("Portföy başlığı zorunlu");
       return;
     }
+    // İl + ilçe required to publish (region drives map / Bölgeler / Keşfet / eşleşme).
+    if (status === "active" && (!teaser.city || !teaser.district)) {
+      toast.error("Yayınlamak için il ve ilçe seçin (mahalle opsiyonel).");
+      return;
+    }
     setSaving(status);
     try {
       const { id } = await createPortfolio(
@@ -102,7 +107,10 @@ function NewPortfolio() {
           <Button
             type="submit"
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            disabled={busy}
+            disabled={busy || !teaser.city || !teaser.district}
+            title={
+              !teaser.city || !teaser.district ? "Yayınlamak için il ve ilçe seçin" : undefined
+            }
           >
             {saving === "active" ? (
               <Loader2 className="size-4 animate-spin" />

@@ -223,9 +223,12 @@ export function SearchForm({
         />
       </Field>
 
+      {(!city || !district) && (
+        <p className="text-xs text-warning">İl ve ilçe seçimi zorunludur (mahalle opsiyonel).</p>
+      )}
       <Button
         type="submit"
-        disabled={submitting || title.trim() === ""}
+        disabled={submitting || title.trim() === "" || !city || !district}
         className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
       >
         {submitting && <Loader2 className="size-4 animate-spin" />}

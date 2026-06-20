@@ -127,6 +127,10 @@ function EditPortfolio() {
       toast.error("Portföy başlığı zorunlu");
       return;
     }
+    if (!teaser.city || !teaser.district) {
+      toast.error("İl ve ilçe seçin (mahalle opsiyonel).");
+      return;
+    }
     setSaving(true);
     try {
       await updatePortfolio(id, buildTeaserInput(teaser, status), buildPrivateInput(priv), attrs);
@@ -213,7 +217,8 @@ function EditPortfolio() {
           <Button
             type="submit"
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            disabled={saving}
+            disabled={saving || !teaser.city || !teaser.district}
+            title={!teaser.city || !teaser.district ? "İl ve ilçe seçin" : undefined}
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             {saving ? "Kaydediliyor…" : "Kaydet"}

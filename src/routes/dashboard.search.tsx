@@ -25,6 +25,7 @@ import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio
 import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
 import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 import { featureFlags } from "@/lib/feature-flags";
+import { RegionSelect, type RegionValue } from "@/components/geo/region-select";
 
 const toCard = (p: PortfolioWithCover): TeaserCardData => ({
   id: p.id,
@@ -82,6 +83,11 @@ function Kesfet() {
   const [category, setCategory] = useState<string>(ALL);
   const [transaction, setTransaction] = useState<string>(ALL);
   const [rooms, setRooms] = useState<string>(ALL);
+  const [region, setRegion] = useState<RegionValue>({
+    city: null,
+    district: null,
+    neighborhood: null,
+  });
   const [showMore, setShowMore] = useState(false);
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
@@ -95,6 +101,9 @@ function Kesfet() {
   const filters = useMemo<NetworkFilters>(
     () => ({
       q: dq.trim() || undefined,
+      city: region.city ?? undefined,
+      district: region.district ?? undefined,
+      neighborhood: region.neighborhood ?? undefined,
       category: (category === ALL ? undefined : category) as NetworkFilters["category"],
       transaction_type: (transaction === ALL
         ? undefined
@@ -103,7 +112,7 @@ function Kesfet() {
       priceMin: dMin ? Number(dMin) : undefined,
       priceMax: dMax ? Number(dMax) : undefined,
     }),
-    [dq, category, transaction, rooms, dMin, dMax],
+    [dq, region, category, transaction, rooms, dMin, dMax],
   );
 
   // Filters changed → back to page 0 (instant filter; no "Filtrele" button).
@@ -210,6 +219,25 @@ function Kesfet() {
           >
             <SlidersHorizontal className="size-4" /> Daha fazla
           </Button>
+        </div>
+
+        {/* Region filter (canonical İl/İlçe/Mahalle → exact match) */}
+        <div className="border-t border-border pt-3">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Bölge
+            </span>
+            {(region.city || region.district || region.neighborhood) && (
+              <button
+                type="button"
+                onClick={() => setRegion({ city: null, district: null, neighborhood: null })}
+                className="text-xs text-gold hover:underline"
+              >
+                Bölgeyi temizle
+              </button>
+            )}
+          </div>
+          <RegionSelect value={region} onChange={setRegion} />
         </div>
 
         {/* Secondary filters (collapsed by default → uncluttered) */}

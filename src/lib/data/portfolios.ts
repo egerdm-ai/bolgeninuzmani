@@ -287,9 +287,11 @@ export async function listNetworkPortfolios(
     .eq("status", "active")
     .neq("owner_id", viewerId);
 
-  if (filters.city) query = query.ilike("city", `%${filters.city}%`);
-  if (filters.district) query = query.ilike("district", `%${filters.district}%`);
-  if (filters.neighborhood) query = query.ilike("neighborhood", `%${filters.neighborhood}%`);
+  // Structured region filters use EXACT canonical match (RegionSelect values) so the
+  // Keşfet count and the region-summary count stay consistent (no ilike drift).
+  if (filters.city) query = query.eq("city", filters.city);
+  if (filters.district) query = query.eq("district", filters.district);
+  if (filters.neighborhood) query = query.eq("neighborhood", filters.neighborhood);
   if (filters.transaction_type) query = query.eq("transaction_type", filters.transaction_type);
   if (filters.category) query = query.eq("category", filters.category);
   if (filters.priceMin != null) query = query.gte("price", filters.priceMin);

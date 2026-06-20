@@ -48,7 +48,7 @@ function RegionDetail() {
   useEffect(() => {
     if (!user) return;
     let active = true;
-    listNetworkPortfolios(user.id, { q: district }, 0, 60)
+    listNetworkPortfolios(user.id, { district }, 0, 60)
       .then((r) => active && setItems(r.items))
       .catch(() => active && setItems([]));
     return () => {
