@@ -3,6 +3,7 @@ import { ShieldCheck, FolderLock, Compass, MapPin, Languages as LangIcon } from 
 import { ProfessionalIdentityHeader } from "@/components/vault/professional-identity-header";
 import { MembershipBadge, RegionExpertBadge } from "@/components/vault/badges";
 import { ShareProfileButton } from "@/components/vault/share-profile-button";
+import { FollowButton } from "@/components/profile/follow-button";
 import {
   ProfessionalProfileTabs,
   type ProfileTab,
@@ -57,6 +58,7 @@ export function ProfessionalProfileView({
           actions={
             <>
               {actions}
+              <FollowButton username={vm.username} />
               <ShareProfileButton username={vm.username} />
             </>
           }
