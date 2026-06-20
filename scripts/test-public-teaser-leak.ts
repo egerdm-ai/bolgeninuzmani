@@ -194,6 +194,18 @@ for (const rel of [
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
 
+// 14b) geo_districts surface — the table + seed + centroid/region-sync derivation are
+//      public centroids only (no D13). Slice from the table to (but excluding) the
+//      legit `drop trigger ... on portfolio_private` line at the very end.
+const geoMig = readdirSync(migDir).find((f) => f.includes("geo_districts"));
+if (geoMig) {
+  const gm = readFileSync(join(migDir, geoMig), "utf8");
+  const gs = gm.indexOf("create table if not exists public.geo_districts");
+  const ge = gm.indexOf("-- 5. RETIRE"); // everything before the portfolio_private trigger drop
+  assert.ok(gs >= 0 && ge > gs, "could not slice geo_districts migration");
+  assertNoForbidden("geo_districts table+seed+derive (DRAFT)", stripSqlComments(gm.slice(gs, ge)));
+}
+
 // 15) B10 Harita — the map component + detail surface must use APPROX coords only;
 //     exact_lat/exact_lng are in FORBIDDEN, so this proves they never reach the map.
 for (const rel of [
