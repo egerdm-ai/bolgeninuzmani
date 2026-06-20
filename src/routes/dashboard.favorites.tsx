@@ -1,14 +1,16 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { featureFlags } from "@/lib/feature-flags";
-import { Bookmark, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Bookmark, Search, Loader2 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { PortfolioCard } from "@/components/vault/portfolio-card";
-import { EmptyStateCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
-import { SurfaceCard } from "@/components/vault/cards";
-import { portfolios, savedSearches } from "@/lib/mock/data";
-import { useSaved } from "@/lib/saved-store";
+import { EmptyStateCard } from "@/components/vault/cards";
+import { PortfolioTeaserCard } from "@/components/portfolio/teaser-card";
+import { featureFlags } from "@/lib/feature-flags";
+import { useAuth } from "@/lib/auth/auth-context";
+import { listSavedPortfolios } from "@/lib/data/saved";
+import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
+import type { TeaserCardData } from "@/components/portfolio/teaser-card";
 
 export const Route = createFileRoute("/dashboard/favorites")({
   beforeLoad: () => {
@@ -18,77 +20,64 @@ export const Route = createFileRoute("/dashboard/favorites")({
 });
 
 function Favorites() {
-  const { savedPortfolios, isSaved, toggleSave } = useSaved();
-  const saved = portfolios.filter((p) => savedPortfolios.includes(p.id));
+  const { user } = useAuth();
+  const savedState = useSavedPortfolios();
+  const [cards, setCards] = useState<TeaserCardData[] | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    listSavedPortfolios(user.id)
+      .then((c) => active && setCards(c))
+      .catch(() => active && setCards([]));
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  // Reflect un-saves immediately (a card toggled off drops out of the list).
+  const visible = (cards ?? []).filter((c) => savedState.isSaved(c.id));
 
   return (
-    <PageContainer className="space-y-8">
-      <PageHeader title="Kaydettiklerim" subtitle="Kaydettiğiniz portföyler ve aramalar." />
+    <PageContainer className="space-y-6">
+      <PageHeader
+        title="Kaydedilenler"
+        subtitle="Daha sonra incelemek için kaydettiğiniz portföyler."
+      />
 
-      <section className="space-y-3">
-        <h2 className="font-display text-xl font-semibold text-foreground">Kayıtlı Portföyler</h2>
-        {saved.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {saved.map((p) => (
-              <PortfolioCard
-                key={p.id}
-                portfolio={p}
-                saved={isSaved(p.id)}
-                onToggleSave={toggleSave}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyStateCard
-            icon={Bookmark}
-            title="Henüz kayıtlı portföy yok"
-            description="Beğendiğiniz portföyleri kaydedin, burada toplanır."
-            action={
-              <Button asChild className="bg-gradient-gold text-primary-foreground hover:opacity-90">
-                <Link to="/dashboard/search">Portföy Ara</Link>
-              </Button>
-            }
-          />
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-display text-xl font-semibold text-foreground">Kayıtlı Aramalar</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {savedSearches.map((s) => (
-            <SurfaceCard key={s.id} hover className="space-y-2">
-              <div className="flex items-start justify-between">
-                <h3 className="font-semibold text-foreground">{s.label}</h3>
-                <span className="flex size-8 items-center justify-center rounded-lg bg-gold/10 text-gold">
-                  <Search className="size-4" />
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">"{s.query}"</p>
-              <div className="flex flex-wrap gap-1.5">
-                {s.filters.map((f) => (
-                  <span
-                    key={f}
-                    className="rounded-md bg-surface-3 px-2 py-0.5 text-xs text-secondary-foreground"
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-xs text-gold">{s.resultCount} sonuç</span>
-                <Button
-                  asChild
-                  variant="ghost"
-                  size="sm"
-                  className="text-gold hover:text-gold-light"
-                >
-                  <Link to="/dashboard/search">Aramayı Aç</Link>
-                </Button>
-              </div>
-            </SurfaceCard>
+      {cards === null ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+          <Loader2 className="size-6 animate-spin text-gold" />
+        </div>
+      ) : visible.length === 0 ? (
+        <EmptyStateCard
+          icon={Bookmark}
+          title="Henüz kayıt yok"
+          description="Keşfet'te beğendiğiniz portföyleri yer işaretiyle kaydedin; burada toplanır."
+          action={
+            <Button
+              asChild
+              className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+            >
+              <Link to="/dashboard/search">
+                <Search className="size-4" /> Keşfet
+              </Link>
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((c) => (
+            <PortfolioTeaserCard
+              key={c.id}
+              p={c}
+              context="app"
+              saved={savedState.isSaved(c.id)}
+              onToggleSave={savedState.enabled ? savedState.toggle : undefined}
+            />
           ))}
         </div>
-      </section>
+      )}
     </PageContainer>
   );
 }

@@ -22,6 +22,7 @@ import {
 } from "@/lib/data/portfolios";
 import { CATEGORY_LABELS, TRANSACTION_LABELS } from "@/lib/portfolio-labels";
 import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
+import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 
 const toCard = (p: PortfolioWithCover): TeaserCardData => ({
   id: p.id,
@@ -66,6 +67,7 @@ function useDebounced<T>(value: T, ms: number): T {
 
 function Kesfet() {
   const { user } = useAuth();
+  const savedState = useSavedPortfolios();
   // Typed fields debounce; selects apply immediately.
   const [q, setQ] = useState("");
   const [priceMin, setPriceMin] = useState("");
@@ -294,7 +296,13 @@ function Kesfet() {
         <>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {result.items.map((p) => (
-              <PortfolioTeaserCard key={p.id} context="app" p={toCard(p)} />
+              <PortfolioTeaserCard
+                key={p.id}
+                context="app"
+                p={toCard(p)}
+                saved={savedState.isSaved(p.id)}
+                onToggleSave={savedState.enabled ? savedState.toggle : undefined}
+              />
             ))}
           </div>
           {totalPages > 1 && (

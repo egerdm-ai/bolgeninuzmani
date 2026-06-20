@@ -11,7 +11,7 @@ export const featureFlags = {
   /** Eşleşmeler: /dashboard/matches. */
   matches: true,
   /** Takip/Kaydedilenler: /dashboard/favorites + follow affordances. */
-  follow: false,
+  follow: true,
   /** AI Asistan: /dashboard/assistant (retired /dashboard/concierge merges here). */
   assistant: false,
   /** AI içe aktarma: /dashboard/ai-import. */

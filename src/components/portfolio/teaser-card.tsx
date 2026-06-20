@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Bed, Square, ImageOff, ShieldCheck } from "lucide-react";
+import { Bed, Square, ImageOff, ShieldCheck, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { s } from "@/lib/styles";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
@@ -38,9 +38,14 @@ export type TeaserCardData = {
 export function PortfolioTeaserCard({
   p,
   context,
+  saved,
+  onToggleSave,
 }: {
   p: TeaserCardData;
   context: "app" | "public";
+  /** When onToggleSave is provided, a Kaydet (bookmark) toggle is shown (in-app only). */
+  saved?: boolean;
+  onToggleSave?: (id: string) => void;
 }) {
   const region = [p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—";
   const body = (
@@ -103,7 +108,24 @@ export function PortfolioTeaserCard({
   );
 
   return (
-    <div className="group overflow-hidden rounded-bu-lg border border-bu-border bg-bu-card shadow-bu-card transition-all duration-200 hover:border-bu-border-gold hover:shadow-bu-raised">
+    <div className="group relative overflow-hidden rounded-bu-lg border border-bu-border bg-bu-card shadow-bu-card transition-all duration-200 hover:border-bu-border-gold hover:shadow-bu-raised">
+      {onToggleSave && (
+        <button
+          type="button"
+          aria-label={saved ? "Kayıtlardan çıkar" : "Kaydet"}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleSave(p.id);
+          }}
+          className={cn(
+            "absolute left-2 top-2 z-10 flex size-8 items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-md transition-colors",
+            saved ? "text-bu-gold" : "text-white hover:text-bu-gold",
+          )}
+        >
+          <Bookmark className={cn("size-4", saved && "fill-current")} />
+        </button>
+      )}
       {context === "app" ? (
         <Link to="/dashboard/portfolios/$id" params={{ id: p.id }} className="block">
           {body}

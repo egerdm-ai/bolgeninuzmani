@@ -16,6 +16,7 @@ import {
   Target,
   Radar,
   Sparkles,
+  Bookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { featureFlags } from "@/lib/feature-flags";
@@ -62,6 +63,9 @@ const workNav: NavItem[] = [
     : []),
   ...(featureFlags.matches
     ? [{ label: "Eşleşmeler", to: "/dashboard/matches", icon: Sparkles }]
+    : []),
+  ...(featureFlags.follow
+    ? [{ label: "Kaydedilenler", to: "/dashboard/favorites", icon: Bookmark }]
     : []),
   { label: "Detay Talepleri", to: "/dashboard/detail-requests", icon: Inbox },
   { label: "Bildirimler", to: "/dashboard/notifications", icon: Bell, count: unreadNotifications },
