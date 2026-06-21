@@ -394,9 +394,11 @@ export function PortfolioFormFields({
               ))}
             </div>
           )}
-          <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border-strong bg-surface-2 px-6 py-8 text-center hover:border-gold/40">
-            <ImagePlus className="size-7 text-gold" />
-            <span className="mt-2 text-sm font-medium text-foreground">
+          <label className="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gold/40 bg-gold/[0.04] px-6 py-10 text-center transition-colors hover:border-gold hover:bg-gold/[0.07]">
+            <span className="flex size-12 items-center justify-center rounded-full bg-gold/10 ring-1 ring-inset ring-gold/25 transition-colors group-hover:bg-gold/20">
+              <ImagePlus className="size-6 text-gold" />
+            </span>
+            <span className="text-sm font-medium text-foreground">
               {existingImages.length > 0 ? "Yeni fotoğraf ekle" : "Fotoğraf seç"}
             </span>
             <span className="text-xs text-muted-foreground">JPG/PNG · maks. 20</span>
