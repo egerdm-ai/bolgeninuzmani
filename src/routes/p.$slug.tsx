@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ShieldCheck, ArrowLeft, Phone, MessageCircle, Lock, Loader2 } from "lucide-react";
+import { ShieldCheck, ArrowLeft, Phone, MessageCircle, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -12,7 +11,8 @@ import {
   publicTeaserThumbUrl,
   type PublicPortfolio,
 } from "@/lib/data/public-portfolio";
-import { formatPortfolioPrice } from "@/lib/portfolio-labels";
+import { formatPortfolioPrice, CATEGORY_LABELS } from "@/lib/portfolio-labels";
+import { publicUrl } from "@/lib/public-origin";
 import { LockedRevealList } from "@/components/portfolio/portfolio-badges";
 import {
   DetailGallery,
@@ -26,37 +26,44 @@ import {
 } from "@/components/portfolio/detail-parts";
 
 export const Route = createFileRoute("/p/$slug")({
-  head: () => ({
-    meta: [
-      { title: "Portföy — Bölgenin Uzmanı" },
-      { property: "og:title", content: "Bölgenin Uzmanı — Özel Portföy" },
-      { property: "og:description", content: "Doğrulanmış emlak profesyonelinin özel portföyü." },
-      { property: "og:type", content: "website" },
-    ],
-  }),
+  // SSR loader → dynamic OG. Teaser-only (get_public_portfolio allow-list); exact/malik/
+  // private never reach here. Single fetch (component reads useLoaderData, no useEffect).
+  loader: async ({ params }) => ({ data: await getPublicPortfolio(params.slug).catch(() => null) }),
+  head: ({ loaderData }) => {
+    const d = loaderData?.data;
+    if (!d) return { meta: [{ title: "Portföy — Bölgenin Uzmanı" }] };
+    const coverPath = d.images.find((i) => i.is_cover)?.path ?? d.images[0]?.path;
+    const image = coverPath ? publicTeaserImageUrl(coverPath) : undefined;
+    const region = [d.district, d.city].filter(Boolean).join(", ");
+    const description = [
+      formatPortfolioPrice(d.price, d.currency),
+      region,
+      CATEGORY_LABELS[d.category],
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const url = publicUrl(`/p/${d.slug}`);
+    return {
+      meta: [
+        { title: `${d.title} — Bölgenin Uzmanı` },
+        { property: "og:title", content: d.title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: url },
+        ...(image ? [{ property: "og:image", content: image }] : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: d.title },
+        { name: "twitter:description", content: description },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
+      ],
+    };
+  },
   component: PublicPortfolioPage,
 });
 
 function PublicPortfolioPage() {
-  const { slug } = Route.useParams();
   const { user } = useAuth();
-  const [data, setData] = useState<PublicPortfolio | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    getPublicPortfolio(slug)
-      .then((d) => {
-        if (!active) return;
-        setData(d);
-        setLoading(false);
-        if (d) document.title = `${d.title} — Bölgenin Uzmanı`;
-      })
-      .catch(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, [slug]);
+  const { data } = Route.useLoaderData();
 
   return (
     <div className="min-h-screen bg-bu-bg">
@@ -82,11 +89,7 @@ function PublicPortfolioPage() {
       </header>
 
       <main className="mx-auto max-w-[1440px] px-4 py-6 lg:px-8">
-        {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="size-6 animate-spin text-bu-gold" />
-          </div>
-        ) : !data ? (
+        {!data ? (
           <div className={cn(s.card, "px-6 py-20 text-center")}>
             <p className="text-sm text-bu-text-2">Portföy bulunamadı veya yayında değil.</p>
             <Button asChild variant="outline" className="mt-4 gap-1.5">
