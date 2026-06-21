@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { publicUrl } from "@/lib/public-origin";
 
 export function ShareProfileButton({
   username,
@@ -16,7 +17,7 @@ export function ShareProfileButton({
 }) {
   const [copied, setCopied] = useState(false);
   const path = `/v/${username}`;
-  const fullLink = typeof window !== "undefined" ? `${window.location.origin}${path}` : path;
+  const fullLink = publicUrl(path);
 
   const copy = () => {
     try {

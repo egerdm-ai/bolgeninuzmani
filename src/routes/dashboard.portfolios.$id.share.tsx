@@ -17,9 +17,10 @@ import { SurfaceCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
 import { getMyPortfolioFull, type PortfolioFull } from "@/lib/data/portfolios";
 import { formatPortfolioPrice } from "@/lib/portfolio-labels";
+import { PUBLIC_ORIGIN } from "@/lib/public-origin";
 
-// Public share domain (D16 placeholder until the real domain is live).
-const SHARE_ORIGIN = "https://bolgeninuzmani.com";
+// Public share domain — single source (VITE_PUBLIC_ORIGIN, falls back to window origin).
+const SHARE_ORIGIN = PUBLIC_ORIGIN;
 
 export const Route = createFileRoute("/dashboard/portfolios/$id/share")({
   component: ShareStudio,
