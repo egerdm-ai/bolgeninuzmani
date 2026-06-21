@@ -20,8 +20,8 @@ export const featureFlags = {
   regions: true,
   /** Harita (MapLibre, approx-only): Keşfet + portföy detay yaklaşık konum. */
   harita: true,
-  /** Bölge Uzmanı önerisi (get_region_experts RPC). RPC push + regen sonrası açılır. */
-  regionExperts: false,
+  /** Bölge Uzmanı önerisi (get_region_experts RPC). */
+  regionExperts: true,
   /**
    * Profesyonel DİZİNİ (index) — /dashboard/professionals (bölge uzmanı dizini).
    * Individual profiles (/dashboard/professionals/$id) stay reachable as

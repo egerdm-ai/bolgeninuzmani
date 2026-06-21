@@ -120,6 +120,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      geo_districts: {
+        Row: {
+          district: string;
+          lat: number;
+          lng: number;
+          province: string;
+        };
+        Insert: {
+          district: string;
+          lat: number;
+          lng: number;
+          province: string;
+        };
+        Update: {
+          district?: string;
+          lat?: number;
+          lng?: number;
+          province?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
           body: string | null;
@@ -619,6 +640,13 @@ export type Database = {
           approx_lng: number;
         }[];
       };
+      derive_approx_centroid: {
+        Args: { _lat: number; _lng: number; _seed: string };
+        Returns: {
+          approx_lat: number;
+          approx_lng: number;
+        }[];
+      };
       generate_portfolio_slug: { Args: { _title: string }; Returns: string };
       generate_ref_no: { Args: never; Returns: string };
       generate_username: { Args: { _email: string }; Returns: string };
@@ -628,6 +656,10 @@ export type Database = {
       };
       get_public_portfolio: { Args: { _slug: string }; Returns: Json };
       get_public_profile: { Args: { _username: string }; Returns: Json };
+      get_region_experts: {
+        Args: { _city: string; _district?: string; _exclude_owner?: string };
+        Returns: Json;
+      };
       get_region_summary: { Args: never; Returns: Json };
       has_portfolio_access: {
         Args: { _portfolio_id: string; _user_id?: string };

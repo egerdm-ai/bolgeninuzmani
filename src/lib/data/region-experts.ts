@@ -1,16 +1,10 @@
-// Bölge Uzmanı önerisi data layer — SKELETON. The get_region_experts RPC is drafted
-// but NOT yet applied (supabase/migrations/20260621130000_region_experts_DRAFT.sql), so
-// the generated Database types do not contain it. To avoid a type-unsafe cast, the fetch
-// is a stub returning [] for now. featureFlags.regionExperts stays OFF.
-//
-// AFTER Ege pushes the migration + regenerates types, replace the stub body with:
-//   const { data, error } = await supabase.rpc("get_region_experts", {
-//     _city: city, _district: district ?? undefined, _exclude_owner: excludeOwner ?? undefined,
-//   });
-//   if (error) throw error;
-//   return (data as unknown as RegionExpert[]) ?? [];
-// The RPC returns the PUBLIC profile allow-list + region_active_count + score; never any
-// contact/locked field.
+import { supabase } from "@/lib/supabase/client";
+
+// Bölge Uzmanı önerisi data layer. get_region_experts is a SECURITY DEFINER RPC (applied)
+// that returns verified agents expert in / active in a region, scored. Its output is the
+// PUBLIC profile allow-list + region_active_count + score — never a contact/locked field.
+// The RPC types as Json (jsonb), so we cast the validated payload to RegionExpert[] (the
+// RPC's allow-list is the contract).
 
 export type RegionExpert = {
   username: string;
@@ -24,16 +18,17 @@ export type RegionExpert = {
   score: number;
 };
 
-/**
- * Top experts for a region. STUB until get_region_experts RPC is pushed + types
- * regenerated (then a typed supabase.rpc call — see header). Returns [] for now; the
- * "Bu Bölgenin Uzmanları" sections stay behind featureFlags.regionExperts (OFF).
- */
+/** Top experts for a region (verified caller; PUBLIC profile allow-list + count). */
 export async function getRegionExperts(
-  _city: string,
-  _district?: string | null,
-  _excludeOwner?: string | null,
+  city: string,
+  district?: string | null,
+  excludeOwner?: string | null,
 ): Promise<RegionExpert[]> {
-  // TODO(region-experts): wire to supabase.rpc("get_region_experts", …) post-push.
-  return [];
+  const { data, error } = await supabase.rpc("get_region_experts", {
+    _city: city,
+    _district: district ?? undefined,
+    _exclude_owner: excludeOwner ?? undefined,
+  });
+  if (error) throw error;
+  return (data as unknown as RegionExpert[] | null) ?? [];
 }
