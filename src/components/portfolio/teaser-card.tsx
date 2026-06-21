@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Bed, Square, ImageOff, ShieldCheck, Bookmark } from "lucide-react";
+import { Bed, Square, ShieldCheck, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { s } from "@/lib/styles";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { CoverPlaceholder } from "@/components/portfolio/cover-placeholder";
 import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 import { BrokerAvatar } from "@/components/vault/broker-avatar";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
@@ -59,9 +60,7 @@ export function PortfolioTeaserCard({
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-bu-text-3">
-            <ImageOff className="size-7" />
-          </div>
+          <CoverPlaceholder category={p.category} size="md" />
         )}
         <ClosedModeBadge mode={p.mode} className="absolute right-2 top-2" />
       </div>

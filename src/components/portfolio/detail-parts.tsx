@@ -4,7 +4,6 @@ import {
   Phone,
   MessageCircle,
   ShieldCheck,
-  ImageOff,
   Expand,
   Lock,
   Bed,
@@ -26,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { s } from "@/lib/styles";
 import { ImageLightbox } from "@/components/portfolio/image-lightbox";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { CoverPlaceholder } from "@/components/portfolio/cover-placeholder";
 import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 import { PortfolioMap } from "@/components/portfolio/portfolio-map";
 import { featureFlags } from "@/lib/feature-flags";
@@ -56,7 +56,15 @@ const fmtLocation = (n?: string | null, d?: string | null, c?: string | null) =>
   [n, d, c].filter(Boolean).join(", ") || "Konum belirtilmemiş";
 
 /* ── 1. HERO GALLERY (§2.2) ── */
-export function DetailGallery({ images, title }: { images: DetailImage[]; title: string }) {
+export function DetailGallery({
+  images,
+  title,
+  category,
+}: {
+  images: DetailImage[];
+  title: string;
+  category: Database["public"]["Enums"]["portfolio_category"];
+}) {
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const hero = images[active];
@@ -72,9 +80,7 @@ export function DetailGallery({ images, title }: { images: DetailImage[]; title:
             onClick={() => setLightbox(active)}
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-bu-text-3">
-            <ImageOff className="size-10" />
-          </div>
+          <CoverPlaceholder category={category} size="lg" />
         )}
         {images.length > 0 && (
           <div className="absolute bottom-4 right-4 flex items-center gap-2">

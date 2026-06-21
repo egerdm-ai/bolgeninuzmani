@@ -1,9 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, BedDouble, Maximize, ShieldCheck, Send, Bookmark, ImageOff } from "lucide-react";
+import { MapPin, BedDouble, Maximize, ShieldCheck, Send, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "./broker-avatar";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { CoverPlaceholder } from "@/components/portfolio/cover-placeholder";
 import { ClosedModeBadge, RefNoText } from "@/components/portfolio/portfolio-badges";
 import { CATEGORY_LABELS, TRANSACTION_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import type { PortfolioWithCover } from "@/lib/data/portfolios";
@@ -57,9 +58,7 @@ export function SearchResultCard({
               className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
-            <span className="flex size-full items-center justify-center text-muted-foreground">
-              <ImageOff className="size-6" />
-            </span>
+            <CoverPlaceholder category={p.category} size="sm" />
           )}
           <ClosedModeBadge mode={p.mode} className="absolute left-1.5 top-1.5" />
         </Link>

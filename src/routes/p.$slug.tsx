@@ -120,7 +120,7 @@ function Teaser({ data }: { data: PublicPortfolio }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
       {/* Main column */}
       <div className="min-w-0 space-y-10">
-        <DetailGallery images={images} title={data.title} />
+        <DetailGallery images={images} title={data.title} category={data.category} />
         <DetailHeader
           title={data.title}
           refNo={data.ref_no}
