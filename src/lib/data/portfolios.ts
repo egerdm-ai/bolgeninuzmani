@@ -248,6 +248,8 @@ export type NetworkFilters = {
   priceMin?: number | null;
   priceMax?: number | null;
   room_count?: string;
+  mode?: PortfolioMode | null;
+  feature?: string;
 };
 
 export type NetworkResult = { items: PortfolioWithCover[]; total: number };
@@ -294,6 +296,8 @@ export async function listNetworkPortfolios(
   if (filters.neighborhood) query = query.eq("neighborhood", filters.neighborhood);
   if (filters.transaction_type) query = query.eq("transaction_type", filters.transaction_type);
   if (filters.category) query = query.eq("category", filters.category);
+  if (filters.mode) query = query.eq("mode", filters.mode);
+  if (filters.feature) query = query.contains("features", [filters.feature]);
   if (filters.priceMin != null) query = query.gte("price", filters.priceMin);
   if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
   if (filters.room_count) query = query.eq("room_count", filters.room_count);

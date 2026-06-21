@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Constants } from "@/lib/database.types";
 import {
@@ -21,32 +22,13 @@ import {
   type PortfolioWithCover,
 } from "@/lib/data/portfolios";
 import { CATEGORY_LABELS, TRANSACTION_LABELS } from "@/lib/portfolio-labels";
-import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
+import { SearchResultCard } from "@/components/vault/search-result-card";
 import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
 import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 import { featureFlags } from "@/lib/feature-flags";
 import { RegionSelect, type RegionValue } from "@/components/geo/region-select";
 
-const toCard = (p: PortfolioWithCover): TeaserCardData => ({
-  id: p.id,
-  slug: p.slug,
-  title: p.title,
-  price: p.price,
-  currency: p.currency,
-  transaction_type: p.transaction_type,
-  category: p.category,
-  mode: p.mode,
-  ref_no: p.ref_no,
-  city: p.city,
-  district: p.district,
-  neighborhood: p.neighborhood,
-  coverThumb: p.cover_url,
-  coverFull: p.cover_url_full,
-  roomCount: p.room_count,
-  grossM2: p.gross_m2,
-  features: p.features,
-  agent: p.agent ?? null,
-});
+const QUICK_FEATURES = ["Deniz Manzarası", "Havuz", "Otopark"];
 
 export const Route = createFileRoute("/dashboard/search")({
   validateSearch: (s: Record<string, unknown>): { q?: string } => ({
@@ -88,6 +70,8 @@ function Kesfet() {
     district: null,
     neighborhood: null,
   });
+  const [quickMode, setQuickMode] = useState<"controlled" | "call_only" | null>(null);
+  const [feature, setFeature] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
@@ -104,6 +88,8 @@ function Kesfet() {
       city: region.city ?? undefined,
       district: region.district ?? undefined,
       neighborhood: region.neighborhood ?? undefined,
+      mode: quickMode ?? undefined,
+      feature: feature ?? undefined,
       category: (category === ALL ? undefined : category) as NetworkFilters["category"],
       transaction_type: (transaction === ALL
         ? undefined
@@ -112,7 +98,7 @@ function Kesfet() {
       priceMin: dMin ? Number(dMin) : undefined,
       priceMax: dMax ? Number(dMax) : undefined,
     }),
-    [dq, region, category, transaction, rooms, dMin, dMax],
+    [dq, region, category, transaction, rooms, quickMode, feature, dMin, dMax],
   );
 
   // Filters changed → back to page 0 (instant filter; no "Filtrele" button).
@@ -240,6 +226,32 @@ function Kesfet() {
           <RegionSelect value={region} onChange={setRegion} />
         </div>
 
+        {/* Quick chips — mode + featured features (instant) */}
+        <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
+          <QuickChip
+            active={quickMode === "controlled"}
+            onClick={() => setQuickMode(quickMode === "controlled" ? null : "controlled")}
+          >
+            Detay Talebi Açık
+          </QuickChip>
+          <QuickChip
+            active={quickMode === "call_only"}
+            onClick={() => setQuickMode(quickMode === "call_only" ? null : "call_only")}
+          >
+            Kapalı Portföy
+          </QuickChip>
+          <span className="mx-1 h-4 w-px bg-border" />
+          {QUICK_FEATURES.map((f) => (
+            <QuickChip
+              key={f}
+              active={feature === f}
+              onClick={() => setFeature(feature === f ? null : f)}
+            >
+              {f}
+            </QuickChip>
+          ))}
+        </div>
+
         {/* Secondary filters (collapsed by default → uncluttered) */}
         {showMore && (
           <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-3">
@@ -334,12 +346,11 @@ function Kesfet() {
               featureFlags.harita ? "grid gap-6 lg:grid-cols-[1fr_minmax(0,400px)]" : undefined
             }
           >
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="flex flex-col gap-4">
               {result.items.map((p) => (
-                <PortfolioTeaserCard
+                <SearchResultCard
                   key={p.id}
-                  context="app"
-                  p={toCard(p)}
+                  p={p}
                   saved={savedState.isSaved(p.id)}
                   onToggleSave={savedState.enabled ? savedState.toggle : undefined}
                 />
@@ -407,5 +418,30 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label className="text-xs text-muted-foreground">{label}</Label>
       {children}
     </div>
+  );
+}
+
+function QuickChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        active
+          ? "border-gold/40 bg-gold/10 text-gold"
+          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   );
 }
