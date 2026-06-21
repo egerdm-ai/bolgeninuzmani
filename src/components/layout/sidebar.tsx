@@ -81,7 +81,7 @@ const accountNav = [
 
 export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { profile, user } = useAuth();
+  const { profile, user, isAdmin } = useAuth();
   const { unreadCount: notifUnread } = useNotifications();
   const [pendingRequests, setPendingRequests] = useState(0);
 
@@ -206,6 +206,22 @@ export function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle:
             <NavLink key={item.to} item={item} active={isActive(item.to)} collapsed={collapsed} />
           ))}
         </div>
+
+        {/* Admin-only — verification UI */}
+        {isAdmin && (
+          <div className="space-y-1">
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Yönetim
+              </p>
+            )}
+            <NavLink
+              item={{ label: "Yönetim", to: "/dashboard/admin", icon: ShieldCheck }}
+              active={isActive("/dashboard/admin")}
+              collapsed={collapsed}
+            />
+          </div>
+        )}
       </nav>
 
       {/* Membership + user */}
