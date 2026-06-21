@@ -9,6 +9,7 @@ import { SurfaceCard } from "@/components/vault/cards";
 import { SearchCard } from "@/components/search/search-card";
 import { SearchForm } from "@/components/search/search-form";
 import { MatchResults } from "@/components/search/match-results";
+import { RegionExperts } from "@/components/profile/region-experts";
 import { featureFlags } from "@/lib/feature-flags";
 import {
   getMySearch,
@@ -126,6 +127,14 @@ function MySearchDetail() {
           </div>
 
           <MatchResults searchId={search.id} />
+
+          {featureFlags.regionExperts && (
+            <RegionExperts
+              city={search.city}
+              district={search.district}
+              excludeOwner={search.owner_id}
+            />
+          )}
         </>
       )}
     </PageContainer>

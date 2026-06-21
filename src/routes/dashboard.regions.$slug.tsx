@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyStateCard } from "@/components/vault/cards";
 import { PortfolioTeaserCard, type TeaserCardData } from "@/components/portfolio/teaser-card";
 import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
+import { RegionExperts } from "@/components/profile/region-experts";
 import { featureFlags } from "@/lib/feature-flags";
 import { useAuth } from "@/lib/auth/auth-context";
 import { listNetworkPortfolios, type PortfolioWithCover } from "@/lib/data/portfolios";
@@ -123,6 +124,10 @@ function RegionDetail() {
             </aside>
           )}
         </div>
+      )}
+
+      {featureFlags.regionExperts && items && items.length > 0 && (
+        <RegionExperts city={items[0].city} district={district} />
       )}
     </PageContainer>
   );

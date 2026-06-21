@@ -40,6 +40,8 @@ import { STATUS_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 import { StatusBadge } from "@/components/vault/badges";
 import { LockedRevealList } from "@/components/portfolio/portfolio-badges";
+import { RegionExperts } from "@/components/profile/region-experts";
+import { featureFlags } from "@/lib/feature-flags";
 import {
   DetailGallery,
   DetailHeader,
@@ -374,6 +376,12 @@ function OwnerPortfolioDetail() {
           )}
         </aside>
       </div>
+
+      {featureFlags.regionExperts && (
+        <div className="mt-8">
+          <RegionExperts city={p.city} district={p.district} excludeOwner={p.owner_id} />
+        </div>
+      )}
 
       {showModal && (
         <RequestModal

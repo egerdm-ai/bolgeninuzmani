@@ -210,6 +210,20 @@ if (geoMig) {
   assertNoForbidden("geo_districts table+seed+derive (DRAFT)", stripSqlComments(gm.slice(gs, ge)));
 }
 
+// 14c) Bölge Uzmanı önerisi — get_region_experts RPC body (DRAFT) returns a PUBLIC
+//      profile allow-list + count only; the data layer + section name no locked token.
+const reMig = readdirSync(migDir).find((f) => f.includes("region_experts"));
+if (reMig) {
+  const rm = readFileSync(join(migDir, reMig), "utf8");
+  const rs = rm.indexOf("create or replace function public.get_region_experts");
+  const re = rm.indexOf("$$;", rs);
+  assert.ok(rs >= 0 && re > rs, "could not locate get_region_experts body");
+  assertNoForbidden("get_region_experts body (DRAFT)", stripSqlComments(rm.slice(rs, re)));
+}
+for (const rel of ["src/lib/data/region-experts.ts", "src/components/profile/region-experts.tsx"]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+
 // 15) B10 Harita — the map component + detail surface must use APPROX coords only;
 //     exact_lat/exact_lng are in FORBIDDEN, so this proves they never reach the map.
 for (const rel of [
