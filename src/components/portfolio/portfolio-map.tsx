@@ -68,12 +68,16 @@ export function PortfolioMap({
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
       map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
+      // Pin fill from the theme-aware brand token (gold dims in light mode); the white
+      // ring is intentional separation on the (theme-independent) light basemap.
+      const gold =
+        getComputedStyle(document.documentElement).getPropertyValue("--bu-gold").trim() ||
+        "#c9a84c";
       for (const p of points) {
         const el = document.createElement("button");
         el.type = "button";
         el.setAttribute("aria-label", p.title);
-        el.style.cssText =
-          "width:18px;height:18px;border-radius:9999px;border:2px solid #fff;background:#c9a84c;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:pointer;";
+        el.style.cssText = `width:18px;height:18px;border-radius:9999px;border:2px solid #fff;background:${gold};box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:pointer;`;
         el.addEventListener("click", () => onSelect?.(p));
         new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
       }

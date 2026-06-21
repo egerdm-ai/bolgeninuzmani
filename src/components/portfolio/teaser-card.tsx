@@ -118,8 +118,18 @@ export function PortfolioTeaserCard({
             onToggleSave(p.id);
           }}
           className={cn(
-            "absolute left-2 top-2 z-10 flex size-8 items-center justify-center rounded-full border border-white/15 bg-black/55 backdrop-blur-md transition-colors",
-            saved ? "text-bu-gold" : "text-white hover:text-bu-gold",
+            "absolute left-2 top-2 z-10 flex size-8 items-center justify-center rounded-full backdrop-blur-md transition-colors",
+            // Over a real photo: dark scrim for contrast. Over the branded placeholder:
+            // a soft token chip (no black blob).
+            p.coverThumb
+              ? cn(
+                  "border border-white/15 bg-black/55",
+                  saved ? "text-bu-gold" : "text-white hover:text-bu-gold",
+                )
+              : cn(
+                  "border border-bu-border bg-bu-card/85",
+                  saved ? "text-bu-gold" : "text-bu-text-2 hover:text-bu-gold",
+                ),
           )}
         >
           <Bookmark className={cn("size-4", saved && "fill-current")} />
