@@ -56,13 +56,18 @@ const currentTheme = (): "light" | "dark" =>
 // Istanbul fallback when no points have coordinates.
 const FALLBACK: [number, number] = [28.9784, 41.0082];
 
+// IMPORTANT: these classes go on the INNER pill (a child span), NOT on the marker root.
+// MapLibre owns the root element's `transform` (translate) for positioning, so the root
+// must carry NO transition and NO transform of its own. Putting scale + transitions on the
+// child means hover/selected animate smoothly without ever fighting MapLibre's translate
+// (which previously caused the pins to sway/lag and look misplaced).
 const PILL_BASE =
-  "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-elegant ring-1 ring-inset transition-all whitespace-nowrap cursor-pointer";
+  "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold shadow-elegant ring-1 ring-inset whitespace-nowrap transition-[transform,background-color,color,box-shadow] duration-150";
 function pillClass(state: "default" | "hovered" | "selected"): string {
   if (state === "selected")
-    return `${PILL_BASE} z-20 scale-110 bg-gradient-gold text-primary-foreground ring-gold`;
-  if (state === "hovered") return `${PILL_BASE} z-20 scale-110 bg-surface-3 text-gold ring-gold/60`;
-  return `${PILL_BASE} bg-surface text-gold ring-border-strong hover:bg-surface-3`;
+    return `${PILL_BASE} scale-110 bg-gradient-gold text-primary-foreground ring-gold`;
+  if (state === "hovered") return `${PILL_BASE} scale-110 bg-surface-3 text-gold ring-gold/60`;
+  return `${PILL_BASE} bg-surface text-gold ring-border-strong`;
 }
 
 export function PortfolioMap({
@@ -178,28 +183,34 @@ export function PortfolioMap({
       const text = p.price ?? p.title;
       const existing = markersRef.current.get(p.id);
       if (existing) {
-        const el = existing.getElement();
-        if (el.dataset.geo !== geo) {
+        const root = existing.getElement();
+        if (root.dataset.geo !== geo) {
           existing.setLngLat([p.lng, p.lat]);
-          el.dataset.geo = geo;
+          root.dataset.geo = geo;
         }
-        if (el.textContent !== text) el.textContent = text;
+        const pill = root.firstElementChild as HTMLElement | null;
+        if (pill && pill.textContent !== text) pill.textContent = text;
       } else {
-        const el = document.createElement("button");
-        el.type = "button";
-        el.setAttribute("aria-label", p.title);
-        el.className = pillClass("default");
-        el.dataset.geo = geo;
-        el.textContent = text;
-        el.addEventListener("click", (e) => {
+        // Root = bare positioning wrapper MapLibre controls (NO transition/transform).
+        const root = document.createElement("button");
+        root.type = "button";
+        root.setAttribute("aria-label", p.title);
+        root.className = "cursor-pointer border-0 bg-transparent p-0";
+        root.dataset.geo = geo;
+        // Child = the visible gold price pill (carries scale + transitions safely).
+        const pill = document.createElement("span");
+        pill.className = pillClass("default");
+        pill.textContent = text;
+        root.appendChild(pill);
+        root.addEventListener("click", (e) => {
           e.stopPropagation();
           onSelectRef.current?.(p);
         });
-        el.addEventListener("mouseenter", () => onHoverRef.current?.(p));
-        el.addEventListener("mouseleave", () => onHoverRef.current?.(null));
+        root.addEventListener("mouseenter", () => onHoverRef.current?.(p));
+        root.addEventListener("mouseleave", () => onHoverRef.current?.(null));
         markersRef.current.set(
           p.id,
-          new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map),
+          new maplibregl.Marker({ element: root }).setLngLat([p.lng, p.lat]).addTo(map),
         );
         membershipChanged = true;
       }
@@ -218,11 +229,16 @@ export function PortfolioMap({
     }
   }, [ready, pointsKey]);
 
-  // 3) Toggle marker classes on selection/hover — no map/marker rebuild.
+  // 3) Selection/hover → restyle the CHILD pill only (never the root's transform). Raise
+  //    the active marker via z-index (z-index ≠ transform, so positioning is untouched).
   useEffect(() => {
     for (const [id, marker] of markersRef.current) {
+      const active = id === selectedId || id === hoveredId;
       const state = id === selectedId ? "selected" : id === hoveredId ? "hovered" : "default";
-      marker.getElement().className = pillClass(state);
+      const root = marker.getElement() as HTMLElement;
+      root.style.zIndex = active ? "20" : "";
+      const pill = root.firstElementChild as HTMLElement | null;
+      if (pill) pill.className = pillClass(state);
     }
   }, [selectedId, hoveredId, ready, pointsKey]);
 
