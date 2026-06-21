@@ -35,3 +35,13 @@ export function formatPortfolioPrice(price: number | null, currency: Currency): 
   if (price == null) return "Belirtilmemiş";
   return `${CURRENCY_SYMBOL[currency]}${new Intl.NumberFormat("tr-TR").format(price)}`;
 }
+
+/** Compact price for map pins / chips — e.g. "64,5M ₺", "850B ₺" (teaser-safe). */
+export function abbreviatePrice(price: number | null, currency: Currency): string {
+  const sym = CURRENCY_SYMBOL[currency];
+  if (price == null) return sym;
+  if (price >= 1_000_000)
+    return `${(price / 1_000_000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })}M ${sym}`;
+  if (price >= 1_000) return `${Math.round(price / 1_000)}B ${sym}`;
+  return `${new Intl.NumberFormat("tr-TR").format(price)} ${sym}`;
+}
