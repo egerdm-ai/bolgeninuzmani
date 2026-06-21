@@ -127,7 +127,15 @@ export function PortfolioMap({
       map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
       // Basemap follows the app theme (markers are DOM overlays → survive setStyle).
-      observer = new MutationObserver(() => map.setStyle(rasterStyle(currentTheme()) as never));
+      // Guard: only call setStyle when the theme ACTUALLY flips, not on every unrelated
+      // <html> class mutation (that caused basemap-reload flicker).
+      let appliedTheme = currentTheme();
+      observer = new MutationObserver(() => {
+        const t = currentTheme();
+        if (t === appliedTheme) return;
+        appliedTheme = t;
+        map.setStyle(rasterStyle(t) as never);
+      });
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
       map.on("load", () => !cancelled && setReady(true));
@@ -146,39 +154,67 @@ export function PortfolioMap({
     };
   }, []);
 
-  // 2) (Re)build markers only when the point SET changes — never on hover.
+  // 2) DIFF markers when the point set changes — keep unchanged ones (no teardown/flicker).
   useEffect(() => {
     const map = mapRef.current;
     const maplibregl = glRef.current;
     if (!ready || !map || !maplibregl) return;
     const pts = pointsRef.current;
+    const present = new Set(pts.map((p) => p.id));
+    let membershipChanged = false;
 
-    for (const m of markersRef.current.values()) m.remove();
-    markersRef.current.clear();
-
-    for (const p of pts) {
-      const el = document.createElement("button");
-      el.type = "button";
-      el.setAttribute("aria-label", p.title);
-      el.className = pillClass("default");
-      el.textContent = p.price ?? p.title;
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        onSelectRef.current?.(p);
-      });
-      el.addEventListener("mouseenter", () => onHoverRef.current?.(p));
-      el.addEventListener("mouseleave", () => onHoverRef.current?.(null));
-      const marker = new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
-      markersRef.current.set(p.id, marker);
+    // Remove markers whose portfolio is no longer in the result set.
+    for (const [id, marker] of markersRef.current) {
+      if (!present.has(id)) {
+        marker.remove();
+        markersRef.current.delete(id);
+        membershipChanged = true;
+      }
     }
 
-    if (pts.length > 1) {
-      const b = new maplibregl.LngLatBounds();
-      pts.forEach((p) => b.extend([p.lng, p.lat]));
-      map.fitBounds(b, { padding: 64, maxZoom: 13 });
-    } else if (pts.length === 1) {
-      map.setCenter([pts[0].lng, pts[0].lat]);
-      map.setZoom(13);
+    // Add new markers; update coords/price on existing ones in place.
+    for (const p of pts) {
+      const geo = `${p.lng},${p.lat}`; // [lng, lat] for MapLibre
+      const text = p.price ?? p.title;
+      const existing = markersRef.current.get(p.id);
+      if (existing) {
+        const el = existing.getElement();
+        if (el.dataset.geo !== geo) {
+          existing.setLngLat([p.lng, p.lat]);
+          el.dataset.geo = geo;
+        }
+        if (el.textContent !== text) el.textContent = text;
+      } else {
+        const el = document.createElement("button");
+        el.type = "button";
+        el.setAttribute("aria-label", p.title);
+        el.className = pillClass("default");
+        el.dataset.geo = geo;
+        el.textContent = text;
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          onSelectRef.current?.(p);
+        });
+        el.addEventListener("mouseenter", () => onHoverRef.current?.(p));
+        el.addEventListener("mouseleave", () => onHoverRef.current?.(null));
+        markersRef.current.set(
+          p.id,
+          new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map),
+        );
+        membershipChanged = true;
+      }
+    }
+
+    // Re-fit ONLY when which pins are shown changed (not on price/text-only updates).
+    if (membershipChanged) {
+      if (pts.length > 1) {
+        const b = new maplibregl.LngLatBounds();
+        pts.forEach((p) => b.extend([p.lng, p.lat]));
+        map.fitBounds(b, { padding: 64, maxZoom: 13 });
+      } else if (pts.length === 1) {
+        map.setCenter([pts[0].lng, pts[0].lat]);
+        map.setZoom(13);
+      }
     }
   }, [ready, pointsKey]);
 
