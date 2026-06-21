@@ -190,6 +190,10 @@ for (const rel of [
   "src/routes/dashboard.regions.$slug.tsx",
   // Geo dataset loader (public il/ilçe/mahalle + centroids — D30 approx only).
   "src/lib/geo/index.ts",
+  // Professionals directory — public profile allow-list + active count only.
+  "src/lib/data/professionals.ts",
+  "src/routes/dashboard.professionals.index.tsx",
+  "src/components/profile/professional-directory-card.tsx",
 ]) {
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }

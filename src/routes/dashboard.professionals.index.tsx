@@ -1,178 +1,150 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { featureFlags } from "@/lib/feature-flags";
-import { useMemo, useState } from "react";
-import { Search, Users, FolderLock, Award, Sparkles, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Loader2, Users } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
-import { ProfessionalCard } from "@/components/vault/professional-card";
-import { professionals } from "@/lib/mock/data";
+import { EmptyStateCard } from "@/components/vault/cards";
+import { ProfessionalDirectoryCard } from "@/components/profile/professional-directory-card";
 import { cn } from "@/lib/utils";
-import { useFollow } from "@/lib/follow-store";
+import { featureFlags } from "@/lib/feature-flags";
+import { listProfessionals, type ProfessionalListItem } from "@/lib/data/professionals";
 
 export const Route = createFileRoute("/dashboard/professionals/")({
   beforeLoad: () => {
     if (!featureFlags.professionals) throw redirect({ to: "/dashboard" });
   },
-  component: ProfessionalsPage,
+  component: Professionals,
 });
 
-type ChipKind = "scope" | "tier" | "region" | "type";
-type Chip = { id: string; label: string; kind: ChipKind; value?: string };
+const lc = (s: string) => s.toLocaleLowerCase("tr-TR");
 
-const chips: Chip[] = [
-  { id: "all", label: "Tümü", kind: "scope" },
-  { id: "following", label: "Takip Ettiklerim", kind: "scope" },
-  { id: "experts", label: "Bölge Uzmanları", kind: "scope" },
-  { id: "elite", label: "Elite", kind: "tier", value: "Elite" },
-  { id: "r-bodrum", label: "Bodrum", kind: "region", value: "Bodrum" },
-  { id: "r-istanbul", label: "İstanbul", kind: "region", value: "İstanbul" },
-  { id: "r-cesme", label: "Çeşme", kind: "region", value: "Çeşme" },
-  { id: "t-ticari", label: "Ticari", kind: "type", value: "Ticari" },
-  { id: "t-villa", label: "Villa", kind: "type", value: "Villa" },
-  { id: "t-arsa", label: "Arsa", kind: "type", value: "Arsa" },
-];
+function Professionals() {
+  const [rows, setRows] = useState<ProfessionalListItem[] | null>(null);
+  const [query, setQuery] = useState("");
+  const [region, setRegion] = useState<string | null>(null);
+  const [type, setType] = useState<string | null>(null);
 
-const stats = [
-  { label: "Profesyonel", value: "48", icon: Users },
-  { label: "Aktif Portföy", value: "126", icon: FolderLock },
-  { label: "Bölge Uzmanı", value: "18", icon: Award },
-  { label: "Yeni Eşleşme", value: "312", icon: Sparkles },
-];
+  useEffect(() => {
+    let active = true;
+    listProfessionals()
+      .then((r) => active && setRows(r))
+      .catch(() => active && setRows([]));
+    return () => {
+      active = false;
+    };
+  }, []);
 
-function ProfessionalsPage() {
-  const { isFollowing } = useFollow();
-  const [search, setSearch] = useState("");
-  const [active, setActive] = useState<string[]>(["all"]);
+  const regions = useMemo(
+    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_regions))].sort().slice(0, 12),
+    [rows],
+  );
+  const types = useMemo(
+    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_types))].sort().slice(0, 10),
+    [rows],
+  );
 
-  const toggleChip = (chip: Chip) => {
-    if (chip.id === "all") {
-      setActive(["all"]);
-      return;
-    }
-    setActive((prev) => {
-      const without = prev.filter((x) => x !== "all");
-      const next = without.includes(chip.id)
-        ? without.filter((x) => x !== chip.id)
-        : [...without, chip.id];
-      return next.length === 0 ? ["all"] : next;
-    });
-  };
-
-  const results = useMemo(() => {
-    const activeChips = chips.filter((c) => active.includes(c.id));
-    const scopes = activeChips.filter((c) => c.kind === "scope").map((c) => c.id);
-    const tiers = activeChips.filter((c) => c.kind === "tier").map((c) => c.value!);
-    const regions = activeChips.filter((c) => c.kind === "region").map((c) => c.value!);
-    const types = activeChips.filter((c) => c.kind === "type").map((c) => c.value!);
-
-    return professionals.filter((pro) => {
-      if (search) {
-        const q = search.toLocaleLowerCase("tr");
-        const hay =
-          `${pro.fullName} ${pro.title} ${pro.companyName} ${pro.location} ${pro.expertiseRegions.join(" ")} ${pro.expertiseTypes.join(" ")}`.toLocaleLowerCase(
-            "tr",
-          );
-        if (!hay.includes(q)) return false;
-      }
-      if (scopes.includes("following") && !isFollowing(pro.id)) return false;
-      if (scopes.includes("experts") && pro.expertBadge === "Network Uzmanı") return false;
-      if (tiers.length > 0 && !tiers.includes(pro.membershipBadge)) return false;
-      if (regions.length > 0) {
-        const hay = `${pro.expertiseRegions.join(" ")} ${pro.location}`;
-        if (!regions.some((r) => hay.includes(r))) return false;
-      }
-      if (types.length > 0 && !types.some((t) => pro.expertiseTypes.includes(t))) return false;
+  const list = useMemo(() => {
+    if (!rows) return [];
+    const q = lc(query.trim());
+    return rows.filter((p) => {
+      if (q && !lc(`${p.full_name} ${p.company_name ?? ""}`).includes(q)) return false;
+      if (region && !p.expertise_regions.includes(region)) return false;
+      if (type && !p.expertise_types.includes(type)) return false;
       return true;
     });
-  }, [search, active, isFollowing]);
-
-  const hasFilters = search !== "" || !(active.length === 1 && active[0] === "all");
+  }, [rows, query, region, type]);
 
   return (
-    <PageContainer className="space-y-5">
-      <PageHeader
-        title="Profesyoneller"
-        subtitle="Bölgenin Uzmanı ağı içindeki doğrulanmış emlak profesyonellerini, bölge uzmanlarını ve portföy vitrinlerini keşfedin."
-      />
-
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-xl border border-border bg-surface-2 px-4 py-3">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <s.icon className="size-3.5 text-gold" /> {s.label}
-            </span>
-            <span className="mt-1 block font-display text-2xl font-semibold text-foreground">
-              {s.value}
-            </span>
-          </div>
-        ))}
-      </div>
+    <PageContainer className="space-y-6">
+      <PageHeader title="Profesyoneller" subtitle="Ağdaki doğrulanmış emlak profesyonelleri." />
 
       {/* Search */}
       <div className="relative">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="İsim, bölge, şirket veya uzmanlık ara..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Ad veya şirket ara…"
           className="h-11 w-full rounded-xl border border-border bg-surface-2 pl-9 pr-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-gold/40"
         />
       </div>
 
-      {/* Quick filter chips */}
-      <div className="flex flex-wrap items-center gap-2">
-        {chips.map((chip) => {
-          const isActive = active.includes(chip.id);
-          return (
-            <button
-              key={chip.id}
-              onClick={() => toggleChip(chip)}
-              className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs font-medium ring-1 ring-inset transition-colors",
-                isActive
-                  ? "bg-gold/15 text-gold ring-gold/30"
-                  : "bg-surface-2 text-secondary-foreground ring-border hover:ring-border-strong",
-              )}
-            >
-              {chip.label}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{results.length}</span> profesyonel
-          bulundu
-        </p>
-        {hasFilters && (
-          <button
-            onClick={() => {
-              setSearch("");
-              setActive(["all"]);
-            }}
-            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <X className="size-3.5" /> Filtreleri temizle
-          </button>
-        )}
-      </div>
-
-      {results.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center">
-          <Users className="mx-auto size-8 text-muted-foreground" />
-          <p className="mt-3 text-sm text-muted-foreground">
-            Aramanıza uygun profesyonel bulunamadı.
-          </p>
+      {/* Expertise filters */}
+      {(regions.length > 0 || types.length > 0) && (
+        <div className="space-y-2">
+          {regions.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Bölge
+              </span>
+              {regions.map((r) => (
+                <Chip
+                  key={r}
+                  active={region === r}
+                  onClick={() => setRegion(region === r ? null : r)}
+                >
+                  {r}
+                </Chip>
+              ))}
+            </div>
+          )}
+          {types.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                Uzmanlık
+              </span>
+              {types.map((t) => (
+                <Chip key={t} active={type === t} onClick={() => setType(type === t ? null : t)}>
+                  {t}
+                </Chip>
+              ))}
+            </div>
+          )}
         </div>
+      )}
+
+      {rows === null ? (
+        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
+          <Loader2 className="size-6 animate-spin text-gold" />
+        </div>
+      ) : list.length === 0 ? (
+        <EmptyStateCard
+          icon={Users}
+          title="Profesyonel bulunamadı"
+          description="Filtrelerinize uygun doğrulanmış profesyonel yok."
+        />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {results.map((pro) => (
-            <ProfessionalCard key={pro.id} professional={pro} />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((p) => (
+            <ProfessionalDirectoryCard key={p.username} p={p} />
           ))}
         </div>
       )}
     </PageContainer>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        active
+          ? "border-gold/40 bg-gold/10 text-gold"
+          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   );
 }

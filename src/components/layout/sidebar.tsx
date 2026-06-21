@@ -18,6 +18,7 @@ import {
   Sparkles,
   Bookmark,
   MapPin,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { featureFlags } from "@/lib/feature-flags";
@@ -47,6 +48,9 @@ type NavItem = {
 const discoverChildren: NavItem[] = [
   { label: "Portföyler", to: "/dashboard/search", icon: Search },
   ...(featureFlags.regions ? [{ label: "Bölgeler", to: "/dashboard/regions", icon: MapPin }] : []),
+  ...(featureFlags.professionals
+    ? [{ label: "Profesyoneller", to: "/dashboard/professionals", icon: Users }]
+    : []),
   ...(featureFlags.arayis
     ? [{ label: "Ağ Arayışları", to: "/dashboard/searches", icon: Radar }]
     : []),

@@ -25,7 +25,7 @@ export const featureFlags = {
    * Individual profiles (/dashboard/professionals/$id) stay reachable as
    * portfolio-owner views (also public at /v/$username).
    */
-  professionals: false,
+  professionals: true,
 } as const;
 
 export type FeatureFlag = keyof typeof featureFlags;
