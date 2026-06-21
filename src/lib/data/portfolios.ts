@@ -248,6 +248,8 @@ export type NetworkFilters = {
   priceMin?: number | null;
   priceMax?: number | null;
   room_count?: string;
+  /** Match any of these room counts (e.g. ["5+1","6+1"] for a "5+ Oda" quick chip). */
+  roomCounts?: string[];
   mode?: PortfolioMode | null;
   feature?: string;
 };
@@ -301,6 +303,7 @@ export async function listNetworkPortfolios(
   if (filters.priceMin != null) query = query.gte("price", filters.priceMin);
   if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
   if (filters.room_count) query = query.eq("room_count", filters.room_count);
+  if (filters.roomCounts?.length) query = query.in("room_count", filters.roomCounts);
   if (filters.q) {
     // sanitize for the PostgREST or() filter grammar
     const safe = filters.q.replace(/[,()*%]/g, " ").trim();

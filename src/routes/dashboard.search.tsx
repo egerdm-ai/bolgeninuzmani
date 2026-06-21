@@ -43,7 +43,12 @@ import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 import { featureFlags } from "@/lib/feature-flags";
 import { RegionSelect, type RegionValue } from "@/components/geo/region-select";
 
-const QUICK_FEATURES = ["Deniz Manzarası", "Havuz", "Otopark"];
+// Lovable labels → DB feature values (seed uses the right-hand names).
+const QUICK_FEATURES = [
+  { label: "Deniz Manzaralı", value: "Deniz Manzarası" },
+  { label: "Havuzlu", value: "Havuz" },
+  { label: "Otoparklı", value: "Otopark" },
+];
 
 export const Route = createFileRoute("/dashboard/search")({
   validateSearch: (s: Record<string, unknown>): { q?: string } => ({
@@ -87,6 +92,7 @@ function Kesfet() {
   });
   const [quickMode, setQuickMode] = useState<"controlled" | "call_only" | null>(null);
   const [feature, setFeature] = useState<string | null>(null);
+  const [rooms5plus, setRooms5plus] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -107,6 +113,7 @@ function Kesfet() {
       neighborhood: region.neighborhood ?? undefined,
       mode: quickMode ?? undefined,
       feature: feature ?? undefined,
+      roomCounts: rooms5plus ? ["5+1", "6+1"] : undefined,
       category: (category === ALL ? undefined : category) as NetworkFilters["category"],
       transaction_type: (transaction === ALL
         ? undefined
@@ -115,7 +122,7 @@ function Kesfet() {
       priceMin: dMin ? Number(dMin) : undefined,
       priceMax: dMax ? Number(dMax) : undefined,
     }),
-    [dq, region, category, transaction, rooms, quickMode, feature, dMin, dMax],
+    [dq, region, category, transaction, rooms, quickMode, feature, rooms5plus, dMin, dMax],
   );
 
   // Filters changed → back to page 0 (instant filter; no "Filtrele" button).
@@ -243,8 +250,21 @@ function Kesfet() {
           <RegionSelect value={region} onChange={setRegion} />
         </div>
 
-        {/* Quick chips — mode + featured features (instant) */}
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-border pt-3">
+        {/* Lovable quick-chip row — instant, horizontal-scrollable */}
+        <div className="flex items-center gap-1.5 overflow-x-auto border-t border-border pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {QUICK_FEATURES.map((f) => (
+            <QuickChip
+              key={f.value}
+              active={feature === f.value}
+              onClick={() => setFeature(feature === f.value ? null : f.value)}
+            >
+              {f.label}
+            </QuickChip>
+          ))}
+          <QuickChip active={rooms5plus} onClick={() => setRooms5plus((v) => !v)}>
+            5+ Oda
+          </QuickChip>
+          <span className="mx-1 h-4 w-px shrink-0 bg-border" />
           <QuickChip
             active={quickMode === "controlled"}
             onClick={() => setQuickMode(quickMode === "controlled" ? null : "controlled")}
@@ -257,16 +277,6 @@ function Kesfet() {
           >
             Kapalı Portföy
           </QuickChip>
-          <span className="mx-1 h-4 w-px bg-border" />
-          {QUICK_FEATURES.map((f) => (
-            <QuickChip
-              key={f}
-              active={feature === f}
-              onClick={() => setFeature(feature === f ? null : f)}
-            >
-              {f}
-            </QuickChip>
-          ))}
         </div>
 
         {/* Secondary filters (collapsed by default → uncluttered) */}
@@ -539,7 +549,7 @@ function QuickChip({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+        "shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition-colors",
         active
           ? "border-gold/40 bg-gold/10 text-gold"
           : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
