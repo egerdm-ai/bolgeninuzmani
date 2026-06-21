@@ -59,21 +59,21 @@ export function ShareProfileButton({
           </button>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => toast.success("WhatsApp paylaşımı hazırlandı")}
-          >
-            <MessageCircle className="size-4" /> WhatsApp
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`Doğrulanmış emlak profesyoneli profili: ${fullLink}`)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <MessageCircle className="size-4" /> WhatsApp
+            </a>
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            onClick={() => toast.success("E-posta paylaşımı hazırlandı")}
-          >
-            <Mail className="size-4" /> E-posta
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <a
+              href={`mailto:?subject=${encodeURIComponent("Bölgenin Uzmanı — Profil")}&body=${encodeURIComponent(`Doğrulanmış emlak profesyoneli profili:\n${fullLink}`)}`}
+            >
+              <Mail className="size-4" /> E-posta
+            </a>
           </Button>
         </div>
       </PopoverContent>
