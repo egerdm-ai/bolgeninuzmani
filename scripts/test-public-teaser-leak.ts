@@ -224,6 +224,13 @@ for (const rel of ["src/lib/data/region-experts.ts", "src/components/profile/reg
   assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
 }
 
+// 14d) Admin verification surface — reads pending profiles + applications (contact is
+//      OPEN per D8, allowed); must NOT touch any portfolio-locked token. Authority is
+//      proven separately by scripts/test-admin-authority.sql (non-admin RPC rejected).
+for (const rel of ["src/lib/data/admin.ts", "src/routes/dashboard.admin.tsx"]) {
+  assertNoForbidden(rel, stripTsComments(readFileSync(join(root, rel), "utf8")));
+}
+
 // 15) B10 Harita — the map component + detail surface must use APPROX coords only;
 //     exact_lat/exact_lng are in FORBIDDEN, so this proves they never reach the map.
 for (const rel of [
