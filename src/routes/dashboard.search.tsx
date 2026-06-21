@@ -1,6 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Send,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
@@ -21,8 +29,15 @@ import {
   type NetworkFilters,
   type PortfolioWithCover,
 } from "@/lib/data/portfolios";
-import { CATEGORY_LABELS, TRANSACTION_LABELS } from "@/lib/portfolio-labels";
+import {
+  CATEGORY_LABELS,
+  TRANSACTION_LABELS,
+  formatPortfolioPrice,
+  abbreviatePrice,
+} from "@/lib/portfolio-labels";
 import { SearchResultCard } from "@/components/vault/search-result-card";
+import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { CoverPlaceholder } from "@/components/portfolio/cover-placeholder";
 import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
 import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 import { featureFlags } from "@/lib/feature-flags";
@@ -72,6 +87,8 @@ function Kesfet() {
   });
   const [quickMode, setQuickMode] = useState<"controlled" | "call_only" | null>(null);
   const [feature, setFeature] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showMore, setShowMore] = useState(false);
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
@@ -343,40 +360,68 @@ function Kesfet() {
         <>
           <div
             className={
-              featureFlags.harita ? "grid gap-6 lg:grid-cols-[1fr_minmax(0,400px)]" : undefined
+              featureFlags.harita
+                ? "grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]"
+                : undefined
             }
           >
             <div className="flex flex-col gap-4">
               {result.items.map((p) => (
-                <SearchResultCard
+                <div
                   key={p.id}
-                  p={p}
-                  saved={savedState.isSaved(p.id)}
-                  onToggleSave={savedState.enabled ? savedState.toggle : undefined}
-                />
+                  onMouseEnter={() => setHoveredId(p.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  <SearchResultCard
+                    p={p}
+                    selected={p.id === selectedId}
+                    saved={savedState.isSaved(p.id)}
+                    onToggleSave={savedState.enabled ? savedState.toggle : undefined}
+                  />
+                </div>
               ))}
             </div>
             {featureFlags.harita &&
               (() => {
                 // APPROX pins only (D30) — exact_lat/exact_lng never reach the map.
-                const pts: MapPoint[] = result.items
-                  .filter((p) => p.approx_lat != null && p.approx_lng != null)
-                  .map((p) => ({
-                    id: p.id,
-                    slug: p.slug,
-                    lat: p.approx_lat as number,
-                    lng: p.approx_lng as number,
-                    title: p.title,
-                  }));
+                const withGeo = result.items.filter(
+                  (p) => p.approx_lat != null && p.approx_lng != null,
+                );
+                const pts: MapPoint[] = withGeo.map((p) => ({
+                  id: p.id,
+                  slug: p.slug,
+                  lat: p.approx_lat as number,
+                  lng: p.approx_lng as number,
+                  title: p.title,
+                  price: abbreviatePrice(p.price, p.currency),
+                }));
+                const selected = withGeo.find((p) => p.id === selectedId) ?? null;
                 return pts.length === 0 ? null : (
                   <aside className="hidden lg:block">
-                    <PortfolioMap
-                      className="sticky top-20 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-border"
-                      points={pts}
-                      onSelect={(pt) =>
-                        navigate({ to: "/dashboard/portfolios/$id", params: { id: pt.id } })
-                      }
-                    />
+                    <div className="sticky top-20 h-[calc(100vh-7rem)]">
+                      <div className="relative size-full">
+                        <PortfolioMap
+                          className="size-full overflow-hidden rounded-2xl border border-border"
+                          points={pts}
+                          selectedId={selectedId}
+                          hoveredId={hoveredId}
+                          onSelect={(pt) => setSelectedId(pt.id)}
+                          onHover={(pt) => setHoveredId(pt?.id ?? null)}
+                        />
+                        {selected && (
+                          <MapPreviewCard
+                            p={selected}
+                            onClose={() => setSelectedId(null)}
+                            onOpen={() =>
+                              navigate({
+                                to: "/dashboard/portfolios/$id",
+                                params: { id: selected.id },
+                              })
+                            }
+                          />
+                        )}
+                      </div>
+                    </div>
                   </aside>
                 );
               })()}
@@ -409,6 +454,65 @@ function Kesfet() {
         </>
       )}
     </PageContainer>
+  );
+}
+
+function MapPreviewCard({
+  p,
+  onClose,
+  onOpen,
+}: {
+  p: PortfolioWithCover;
+  onClose: () => void;
+  onOpen: () => void;
+}) {
+  const region = [p.neighborhood, p.district, p.city].filter(Boolean).join(", ") || "—";
+  return (
+    <div className="absolute inset-x-3 bottom-3 z-10">
+      <div className="flex gap-3 rounded-xl border border-border bg-surface p-3 shadow-elegant">
+        <button
+          type="button"
+          onClick={onOpen}
+          className="size-20 shrink-0 overflow-hidden rounded-lg bg-surface-3"
+          aria-label={p.title}
+        >
+          {p.cover_url ? (
+            <ThumbImage
+              thumb={p.cover_url}
+              full={p.cover_url_full}
+              alt={p.title}
+              className="size-full object-cover"
+            />
+          ) : (
+            <CoverPlaceholder category={p.category} size="sm" />
+          )}
+        </button>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex items-start justify-between gap-2">
+            <p className="line-clamp-1 text-sm font-semibold text-foreground">{p.title}</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="-mr-1 -mt-1 shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground"
+              aria-label="Kapat"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+          <p className="line-clamp-1 text-xs text-muted-foreground">~{region}</p>
+          <p className="mt-0.5 font-display text-base font-bold text-gold">
+            {formatPortfolioPrice(p.price, p.currency)}
+          </p>
+          <Button
+            size="sm"
+            onClick={onOpen}
+            className="mt-1.5 h-7 gap-1 self-start bg-gradient-gold px-2.5 text-[11px] text-primary-foreground hover:opacity-90"
+          >
+            <Send className="size-3" /> Detay Talep Et
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }
 
