@@ -1,42 +1,52 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { ShieldCheck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { ProfessionalProfileView } from "@/components/profile/professional-profile-view";
-import { toProfessionalVM, type ProfessionalVM } from "@/lib/profile-vm";
+import { toProfessionalVM } from "@/lib/profile-vm";
 import { getPublicProfile, getPublicAgentPortfolios } from "@/lib/data/public-portfolio";
+import { publicUrl } from "@/lib/public-origin";
 
 export const Route = createFileRoute("/v/$username")({
-  head: () => ({
-    meta: [
-      { title: "Profesyonel — Bölgenin Uzmanı" },
-      { property: "og:title", content: "Bölgenin Uzmanı — Doğrulanmış Emlak Profesyoneli" },
-      { property: "og:type", content: "profile" },
-    ],
-  }),
+  // SSR loader → dynamic OG. Public profile allow-list (get_public_profile); no contact-
+  // sensitive/locked field reaches OG. Single fetch (component reads useLoaderData).
+  loader: async ({ params }) => {
+    const [profile, portfolios] = await Promise.all([
+      getPublicProfile(params.username).catch(() => null),
+      getPublicAgentPortfolios(params.username).catch(() => []),
+    ]);
+    return { profile, portfolios };
+  },
+  head: ({ loaderData }) => {
+    const p = loaderData?.profile;
+    if (!p) return { meta: [{ title: "Profesyonel — Bölgenin Uzmanı" }] };
+    const description =
+      [p.title, p.company_name].filter(Boolean).join(" · ") ||
+      [...p.expertise_regions, ...p.expertise_types].slice(0, 4).join(", ") ||
+      "Doğrulanmış emlak profesyoneli";
+    const url = publicUrl(`/v/${p.username}`);
+    const image = p.avatar_url ?? undefined;
+    return {
+      meta: [
+        { title: `${p.full_name} — Bölgenin Uzmanı` },
+        { property: "og:title", content: p.full_name },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { property: "og:url", content: url },
+        ...(image ? [{ property: "og:image", content: image }] : []),
+        { name: "twitter:card", content: "summary" },
+        { name: "twitter:title", content: p.full_name },
+        { name: "twitter:description", content: description },
+        ...(image ? [{ name: "twitter:image", content: image }] : []),
+      ],
+    };
+  },
   component: PublicProfilePage,
 });
 
 function PublicProfilePage() {
-  const { username } = Route.useParams();
-  const [vm, setVm] = useState<ProfessionalVM | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([getPublicProfile(username), getPublicAgentPortfolios(username).catch(() => [])])
-      .then(([profile, ports]) => {
-        if (!active) return;
-        setVm(profile ? toProfessionalVM(profile, ports) : null);
-        setLoading(false);
-        if (profile) document.title = `${profile.full_name} — Bölgenin Uzmanı`;
-      })
-      .catch(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
-  }, [username]);
+  const { profile, portfolios } = Route.useLoaderData();
+  const vm = profile ? toProfessionalVM(profile, portfolios) : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,11 +70,7 @@ function PublicProfilePage() {
       </header>
 
       <main className="mx-auto max-w-[1100px] px-4 pb-12 pt-6 lg:px-8">
-        {loading ? (
-          <div className="flex items-center justify-center py-24">
-            <Loader2 className="size-6 animate-spin text-gold" />
-          </div>
-        ) : !vm ? (
+        {!vm ? (
           <div className="rounded-2xl border border-border bg-surface px-6 py-20 text-center">
             <p className="text-sm text-muted-foreground">Profesyonel bulunamadı.</p>
             <Button asChild variant="outline" className="mt-4 gap-1.5">
