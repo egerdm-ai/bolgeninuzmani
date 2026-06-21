@@ -75,6 +75,7 @@ export function PortfolioMap({
   useEffect(() => {
     if (!ref.current) return;
     let cancelled = false;
+    const markers = markersRef.current;
 
     (async () => {
       const maplibregl = (await import("maplibre-gl")).default;
@@ -90,7 +91,7 @@ export function PortfolioMap({
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
       map.addControl(new maplibregl.AttributionControl({ compact: true }));
 
-      markersRef.current.clear();
+      markers.clear();
       for (const p of points) {
         const el = document.createElement("button");
         el.type = "button";
@@ -103,7 +104,7 @@ export function PortfolioMap({
         });
         el.addEventListener("mouseenter", () => onHover?.(p));
         el.addEventListener("mouseleave", () => onHover?.(null));
-        markersRef.current.set(p.id, el);
+        markers.set(p.id, el);
         new maplibregl.Marker({ element: el }).setLngLat([p.lng, p.lat]).addTo(map);
       }
 
@@ -119,7 +120,7 @@ export function PortfolioMap({
 
     return () => {
       cancelled = true;
-      markersRef.current.clear();
+      markers.clear();
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
