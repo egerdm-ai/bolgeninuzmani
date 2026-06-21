@@ -50,8 +50,9 @@ export function ProfessionalProfileTabs({
                 <span
                   className={cn(
                     "rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none",
+                    // active tab is gold → a solid token chip reads in both themes
                     isActive
-                      ? "bg-black/20 text-primary-foreground"
+                      ? "bg-background text-foreground"
                       : "bg-surface-3 text-secondary-foreground",
                   )}
                 >
