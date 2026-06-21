@@ -26,6 +26,7 @@ import { Route as DashboardDetailRequestsRouteImport } from './routes/dashboard.
 import { Route as DashboardConciergeRouteImport } from './routes/dashboard.concierge'
 import { Route as DashboardAssistantRouteImport } from './routes/dashboard.assistant'
 import { Route as DashboardAiImportRouteImport } from './routes/dashboard.ai-import'
+import { Route as DashboardAdminRouteImport } from './routes/dashboard.admin'
 import { Route as DashboardSearchesIndexRouteImport } from './routes/dashboard.searches.index'
 import { Route as DashboardRegionsIndexRouteImport } from './routes/dashboard.regions.index'
 import { Route as DashboardProfessionalsIndexRouteImport } from './routes/dashboard.professionals.index'
@@ -126,6 +127,11 @@ const DashboardAiImportRoute = DashboardAiImportRouteImport.update({
   path: '/ai-import',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardAdminRoute = DashboardAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardSearchesIndexRoute = DashboardSearchesIndexRouteImport.update({
   id: '/searches/',
   path: '/searches/',
@@ -209,6 +215,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/ai-import': typeof DashboardAiImportRoute
   '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
@@ -241,6 +248,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/ai-import': typeof DashboardAiImportRoute
   '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
@@ -275,6 +283,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/admin': typeof DashboardAdminRoute
   '/dashboard/ai-import': typeof DashboardAiImportRoute
   '/dashboard/assistant': typeof DashboardAssistantRoute
   '/dashboard/concierge': typeof DashboardConciergeRoute
@@ -310,6 +319,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/signup'
+    | '/dashboard/admin'
     | '/dashboard/ai-import'
     | '/dashboard/assistant'
     | '/dashboard/concierge'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/dashboard/admin'
     | '/dashboard/ai-import'
     | '/dashboard/assistant'
     | '/dashboard/concierge'
@@ -375,6 +386,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/signup'
+    | '/dashboard/admin'
     | '/dashboard/ai-import'
     | '/dashboard/assistant'
     | '/dashboard/concierge'
@@ -534,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAiImportRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/admin': {
+      id: '/dashboard/admin'
+      path: '/admin'
+      fullPath: '/dashboard/admin'
+      preLoaderRoute: typeof DashboardAdminRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/searches/': {
       id: '/dashboard/searches/'
       path: '/searches'
@@ -636,6 +655,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface DashboardRouteChildren {
+  DashboardAdminRoute: typeof DashboardAdminRoute
   DashboardAiImportRoute: typeof DashboardAiImportRoute
   DashboardAssistantRoute: typeof DashboardAssistantRoute
   DashboardConciergeRoute: typeof DashboardConciergeRoute
@@ -664,6 +684,7 @@ interface DashboardRouteChildren {
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardAdminRoute: DashboardAdminRoute,
   DashboardAiImportRoute: DashboardAiImportRoute,
   DashboardAssistantRoute: DashboardAssistantRoute,
   DashboardConciergeRoute: DashboardConciergeRoute,
