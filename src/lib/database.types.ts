@@ -614,6 +614,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_set_profile_status: {
+        Args: {
+          _status: Database["public"]["Enums"]["profile_status"];
+          _user_id: string;
+        };
+        Returns: undefined;
+      };
+      am_i_admin: { Args: never; Returns: boolean };
       approve_detail_request: {
         Args: { _request_id: string; _response_message?: string };
         Returns: {
