@@ -24,12 +24,25 @@ async function drawWebp(bmp: ImageBitmap, maxEdge: number, quality: number): Pro
 
 export type ProcessedImage = { display: Blob; thumb: Blob };
 
+/** Reject oversized inputs early (clear message) instead of crashing the canvas decode. */
+const MAX_INPUT_BYTES = 25 * 1024 * 1024; // 25 MB
+
 /**
- * Decode once, produce display (≤1600px, q0.8) + thumb (≤400px, q0.7) WebP blobs.
- * Throws on a non-image / undecodable file — the caller surfaces the error.
+ * Decode ONCE (createImageBitmap), then produce display (≤1600px, q0.8) + thumb (≤400px,
+ * q0.7) WebP blobs from the SAME bitmap (no second decode) and close it promptly to free
+ * memory. Throws a clear error on oversized / non-image / undecodable files; the caller
+ * isolates the failure per image (other images still upload).
  */
 export async function processPortfolioImage(file: File): Promise<ProcessedImage> {
-  const bmp = await createImageBitmap(file);
+  if (file.size > MAX_INPUT_BYTES) {
+    throw new Error(`Görsel çok büyük (${(file.size / 1024 / 1024).toFixed(1)}MB) — en fazla 25MB`);
+  }
+  let bmp: ImageBitmap;
+  try {
+    bmp = await createImageBitmap(file);
+  } catch {
+    throw new Error("Görsel çözülemedi (desteklenmeyen veya bozuk dosya olabilir)");
+  }
   try {
     const display = await drawWebp(bmp, 1600, 0.8);
     const thumb = await drawWebp(bmp, 400, 0.7);

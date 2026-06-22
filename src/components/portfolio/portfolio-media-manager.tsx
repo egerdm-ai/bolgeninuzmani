@@ -80,6 +80,25 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
     }
   };
 
+  // Image upload keeps successful photos and reports failed ones (no throw → portfolio
+  // is never blocked by one bad/slow photo; the user re-adds the failed ones).
+  const runUpload = async (files: File[]) => {
+    setBusy(true);
+    try {
+      const res = await uploadImages(portfolioId, files, uploadVisibility);
+      await reload();
+      if (res.uploaded > 0) toast.success(`${res.uploaded} görsel yüklendi`);
+      if (res.failed.length > 0)
+        toast.warning(`${res.failed.length} görsel yüklenemedi`, {
+          description: `Tekrar deneyin: ${res.failed.map((f) => f.name).join(", ")}`,
+        });
+    } catch (e) {
+      toast.error("İşlem başarısız", { description: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   if (!full) {
     return (
       <SurfaceCard className="flex items-center justify-center py-10">
@@ -213,11 +232,7 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
               disabled={busy}
               onChange={(e) => {
                 const files = e.target.files ? Array.from(e.target.files) : [];
-                if (files.length)
-                  run(
-                    () => uploadImages(portfolioId, files, uploadVisibility),
-                    "Görseller yüklendi",
-                  );
+                if (files.length) runUpload(files);
               }}
             />
           </label>

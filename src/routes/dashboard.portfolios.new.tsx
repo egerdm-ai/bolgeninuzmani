@@ -44,7 +44,7 @@ function NewPortfolio() {
     }
     setSaving(status);
     try {
-      const { id } = await createPortfolio(
+      const { id, images: imgRes } = await createPortfolio(
         user.id,
         buildTeaserInput(teaser, status),
         buildPrivateInput(priv),
@@ -52,6 +52,13 @@ function NewPortfolio() {
         attrs,
       );
       toast.success(status === "active" ? "Portföy yayınlandı" : "Taslak kaydedildi");
+      if (imgRes.failed.length > 0) {
+        toast.warning(`${imgRes.failed.length} görsel yüklenemedi`, {
+          description: `Portföy kaydedildi. Düzenle'den tekrar yükleyebilirsiniz: ${imgRes.failed
+            .map((f) => f.name)
+            .join(", ")}`,
+        });
+      }
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
     } catch (err) {
       toast.error("Portföy oluşturulamadı", {

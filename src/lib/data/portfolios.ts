@@ -353,7 +353,7 @@ export async function createPortfolio(
   priv: PortfolioPrivateInput = {},
   images: PendingImage[] = [],
   attributes: AttributesInput = {},
-): Promise<{ id: string; slug: string }> {
+): Promise<{ id: string; slug: string; images: UploadResult }> {
   // D33: split attributes by the registry; the guard hard-fails if any locked
   // key reaches the public bag (which would leak via the teaser table).
   const { publicAttrs, lockedAttrs } = splitAttributes(attributes);
@@ -370,10 +370,9 @@ export async function createPortfolio(
     .single();
   if (error) throw error;
 
-  // Upload public first (so the first public image becomes the cover), then
-  // locked → the correct bucket. Each group uploads its files in parallel.
-  await uploadPendingImages(created.id, images);
-
+  // Locked attrs / private row FIRST (cheap, must not be lost), THEN images. Image upload
+  // never throws per-image — the portfolio is always kept; failures are reported back so
+  // the UI tells the user to re-add them from Düzenle (no rollback, no data loss).
   const hasLockedAttrs = Object.keys(lockedAttrs).length > 0;
   if (privateHasData(priv) || hasLockedAttrs) {
     const { error: pErr } = await supabase
@@ -382,7 +381,8 @@ export async function createPortfolio(
     if (pErr) throw pErr;
   }
 
-  return created;
+  const imageResult = await uploadPendingImages(created.id, images);
+  return { ...created, images: imageResult };
 }
 
 /** Update teaser columns + public attributes, and upsert the locked private row. */
@@ -431,81 +431,139 @@ export async function deletePortfolio(id: string): Promise<void> {
  * array index), chosen COVER (the public image flagged isCover, else the first
  * public one), and per-image visibility (D34). Each image → display + thumb WebP.
  */
+/** Outcome of an image batch: the portfolio is ALWAYS kept; failed photos are reported
+ *  so the UI can tell the user to re-add them from Düzenle (no rollback, no data loss). */
+export type UploadResult = {
+  total: number;
+  uploaded: number;
+  failed: { name: string; reason: string }[];
+};
+
+const UPLOAD_CONCURRENCY = 3; // cap simultaneous decode+upload → no memory/network saturation
+
+async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt < tries; attempt++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < tries - 1) await new Promise((r) => setTimeout(r, 300 * 2 ** attempt));
+    }
+  }
+  throw lastErr;
+}
+
+/** Run an async task over items with a bounded number in flight (preserves throughput,
+ *  avoids the all-at-once saturation that made uploads flaky on mobile/slow links). */
+async function mapWithConcurrency<T>(
+  items: T[],
+  limit: number,
+  task: (item: T, index: number) => Promise<void>,
+): Promise<void> {
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (cursor < items.length) {
+      const i = cursor++;
+      await task(items[i], i);
+    }
+  });
+  await Promise.all(workers);
+}
+
+/** Upload one image (display + thumb) + insert its row. Resize is not retried (a bad file
+ *  won't get better); each storage upload + the row insert retry transient errors. */
+async function uploadOneImage(
+  portfolioId: string,
+  file: File,
+  visibility: ImageVisibility,
+  sortOrder: number,
+  isCover: boolean,
+): Promise<void> {
+  const { display, thumb } = await processPortfolioImage(file);
+  const bucket = imageBucket(visibility);
+  const path = `${portfolioId}/${crypto.randomUUID()}.webp`;
+  const up = (p: string, blob: Blob) =>
+    withRetry(async () => {
+      const { error } = await supabase.storage.from(bucket).upload(p, blob, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: "image/webp",
+      });
+      if (error) throw error;
+    });
+  await up(path, display);
+  await up(deriveThumbPath(path), thumb);
+  await withRetry(async () => {
+    const { error } = await supabase
+      .from("portfolio_images")
+      .insert({
+        portfolio_id: portfolioId,
+        path,
+        sort_order: sortOrder,
+        is_cover: isCover,
+        visibility,
+      });
+    if (error) throw error;
+  });
+}
+
 export async function uploadPendingImages(
   portfolioId: string,
   images: PendingImage[],
-): Promise<void> {
-  if (!images.length) return;
+): Promise<UploadResult> {
+  const result: UploadResult = { total: images.length, uploaded: 0, failed: [] };
+  if (!images.length) return result;
   const firstPublic = images.findIndex((im) => im.visibility === "public");
   const chosen = images.findIndex((im) => im.visibility === "public" && im.isCover);
   const coverIdx = chosen >= 0 ? chosen : firstPublic;
 
-  await Promise.all(
-    images.map(async (im, i) => {
-      const { display, thumb } = await processPortfolioImage(im.file);
-      const bucket = imageBucket(im.visibility);
-      const path = `${portfolioId}/${crypto.randomUUID()}.webp`;
-      const up = async (p: string, blob: Blob) => {
-        const { error } = await supabase.storage.from(bucket).upload(p, blob, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: "image/webp",
-        });
-        if (error) throw error;
-      };
-      await Promise.all([up(path, display), up(deriveThumbPath(path), thumb)]);
-      const { error: rowErr } = await supabase.from("portfolio_images").insert({
-        portfolio_id: portfolioId,
-        path,
-        sort_order: i,
-        is_cover: i === coverIdx,
-        visibility: im.visibility,
+  // Per-image isolation: one failure never sinks the others, and never throws.
+  await mapWithConcurrency(images, UPLOAD_CONCURRENCY, async (im, i) => {
+    try {
+      await uploadOneImage(portfolioId, im.file, im.visibility, i, i === coverIdx);
+      result.uploaded++;
+    } catch (e) {
+      result.failed.push({
+        name: im.file.name,
+        reason: e instanceof Error ? e.message : String(e),
       });
-      if (rowErr) throw rowErr;
-    }),
-  );
+    }
+  });
+  return result;
 }
 
 export async function uploadImages(
   portfolioId: string,
   files: File[],
   visibility: ImageVisibility = "public",
-): Promise<void> {
-  if (!files.length) return;
+): Promise<UploadResult> {
+  const result: UploadResult = { total: files.length, uploaded: 0, failed: [] };
+  if (!files.length) return result;
   // existing count → continue sort order / cover only if none yet
   const { count } = await supabase
     .from("portfolio_images")
     .select("id", { count: "exact", head: true })
     .eq("portfolio_id", portfolioId);
   const startIndex = count ?? 0;
-  const bucket = imageBucket(visibility);
 
-  // Upload all files in parallel (independent work) so many images don't feel slow.
-  await Promise.all(
-    files.map(async (file, i) => {
-      // Resize to two WebP derivatives (display ≤1600px + thumb ≤400px); the raw
-      // ~4MB file is NEVER stored. path = <uuid>.webp, thumb = <uuid>_thumb.webp.
-      const { display, thumb } = await processPortfolioImage(file);
-      const path = `${portfolioId}/${crypto.randomUUID()}.webp`;
-      const up = async (p: string, blob: Blob) => {
-        const { error } = await supabase.storage.from(bucket).upload(p, blob, {
-          cacheControl: "3600",
-          upsert: false,
-          contentType: "image/webp",
-        });
-        if (error) throw error;
-      };
-      await Promise.all([up(path, display), up(deriveThumbPath(path), thumb)]);
-      const { error: rowErr } = await supabase.from("portfolio_images").insert({
-        portfolio_id: portfolioId,
-        path,
-        sort_order: startIndex + i,
-        is_cover: visibility === "public" && startIndex + i === 0,
+  // Bounded concurrency + per-image retry + isolation (raw ~4MB file is never stored;
+  // each image → display ≤1600px + thumb ≤400px WebP). One failure never sinks the rest.
+  await mapWithConcurrency(files, UPLOAD_CONCURRENCY, async (file, i) => {
+    try {
+      await uploadOneImage(
+        portfolioId,
+        file,
         visibility,
-      });
-      if (rowErr) throw rowErr;
-    }),
-  );
+        startIndex + i,
+        visibility === "public" && startIndex + i === 0,
+      );
+      result.uploaded++;
+    } catch (e) {
+      result.failed.push({ name: file.name, reason: e instanceof Error ? e.message : String(e) });
+    }
+  });
+  return result;
 }
 
 type ImageRef = Pick<PortfolioImage, "id" | "path" | "visibility">;
