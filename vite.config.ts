@@ -12,4 +12,9 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Deploy target: Vercel. The Lovable wrapper defaults Nitro to cloudflare-module, which
+  // emits dist/ (NOT the Build Output API), so Vercel can't find the SSR function → 404.
+  // Hard-pin the Vercel preset so `vite build` deterministically emits .vercel/output
+  // (config.json + functions/ + static/), independent of any build-time env var.
+  nitro: { preset: "vercel" },
 });
