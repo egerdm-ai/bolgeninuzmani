@@ -1,24 +1,11 @@
 import type { ReactNode } from "react";
-import {
-  ShieldCheck,
-  MapPin,
-  ImagePlus,
-  Lock,
-  X,
-  Star,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ShieldCheck, MapPin, ImagePlus, X, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  LOCKED_ATTRIBUTES,
-  attributesForCategory,
-  type AttributeDef,
-} from "@/lib/portfolio-attributes";
+import { attributesForCategory, type AttributeDef } from "@/lib/portfolio-attributes";
 import {
   Select,
   SelectContent,
@@ -158,8 +145,6 @@ export function buildPrivateInput(pv: PrivateFormState): PortfolioPrivateInput {
 export function PortfolioFormFields({
   teaser,
   setTeaser,
-  priv,
-  setPriv,
   images = [],
   setImages = () => {},
   attrs,
@@ -169,8 +154,6 @@ export function PortfolioFormFields({
 }: {
   teaser: TeaserFormState;
   setTeaser: (t: TeaserFormState) => void;
-  priv: PrivateFormState;
-  setPriv: (p: PrivateFormState) => void;
   images?: PendingImage[];
   setImages?: (i: PendingImage[]) => void;
   attrs: AttrFormState;
@@ -180,24 +163,16 @@ export function PortfolioFormFields({
   hideImages?: boolean;
 }) {
   const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
-  const sp = (k: keyof PrivateFormState) => (v: string) => setPriv({ ...priv, [k]: v });
   const setAttr = (k: string, v: string | boolean) => setAttrs({ ...attrs, [k]: v });
 
-  // Are any LOCKED inputs filled? Drives the call_only suggestion hint (D36).
-  const lockedFilled =
-    Object.values(priv).some((v) => v.trim() !== "") ||
-    LOCKED_ATTRIBUTES.some((d) => {
-      const v = attrs[d.key];
-      return v !== undefined && v !== "" && v !== false;
-    }) ||
-    images.some((i) => i.visibility === "locked");
   const callOnly = teaser.mode === "call_only";
 
-  // D40: only the selected category's standard fields (public → Detaylar,
-  // locked → Kilitli Bilgiler). oda/m²/features stay first-class columns above.
-  const catAttrs = attributesForCategory(teaser.category);
-  const catPublicAttrs = catAttrs.filter((a) => a.visibility === "public");
-  const catLockedAttrs = catAttrs.filter((a) => a.visibility === "locked");
+  // Only the selected category's PUBLIC standard fields (Detaylar). K1 (Faz 2.1):
+  // the locked model is konum/fotolar/belgeler — there are NO locked attribute fields,
+  // so the old "Kilitli Bilgiler" form card is gone.
+  const catPublicAttrs = attributesForCategory(teaser.category).filter(
+    (a) => a.visibility === "public",
+  );
 
   // 3F: inline pending-photo management (order / cover / visibility / delete).
   const moveImage = (i: number, dir: -1 | 1) => {
@@ -278,7 +253,7 @@ export function PortfolioFormFields({
             active={!callOnly}
             onClick={() => sf("mode")("controlled")}
             title="Kontrollü Paylaşım"
-            desc="Kilitli alanlar (tam adres, malik, belgeler) + Detay Talebi akışı. Diğer emlakçılar onay alarak görür."
+            desc="Konum, fotoğraflar ve belgeler alan bazında kilitlenebilir + Detay Talebi akışı. Diğer emlakçılar onay alarak erişir."
           />
           <ModeOption
             active={callOnly}
@@ -287,9 +262,10 @@ export function PortfolioFormFields({
             desc="Kilitli alan yok. Teaser'da 'detaylar için arayın' + telefonunuz görünür; Detay Talebi akışı kapalı."
           />
         </div>
-        {!callOnly && !lockedFilled && (
+        {!callOnly && (
           <p className="text-xs text-muted-foreground">
-            İpucu: kilitli bilgi girmeyecekseniz “Kapalı Portföy” modunu seçebilirsiniz.
+            İpucu: konum, fotoğraf veya belge kilitlemeyecekseniz “Kapalı Portföy” modunu
+            seçebilirsiniz.
           </p>
         )}
       </SurfaceCard>
@@ -485,66 +461,10 @@ export function PortfolioFormFields({
         </SurfaceCard>
       )}
 
-      {!callOnly && (
-        <SurfaceCard className="space-y-4 border-gold/25">
-          <SectionTitle icon={Lock} title="Kilitli Bilgiler" />
-          <p className="-mt-2 flex items-center gap-1.5 text-xs text-gold">
-            <Lock className="size-3.5" /> Bu alanlar teaser'da GÖRÜNMEZ; yalnızca size ve erişim
-            onayladığınız emlakçılara açılır. Tam koordinattan ~yaklaşık harita pini otomatik
-            üretilir.
-          </p>
-          <Field label="Tam Adres">
-            <Input
-              value={priv.exact_address}
-              onChange={(e) => sp("exact_address")(e.target.value)}
-            />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Tam Enlem (lat)">
-              <Input
-                type="number"
-                value={priv.exact_lat}
-                onChange={(e) => sp("exact_lat")(e.target.value)}
-                placeholder="37.1234"
-              />
-            </Field>
-            <Field label="Tam Boylam (lng)">
-              <Input
-                type="number"
-                value={priv.exact_lng}
-                onChange={(e) => sp("exact_lng")(e.target.value)}
-                placeholder="27.4321"
-              />
-            </Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Malik Adı">
-              <Input value={priv.malik_name} onChange={(e) => sp("malik_name")(e.target.value)} />
-            </Field>
-            <Field label="Malik İletişim">
-              <Input
-                value={priv.malik_contact}
-                onChange={(e) => sp("malik_contact")(e.target.value)}
-              />
-            </Field>
-          </div>
-          <Field label="Özel Açıklama">
-            <Textarea
-              rows={3}
-              value={priv.private_description}
-              onChange={(e) => sp("private_description")(e.target.value)}
-            />
-          </Field>
-          <Field label="Özel Notlar">
-            <Textarea
-              rows={2}
-              value={priv.private_notes}
-              onChange={(e) => sp("private_notes")(e.target.value)}
-            />
-          </Field>
-          <AttrGrid defs={catLockedAttrs} attrs={attrs} onChange={setAttr} />
-        </SurfaceCard>
-      )}
+      {/* K1 (Faz 2.1): the old "Kilitli Bilgiler" card (tam adres, malik adı/iletişim,
+          özel açıklama/notlar, bina/site adı, daire/kapı no, blok, ada/parsel/pafta) is
+          removed. The locked model is now KONUM (harita pini — Faz 2.2), FOTOLAR
+          (foto bazında Açık/Kilitli) ve BELGELER (belge tipi teaser'da görünür). */}
     </>
   );
 }
@@ -689,7 +609,7 @@ function AttrInput({
   );
 }
 
-function SectionTitle({ icon: Icon, title }: { icon: typeof Lock; title: string }) {
+function SectionTitle({ icon: Icon, title }: { icon: typeof ShieldCheck; title: string }) {
   return (
     <div className="flex items-center gap-2">
       <Icon className="size-4 text-gold" />

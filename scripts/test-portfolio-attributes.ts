@@ -33,22 +33,27 @@ ok("public key (cephe) routes to publicAttrs only", () => {
   assert.equal("cephe" in lockedAttrs, false);
 });
 
-ok("locked key (daire_no) routes to lockedAttrs, NEVER publicAttrs", () => {
-  const { publicAttrs, lockedAttrs } = splitAttributes({ daire_no: "12", bina_site_adi: "X" });
-  assert.equal(lockedAttrs.daire_no, "12");
-  assert.equal(lockedAttrs.bina_site_adi, "X");
+ok("retired identity keys (daire_no, bina_site_adi) are deprecated → dropped, never locked", () => {
+  const { publicAttrs, lockedAttrs } = splitAttributes({
+    daire_no: "12",
+    bina_site_adi: "X",
+    cephe: "guney",
+  });
   assert.equal("daire_no" in publicAttrs, false);
+  assert.equal("daire_no" in lockedAttrs, false);
   assert.equal("bina_site_adi" in publicAttrs, false);
+  assert.equal("bina_site_adi" in lockedAttrs, false);
+  assert.equal(publicAttrs.cephe, "guney"); // real public value still routes through
 });
 
-ok("mixed input splits correctly", () => {
+ok("mixed input: public routes, deprecated dropped (no locked attrs in new model)", () => {
   const { publicAttrs, lockedAttrs } = splitAttributes({
     cephe: "kuzey",
     aidat: 1500,
     daire_no: "3",
   });
   assert.deepEqual(Object.keys(publicAttrs).sort(), ["aidat", "cephe"]);
-  assert.deepEqual(Object.keys(lockedAttrs), ["daire_no"]);
+  assert.deepEqual(Object.keys(lockedAttrs), []);
 });
 
 ok("empty/null values are dropped", () => {
@@ -60,38 +65,28 @@ ok("unknown key throws (registry is the only source of truth)", () => {
   assert.throws(() => splitAttributes({ gizli_alan: "x" }), /Bilinmeyen özellik/);
 });
 
-ok("assertNoLockedInPublic throws if a locked key is in the public bag", () => {
-  assert.throws(() => assertNoLockedInPublic({ daire_no: "12" }), /Güvenlik ihlali/);
+ok("no locked attributes remain — locked model is konum/fotolar/belgeler, not attributes", () => {
+  assert.equal(LOCKED_ATTRIBUTES.length, 0);
 });
 
-ok("assertNoLockedInPublic passes for a clean public bag", () => {
+ok("assertNoLockedInPublic passes for a clean public bag (defense-in-depth retained)", () => {
   assert.doesNotThrow(() => assertNoLockedInPublic({ cephe: "guney", aidat: 1500 }));
 });
 
 ok("registry visibility lookups are correct", () => {
   assert.equal(attributeVisibility("cephe"), "public");
-  assert.equal(attributeVisibility("daire_no"), "locked");
+  assert.equal(attributeVisibility("daire_no"), undefined); // retired (deprecated)
   assert.equal(attributeVisibility("nope"), undefined);
 });
 
 // ---- D40 expanded registry: generic coverage of ALL fields ----
 
-ok("EVERY locked key routes to lockedAttrs, NEVER publicAttrs (full sweep)", () => {
-  const input = Object.fromEntries(LOCKED_ATTRIBUTES.map((a) => [a.key, sampleValue(a.type)]));
+ok("EVERY deprecated key is dropped (never public, never locked)", () => {
+  const input = Object.fromEntries([...DEPRECATED_ATTRIBUTE_KEYS].map((k) => [k, "x"]));
   const { publicAttrs, lockedAttrs } = splitAttributes(input);
-  for (const a of LOCKED_ATTRIBUTES) {
-    assert.equal(a.key in lockedAttrs, true, `${a.key} should be locked`);
-    assert.equal(a.key in publicAttrs, false, `${a.key} must NOT be public`);
-  }
-});
-
-ok("assertNoLockedInPublic throws for EVERY locked key individually", () => {
-  for (const a of LOCKED_ATTRIBUTES) {
-    assert.throws(
-      () => assertNoLockedInPublic({ [a.key]: sampleValue(a.type) }),
-      /Güvenlik ihlali/,
-      `${a.key} must be rejected from the public bag`,
-    );
+  for (const k of DEPRECATED_ATTRIBUTE_KEYS) {
+    assert.equal(k in publicAttrs, false, `${k} must not be public`);
+    assert.equal(k in lockedAttrs, false, `${k} must not be locked`);
   }
 });
 
@@ -105,26 +100,28 @@ ok("EVERY public key routes to publicAttrs (full sweep) + guard passes", () => {
   assert.doesNotThrow(() => assertNoLockedInPublic(publicAttrs));
 });
 
-ok("new locked identity keys are present + locked", () => {
-  for (const k of ["ada_no", "parsel_no", "blok", "pafta", "bina_site_adi"]) {
-    assert.equal(attributeVisibility(k), "locked", `${k} must be locked`);
+ok("retired identity keys are deprecated, not in the registry", () => {
+  for (const k of ["ada_no", "parsel_no", "blok", "pafta", "bina_site_adi", "daire_no"]) {
+    assert.equal(attributeDef(k), undefined, `${k} should be retired`);
+    assert.equal(DEPRECATED_ATTRIBUTE_KEYS.has(k), true, `${k} should be deprecated`);
   }
 });
 
-ok("attributesForCategory filters by category (konut has konut fields, not arsa-only)", () => {
+ok("attributesForCategory filters by category (public-only model)", () => {
   const konut = attributesForCategory("konut").map((a) => a.key);
   assert.equal(konut.includes("balkon"), true);
-  assert.equal(konut.includes("ada_no"), false); // arsa/ticari-only locked key
+  assert.equal(konut.includes("daire_no"), false); // retired locked key
   const arsa = attributesForCategory("arsa").map((a) => a.key);
-  assert.equal(arsa.includes("ada_no"), true);
-  assert.equal(arsa.includes("balkon"), false);
+  assert.equal(arsa.includes("arsa_tipi"), true);
+  assert.equal(arsa.includes("ada_no"), false); // retired locked key
 });
 
-ok("registry integrity: unique keys + every field has >=1 category", () => {
+ok("registry integrity: unique keys, >=1 category, all PUBLIC (locked model retired)", () => {
   const keys = PORTFOLIO_ATTRIBUTES.map((a) => a.key);
   assert.equal(new Set(keys).size, keys.length, "attribute keys must be unique");
   for (const a of PORTFOLIO_ATTRIBUTES) {
     assert.equal(a.categories.length > 0, true, `${a.key} must declare >=1 category`);
+    assert.equal(a.visibility, "public", `${a.key} must be public (no locked attributes)`);
   }
 });
 

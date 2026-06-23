@@ -21,12 +21,9 @@ import { StickyActionBar } from "@/components/portfolio/sticky-action-bar";
 import {
   PortfolioFormFields,
   buildTeaserInput,
-  buildPrivateInput,
   emptyTeaser,
-  emptyPrivate,
   emptyAttrs,
   type TeaserFormState,
-  type PrivateFormState,
   type AttrFormState,
 } from "@/components/portfolio/portfolio-form-fields";
 
@@ -55,7 +52,6 @@ function EditPortfolio() {
   const { user } = useAuth();
 
   const [teaser, setTeaser] = useState<TeaserFormState>(emptyTeaser);
-  const [priv, setPriv] = useState<PrivateFormState>(emptyPrivate);
   const [attrs, setAttrs] = useState<AttrFormState>(emptyAttrs);
   const [status, setStatus] = useState<PortfolioStatus>("draft");
   const [existingImages, setExistingImages] = useState<{ url: string; is_cover: boolean }[]>([]);
@@ -93,20 +89,10 @@ function EditPortfolio() {
           features: (p.features ?? []).join(", "),
           mode: p.mode,
         });
-        const m =
-          full.private?.malik_info && typeof full.private.malik_info === "object"
-            ? (full.private.malik_info as Record<string, unknown>)
-            : {};
-        setPriv({
-          exact_address: full.private?.exact_address ?? "",
-          exact_lat: numStr(full.private?.exact_lat ?? null),
-          exact_lng: numStr(full.private?.exact_lng ?? null),
-          malik_name: typeof m.name === "string" ? m.name : "",
-          malik_contact: typeof m.contact === "string" ? m.contact : "",
-          private_description: full.private?.private_description ?? "",
-          private_notes: full.private?.private_notes ?? "",
-        });
-        setAttrs(mergeAttrs(p.attributes, full.private?.attributes));
+        // K1 (Faz 2.1): private/locked fields are no longer edited here. Load only the
+        // PUBLIC attribute bag; the row's portfolio_private (exact coords + any legacy
+        // adres/malik/notlar/locked-attrs) is left untouched on save (not nulled).
+        setAttrs(mergeAttrs(p.attributes, null));
         setExistingImages(full.images.map((i) => ({ url: i.url, is_cover: i.is_cover })));
         setLoading(false);
       })
@@ -133,7 +119,9 @@ function EditPortfolio() {
     }
     setSaving(true);
     try {
-      await updatePortfolio(id, buildTeaserInput(teaser, status), buildPrivateInput(priv), attrs);
+      // priv = undefined → updatePortfolio does NOT touch portfolio_private, so legacy
+      // locked data is preserved (D13: no silent deletion). attrs is public-only.
+      await updatePortfolio(id, buildTeaserInput(teaser, status), undefined, attrs);
       toast.success("Portföy güncellendi");
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
     } catch (err) {
@@ -204,8 +192,6 @@ function EditPortfolio() {
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
-          priv={priv}
-          setPriv={setPriv}
           attrs={attrs}
           setAttrs={setAttrs}
           existingImages={existingImages}

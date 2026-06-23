@@ -10,9 +10,7 @@ import { createPortfolio, type PendingImage } from "@/lib/data/portfolios";
 import {
   PortfolioFormFields,
   buildTeaserInput,
-  buildPrivateInput,
   emptyTeaser,
-  emptyPrivate,
   emptyAttrs,
 } from "@/components/portfolio/portfolio-form-fields";
 import { StickyActionBar } from "@/components/portfolio/sticky-action-bar";
@@ -25,7 +23,6 @@ function NewPortfolio() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [teaser, setTeaser] = useState(emptyTeaser);
-  const [priv, setPriv] = useState(emptyPrivate);
   const [attrs, setAttrs] = useState(emptyAttrs);
   const [images, setImages] = useState<PendingImage[]>([]);
   const [saving, setSaving] = useState<null | "draft" | "active">(null);
@@ -44,10 +41,12 @@ function NewPortfolio() {
     }
     setSaving(status);
     try {
+      // K1 (Faz 2.1): no private/locked fields collected here → no portfolio_private
+      // row is forced (konum pini comes in Faz 2.2). Empty priv keeps it absent.
       const { id, images: imgRes } = await createPortfolio(
         user.id,
         buildTeaserInput(teaser, status),
-        buildPrivateInput(priv),
+        {},
         images,
         attrs,
       );
@@ -85,8 +84,6 @@ function NewPortfolio() {
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
-          priv={priv}
-          setPriv={setPriv}
           images={images}
           setImages={setImages}
           attrs={attrs}

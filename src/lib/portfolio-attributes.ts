@@ -418,45 +418,15 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
     ],
   },
 
-  // ======================= LOCKED (identity-revealing) =======================
-  // Building / facility name + door/unit + block: pinpoint the property/owner.
-  {
-    key: "bina_site_adi",
-    label: "Bina / Site / Tesis Adı",
-    type: "text",
-    visibility: "locked",
-    categories: [...BUILDINGS],
-  },
-  {
-    key: "daire_no",
-    label: "Daire / Kapı No",
-    type: "text",
-    visibility: "locked",
-    categories: ["konut", "ticari"],
-  },
-  { key: "blok", label: "Blok", type: "text", visibility: "locked", categories: [...KONUT] },
-  // Ada/parsel: a tapu query from these returns the owner directly → LOCKED.
-  {
-    key: "ada_no",
-    label: "Ada No",
-    type: "text",
-    visibility: "locked",
-    categories: ["arsa", "isletme", "turizm"],
-  },
-  {
-    key: "parsel_no",
-    label: "Parsel No",
-    type: "text",
-    visibility: "locked",
-    categories: ["arsa", "isletme", "turizm"],
-  },
-  {
-    key: "pafta",
-    label: "Pafta / Tam Konum",
-    type: "text",
-    visibility: "locked",
-    categories: ["arsa", "isletme", "turizm"],
-  },
+  // ======================= LOCKED =======================
+  // K1 (Faz 2.1): the locked model is now KONUM (portfolio_private.exact_lat/lng),
+  // FOTOLAR (per-photo image_visibility) and BELGELER (portfolio_documents, with the
+  // document TYPE teaser-visible). The old identity-revealing locked ATTRIBUTES
+  // (bina_site_adi, daire_no, blok, ada_no, parsel_no, pafta) are RETIRED: removed
+  // from the UI/model and listed in DEPRECATED_ATTRIBUTE_KEYS so a legacy row still
+  // carrying them in portfolio_private.attributes is dropped on save — never crashed,
+  // never silently mass-deleted (no column drop). There are no locked attributes
+  // anymore → LOCKED_ATTRIBUTES is [].
 ];
 
 const BY_KEY = new Map(PORTFOLIO_ATTRIBUTES.map((a) => [a.key, a]));
@@ -467,7 +437,17 @@ const BY_KEY = new Map(PORTFOLIO_ATTRIBUTES.map((a) => [a.key, a]));
  * portfolio that still carries a retired field never crashes. Genuinely unknown keys
  * still throw — the registry remains the only source of truth.
  */
-export const DEPRECATED_ATTRIBUTE_KEYS = new Set<string>(["yapi_tipi"]);
+export const DEPRECATED_ATTRIBUTE_KEYS = new Set<string>([
+  "yapi_tipi",
+  // Retired identity-revealing locked attributes (K1, Faz 2.1). Preserved on legacy
+  // rows (portfolio_private.attributes), dropped on save, gone from the active model.
+  "bina_site_adi",
+  "daire_no",
+  "blok",
+  "ada_no",
+  "parsel_no",
+  "pafta",
+]);
 
 export const PUBLIC_ATTRIBUTES = PORTFOLIO_ATTRIBUTES.filter((a) => a.visibility === "public");
 export const LOCKED_ATTRIBUTES = PORTFOLIO_ATTRIBUTES.filter((a) => a.visibility === "locked");
