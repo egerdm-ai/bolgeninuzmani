@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { MapPin } from "lucide-react";
+import { MapPin, Crosshair } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Faz 2.2 — Konum adımı. The owner drops/drags a pin (the EXACT property point) and
@@ -83,6 +83,7 @@ export function LocationPicker({
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
   const drawRef = useRef<() => void>(() => {});
+  const setPinRef = useRef<(lng: number, lat: number) => void>(() => {});
   onChangeRef.current = onChange;
   valueRef.current = value;
   const [ready, setReady] = useState(false);
@@ -92,6 +93,7 @@ export function LocationPicker({
     if (!ref.current) return;
     let cancelled = false;
     let observer: MutationObserver | null = null;
+    let ro: ResizeObserver | null = null;
     (async () => {
       const maplibregl = (await import("maplibre-gl")).default;
       if (cancelled || !ref.current) return;
@@ -111,7 +113,9 @@ export function LocationPicker({
         if (markerRef.current) {
           markerRef.current.setLngLat([lng, lat]);
         } else {
-          const m = new maplibregl.Marker({ draggable: true, color: GOLD })
+          // anchor:"bottom" → the pin TIP points exactly at the coordinate (the default
+          // "center" floated the tip ~20px below the real point → the perceived offset).
+          const m = new maplibregl.Marker({ draggable: true, color: GOLD, anchor: "bottom" })
             .setLngLat([lng, lat])
             .addTo(map);
           m.on("dragend", () => {
@@ -121,13 +125,18 @@ export function LocationPicker({
           markerRef.current = m;
         }
       };
+      // Place + commit together; exposed via ref so the touch-reliable "Merkeze Pin Koy"
+      // button can drop the pin at the map center too.
+      const setPin = (lng: number, lat: number) => {
+        placeMarker(lng, lat);
+        onChangeRef.current({ ...valueRef.current, lat, lng });
+      };
+      setPinRef.current = setPin;
       if (hasPin) placeMarker(v.lng as number, v.lat as number);
 
+      // 'click' fires for a mouse click AND a touch tap → single-tap placement on mobile.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      map.on("click", (e: any) => {
-        placeMarker(e.lngLat.lng, e.lngLat.lat);
-        onChangeRef.current({ ...valueRef.current, lat: e.lngLat.lat, lng: e.lngLat.lng });
-      });
+      map.on("click", (e: any) => setPin(e.lngLat.lng, e.lngLat.lat));
 
       let appliedTheme = currentTheme();
       observer = new MutationObserver(() => {
@@ -139,11 +148,23 @@ export function LocationPicker({
       });
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
-      map.on("load", () => !cancelled && setReady(true));
+      map.on("load", () => {
+        if (cancelled) return;
+        map.resize(); // the container may have settled after init → fixes the projection
+        setReady(true);
+      });
+
+      // Late layout / mobile orientation / card reflow → keep the projection correct so
+      // the pin never drifts from the tapped point or jumps after a resize.
+      if (typeof ResizeObserver !== "undefined" && ref.current) {
+        ro = new ResizeObserver(() => mapRef.current?.resize());
+        ro.observe(ref.current);
+      }
     })();
     return () => {
       cancelled = true;
       observer?.disconnect();
+      ro?.disconnect();
       markerRef.current?.remove();
       markerRef.current = null;
       mapRef.current?.remove();
@@ -185,18 +206,50 @@ export function LocationPicker({
     if (ready) draw();
   }, [ready, value.precision, value.radiusKm, value.lat, value.lng]);
 
+  // Touch-reliable placement: pan so the target is under the center crosshair, then
+  // drop the pin at the map center (no precise tap needed — fixes mobile discoverability).
+  const placeAtCenter = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const c = map.getCenter();
+    setPinRef.current(c.lng, c.lat);
+  };
   const hasPin = value.lat != null && value.lng != null;
 
   return (
     <div className={cn("space-y-3", className)}>
       <div className="relative">
-        <div ref={ref} className="h-72 w-full overflow-hidden rounded-xl border border-border" />
+        <div
+          ref={ref}
+          className="h-80 w-full overflow-hidden rounded-xl border border-border sm:h-96"
+        />
+        {/* Center crosshair → shows exactly where "Merkeze Pin Koy" drops the tip. */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <Crosshair className="size-6 text-gold drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]" />
+        </div>
         {!hasPin && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-            <span className="flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-xs font-medium text-foreground shadow-elegant ring-1 ring-inset ring-border">
-              <MapPin className="size-3.5 text-gold" /> Haritaya tıklayıp pin koyun
+          <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center px-3">
+            <span className="flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1.5 text-center text-xs font-medium text-foreground shadow-elegant ring-1 ring-inset ring-border">
+              <MapPin className="size-3.5 shrink-0 text-gold" /> Haritaya dokunun ya da “Merkeze Pin
+              Koy”
             </span>
           </div>
+        )}
+      </div>
+
+      {/* Touch-reliable placement + drag hint. */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={placeAtCenter}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-gold/40 px-3 py-2 text-sm font-medium text-gold transition-colors hover:bg-gold/10"
+        >
+          <Crosshair className="size-4" /> Merkeze Pin Koy
+        </button>
+        {hasPin && (
+          <span className="text-[11px] text-muted-foreground">
+            Pin'i sürükleyerek (mobilde basılı tutup kaydırarak) taşıyabilirsiniz.
+          </span>
         )}
       </div>
 
