@@ -6,7 +6,12 @@ import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth/auth-context";
-import { createPortfolio, type PendingImage } from "@/lib/data/portfolios";
+import {
+  createPortfolio,
+  uploadPendingDocuments,
+  type PendingImage,
+  type PendingDoc,
+} from "@/lib/data/portfolios";
 import {
   PortfolioFormFields,
   buildTeaserInput,
@@ -28,6 +33,7 @@ function NewPortfolio() {
   const [location, setLocation] = useState<LocationValue>(emptyLocation);
   const [attrs, setAttrs] = useState(emptyAttrs);
   const [images, setImages] = useState<PendingImage[]>([]);
+  const [docs, setDocs] = useState<PendingDoc[]>([]);
   const [saving, setSaving] = useState<null | "draft" | "active">(null);
 
   async function submit(e: FormEvent, status: "draft" | "active") {
@@ -62,6 +68,8 @@ function NewPortfolio() {
         images,
         attrs,
       );
+      // 2.4: belgeler portföy oluştuktan sonra yüklenir (portfolio_id gerekiyor).
+      if (docs.length) await uploadPendingDocuments(id, docs);
       toast.success(status === "active" ? "Portföy yayınlandı" : "Taslak kaydedildi");
       if (imgRes.failed.length > 0) {
         toast.warning(`${imgRes.failed.length} görsel yüklenemedi`, {
@@ -100,6 +108,8 @@ function NewPortfolio() {
           setLocation={setLocation}
           images={images}
           setImages={setImages}
+          docs={docs}
+          setDocs={setDocs}
           attrs={attrs}
           setAttrs={setAttrs}
         />

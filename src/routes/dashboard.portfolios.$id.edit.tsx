@@ -90,6 +90,7 @@ function EditPortfolio() {
           net_m2: numStr(p.net_m2),
           land_m2: numStr(p.land_m2),
           features: (p.features ?? []).join(", "),
+          video_url: p.video_url ?? "",
           mode: p.mode,
         });
         // K1 (Faz 2.1): private free fields (adres/malik/notlar/locked-attrs) are no

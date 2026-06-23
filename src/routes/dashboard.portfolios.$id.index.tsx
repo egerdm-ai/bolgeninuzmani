@@ -15,6 +15,7 @@ import {
   Send,
   Phone,
   MessageCircle,
+  PlayCircle,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
@@ -219,6 +220,16 @@ function OwnerPortfolioDetail() {
               ) : undefined
             }
           />
+          {p.video_url && (
+            <a
+              href={p.video_url}
+              target="_blank"
+              rel="noreferrer"
+              className={cn(s.btnSecondary, "w-fit gap-1.5")}
+            >
+              <PlayCircle className="size-4" /> Videoyu İzle
+            </a>
+          )}
           <div className="border-t border-bu-border pt-6">
             <QuickInfoStrip
               roomCount={p.room_count}

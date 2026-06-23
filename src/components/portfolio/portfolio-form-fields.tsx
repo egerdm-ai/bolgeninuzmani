@@ -1,5 +1,14 @@
-import type { ReactNode } from "react";
-import { ShieldCheck, MapPin, ImagePlus, X, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import {
+  ShieldCheck,
+  MapPin,
+  ImagePlus,
+  X,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  FileText,
+} from "lucide-react";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,8 +38,22 @@ import type {
   PortfolioStatus,
   PortfolioMode,
   PendingImage,
+  PendingDoc,
+  DocumentKind,
 } from "@/lib/data/portfolios";
+import { DOCUMENT_KIND_LABELS } from "@/lib/portfolio-labels";
 import type { Json } from "@/lib/database.types";
+
+// Belge tipi seçim sırası (Kat Planı birincil; Tapu default değil). Labels canonical.
+const DOC_KIND_ORDER: DocumentKind[] = [
+  "kat_plani",
+  "ruhsat",
+  "imar_plani",
+  "proje",
+  "tapu",
+  "pdf",
+  "diger",
+];
 
 // Form state is all-strings (controlled inputs); converted on submit.
 export type TeaserFormState = {
@@ -49,6 +72,7 @@ export type TeaserFormState = {
   net_m2: string;
   land_m2: string;
   features: string;
+  video_url: string;
   mode: PortfolioMode;
 };
 
@@ -78,6 +102,7 @@ export const emptyTeaser: TeaserFormState = {
   net_m2: "",
   land_m2: "",
   features: "",
+  video_url: "",
   mode: "controlled",
 };
 
@@ -132,6 +157,7 @@ export function buildTeaserInput(
     net_m2: toNum(t.net_m2),
     land_m2: toNum(t.land_m2),
     features: toList(t.features),
+    video_url: t.video_url.trim() || null,
     status,
     mode: t.mode,
   };
@@ -163,6 +189,8 @@ export function PortfolioFormFields({
   setLocation = () => {},
   images = [],
   setImages = () => {},
+  docs = [],
+  setDocs = () => {},
   attrs,
   setAttrs,
   existingImages = [],
@@ -174,6 +202,9 @@ export function PortfolioFormFields({
   setLocation?: (l: LocationValue) => void;
   images?: PendingImage[];
   setImages?: (i: PendingImage[]) => void;
+  /** Create-wizard pending documents (edit uses the full media manager instead). */
+  docs?: PendingDoc[];
+  setDocs?: (d: PendingDoc[]) => void;
   attrs: AttrFormState;
   setAttrs: (a: AttrFormState) => void;
   existingImages?: { url: string; is_cover: boolean }[];
@@ -182,6 +213,7 @@ export function PortfolioFormFields({
 }) {
   const sf = (k: keyof TeaserFormState) => (v: string) => setTeaser({ ...teaser, [k]: v });
   const setAttr = (k: string, v: string | boolean) => setAttrs({ ...attrs, [k]: v });
+  const [docKind, setDocKind] = useState<DocumentKind>("kat_plani");
 
   const callOnly = teaser.mode === "call_only";
 
@@ -245,6 +277,14 @@ export function PortfolioFormFields({
             rows={3}
             value={teaser.public_description}
             onChange={(e) => sf("public_description")(e.target.value)}
+          />
+        </Field>
+        {/* 2.4: video ekleme (opsiyonel public link). */}
+        <Field label="Video Bağlantısı (YouTube/Vimeo — opsiyonel)">
+          <Input
+            value={teaser.video_url}
+            onChange={(e) => sf("video_url")(e.target.value)}
+            placeholder="https://youtube.com/watch?v=…"
           />
         </Field>
       </SurfaceCard>
@@ -477,10 +517,66 @@ export function PortfolioFormFields({
         </SurfaceCard>
       )}
 
-      {/* K1 (Faz 2.1): the old "Kilitli Bilgiler" card (tam adres, malik adı/iletişim,
-          özel açıklama/notlar, bina/site adı, daire/kapı no, blok, ada/parsel/pafta) is
-          removed. The locked model is now KONUM (harita pini — Faz 2.2), FOTOLAR
-          (foto bazında Açık/Kilitli) ve BELGELER (belge tipi teaser'da görünür). */}
+      {/* 2.4: Belgeler oluştur ekranında da görünür (oluştur=düzenle). Pending docs
+          portföy oluştuktan sonra yüklenir; belge TİPİ teaser'da görünür, içerik
+          talep+onayla açılır. call_only modda kilit yok → gizli. */}
+      {!hideImages && !callOnly && (
+        <SurfaceCard className="space-y-4 border-gold/25">
+          <SectionTitle icon={FileText} title="Belgeler (kilitli)" />
+          <p className="-mt-2 text-xs text-muted-foreground">
+            Belge TİPİ teaser'da görünür (“Kilitli: Kat Planı”); içerik talep + onayla açılır.
+          </p>
+          {docs.length > 0 && (
+            <ul className="space-y-2">
+              {docs.map((d, i) => (
+                <li
+                  key={i}
+                  className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm"
+                >
+                  <span className="flex items-center gap-2 text-secondary-foreground">
+                    <FileText className="size-4 text-gold" />
+                    {DOCUMENT_KIND_LABELS[d.kind]} · {d.file.name}
+                  </span>
+                  <button
+                    type="button"
+                    title="Kaldır"
+                    onClick={() => setDocs(docs.filter((_, j) => j !== i))}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
+            <Select value={docKind} onValueChange={(v) => setDocKind(v as DocumentKind)}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {DOC_KIND_ORDER.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    {DOCUMENT_KIND_LABELS[k]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-gold/40 px-3 py-1.5 text-sm text-gold hover:bg-gold/10">
+              <FileText className="size-4" /> Belge ekle
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) setDocs([...docs, { file: f, kind: docKind }]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+        </SurfaceCard>
+      )}
     </>
   );
 }

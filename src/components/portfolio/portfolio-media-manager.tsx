@@ -16,6 +16,7 @@ import {
 import { SurfaceCard } from "@/components/vault/cards";
 import { Button } from "@/components/ui/button";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
+import { DOCUMENT_KIND_LABELS } from "@/lib/portfolio-labels";
 import {
   Select,
   SelectContent,
@@ -38,14 +39,18 @@ import {
   type DocumentKind,
 } from "@/lib/data/portfolios";
 
-const DOC_KINDS: { value: DocumentKind; label: string }[] = [
-  { value: "tapu", label: "Tapu" },
-  { value: "ruhsat", label: "Ruhsat" },
-  { value: "imar_plani", label: "İmar Planı" },
-  { value: "proje", label: "Proje" },
-  { value: "pdf", label: "PDF" },
-  { value: "diger", label: "Diğer" },
+// 2.4 / K1: Kat Planı is the primary type (default). Tapu stays available but is NOT
+// the default (hassas, herkese atılmaz). Labels are canonical (DOCUMENT_KIND_LABELS).
+const DOC_KIND_ORDER: DocumentKind[] = [
+  "kat_plani",
+  "ruhsat",
+  "imar_plani",
+  "proje",
+  "tapu",
+  "pdf",
+  "diger",
 ];
+const DOC_KINDS = DOC_KIND_ORDER.map((value) => ({ value, label: DOCUMENT_KIND_LABELS[value] }));
 
 /**
  * Owner media manager (D34): images (delete / reorder / cover / public↔locked
@@ -56,7 +61,8 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
   const [full, setFull] = useState<PortfolioFull | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploadVisibility, setUploadVisibility] = useState<ImageVisibility>("public");
-  const [docKind, setDocKind] = useState<DocumentKind>("tapu");
+  const [docKind, setDocKind] = useState<DocumentKind>("kat_plani");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
 
   const reload = useCallback(async () => {
     const d = await getMyPortfolioFull(portfolioId);
@@ -109,15 +115,29 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
 
   const images = full.images;
 
+  const persistOrder = (next: typeof images) =>
+    void run(
+      () => reorderImages(next.map((img, i) => ({ id: img.id, sort_order: i }))),
+      "Sıralama güncellendi",
+    );
+
   const move = (index: number, dir: -1 | 1) => {
     const next = [...images];
     const j = index + dir;
     if (j < 0 || j >= next.length) return;
     [next[index], next[j]] = [next[j], next[index]];
-    void run(
-      () => reorderImages(next.map((img, i) => ({ id: img.id, sort_order: i }))),
-      "Sıralama güncellendi",
-    );
+    persistOrder(next);
+  };
+
+  // 2.4: native drag-sort (tut-sürükle). Arrows stay as a keyboard/fallback control.
+  const dropAt = (to: number) => {
+    const from = dragIndex;
+    setDragIndex(null);
+    if (from == null || from === to) return;
+    const next = [...images];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    persistOrder(next);
   };
 
   return (
@@ -134,7 +154,15 @@ export function PortfolioMediaManager({ portfolioId }: { portfolioId: string }) 
         ) : (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {images.map((img, i) => (
-              <div key={img.id} className="overflow-hidden rounded-lg border border-border">
+              <div
+                key={img.id}
+                draggable
+                onDragStart={() => setDragIndex(i)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => dropAt(i)}
+                onDragEnd={() => setDragIndex(null)}
+                className={`cursor-move overflow-hidden rounded-lg border border-border ${dragIndex === i ? "opacity-50 ring-2 ring-gold" : ""}`}
+              >
                 <div className="relative aspect-[4/3] bg-surface-2">
                   <ThumbImage
                     thumb={img.thumbUrl}

@@ -59,6 +59,10 @@ export type PublicPortfolio = {
   // D37: count of LOCKED photos (non-identifying). Optional — populated only after
   // the locked_photo_count migration draft is applied to get_public_portfolio.
   locked_photo_count?: number | null;
+  // Faz 2.4: TYPE-ONLY locked document kinds (e.g. ["kat_plani"]) — teaser-safe; the
+  // document content stays gated. Optional — populated only after the
+  // public_teaser_doc_kinds migration draft is applied to get_public_portfolio.
+  locked_document_kinds?: string[] | null;
   attributes: Record<string, unknown>;
   images: PublicTeaserImage[];
   agent: PublicAgent | null;

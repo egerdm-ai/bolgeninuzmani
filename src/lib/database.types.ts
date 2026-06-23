@@ -375,6 +375,7 @@ export type Database = {
           title: string;
           transaction_type: Database["public"]["Enums"]["transaction_type"];
           updated_at: string;
+          video_url: string | null;
         };
         Insert: {
           approx_lat?: number | null;
@@ -406,6 +407,7 @@ export type Database = {
           title: string;
           transaction_type: Database["public"]["Enums"]["transaction_type"];
           updated_at?: string;
+          video_url?: string | null;
         };
         Update: {
           approx_lat?: number | null;
@@ -437,6 +439,7 @@ export type Database = {
           title?: string;
           transaction_type?: Database["public"]["Enums"]["transaction_type"];
           updated_at?: string;
+          video_url?: string | null;
         };
         Relationships: [
           {

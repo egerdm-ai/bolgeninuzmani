@@ -65,6 +65,7 @@ export type PortfolioTeaserInput = {
   mode?: PortfolioMode; // D36 controlled|call_only (public teaser column)
   location_precision?: "exact" | "approx"; // Faz 2.2 teaser-safe (exact reveals pin)
   approx_radius_km?: number | null; // Faz 2.2 teaser-safe fuzz radius (km)
+  video_url?: string | null; // Faz 2.4 teaser-safe public video link
 };
 
 /** Locked fields (D20) — collected on an owner-only step; go to portfolio_private. */
@@ -640,6 +641,24 @@ export async function setImageVisibility(img: ImageRef, target: ImageVisibility)
 // ---------------------------------------------------------------------------
 // Documents (locked; private bucket + signed-URL download)
 // ---------------------------------------------------------------------------
+
+/** A picked-but-not-yet-uploaded document with its chosen type (create wizard). */
+export type PendingDoc = { file: File; kind: DocumentKind };
+
+/** Upload create-wizard pending documents after the portfolio exists (per-doc isolation:
+ *  one bad doc never blocks the rest). Mirrors uploadPendingImages. */
+export async function uploadPendingDocuments(
+  portfolioId: string,
+  docs: PendingDoc[],
+): Promise<void> {
+  for (const d of docs) {
+    try {
+      await uploadDocument(portfolioId, d.file, d.kind);
+    } catch {
+      // swallow per-doc — the portfolio is kept; the user can re-add from Düzenle.
+    }
+  }
+}
 
 export async function uploadDocument(
   portfolioId: string,

@@ -11,7 +11,7 @@ import {
   publicTeaserThumbUrl,
   type PublicPortfolio,
 } from "@/lib/data/public-portfolio";
-import { formatPortfolioPrice, CATEGORY_LABELS } from "@/lib/portfolio-labels";
+import { formatPortfolioPrice, CATEGORY_LABELS, documentKindLabel } from "@/lib/portfolio-labels";
 import { publicUrl } from "@/lib/public-origin";
 import { LockedRevealList } from "@/components/portfolio/portfolio-badges";
 import {
@@ -212,6 +212,19 @@ function Teaser({ data }: { data: PublicPortfolio }) {
                 <h3 className="text-sm font-semibold text-bu-text">Kilitli Bilgiler</h3>
               </div>
               <LockedRevealList photoCount={data.locked_photo_count} />
+              {/* 2.4: belge TİPİ teaser'da görünür ("Kilitli: Kat Planı"); içerik talep+onayla açılır. */}
+              {data.locked_document_kinds && data.locked_document_kinds.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {data.locked_document_kinds.map((k) => (
+                    <span
+                      key={k}
+                      className="inline-flex items-center gap-1 rounded-bu-md border border-bu-gold-border bg-bu-gold-muted px-2 py-1 text-xs font-medium text-bu-gold"
+                    >
+                      <Lock className="size-3" /> Kilitli: {documentKindLabel(k)}
+                    </span>
+                  ))}
+                </div>
+              )}
               {/* logged-in → in-app detail where the Detay Talebi flow works; anon → login */}
               <Button asChild className="w-full bg-gradient-gold text-bu-text-inv hover:opacity-90">
                 {user ? (

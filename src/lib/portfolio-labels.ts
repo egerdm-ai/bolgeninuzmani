@@ -4,6 +4,7 @@ type Category = Database["public"]["Enums"]["portfolio_category"];
 type Txn = Database["public"]["Enums"]["transaction_type"];
 type Status = Database["public"]["Enums"]["portfolio_status"];
 type Currency = Database["public"]["Enums"]["currency"];
+type DocumentKind = Database["public"]["Enums"]["document_kind"];
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   konut: "Konut",
@@ -102,6 +103,23 @@ export const STATUS_LABELS: Record<Status, string> = {
   passive: "Pasif",
   sold: "Satıldı / Kiralandı",
 };
+
+// Canonical document type labels (Faz 2.4). Kat Planı is primary; Tapu available
+// but never a default. Used by the media manager + the /p teaser ("Kilitli: Kat Planı").
+export const DOCUMENT_KIND_LABELS: Record<DocumentKind, string> = {
+  kat_plani: "Kat Planı",
+  ruhsat: "Ruhsat",
+  imar_plani: "İmar Planı",
+  proje: "Proje",
+  tapu: "Tapu",
+  pdf: "PDF",
+  diger: "Diğer",
+};
+
+/** Human label for a stored document_kind value (falls back to the raw value). */
+export function documentKindLabel(kind: string): string {
+  return DOCUMENT_KIND_LABELS[kind as DocumentKind] ?? kind;
+}
 
 export const CURRENCY_OPTIONS: Currency[] = ["TRY", "USD", "EUR"];
 
