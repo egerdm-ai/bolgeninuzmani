@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { attributesForCategory, type AttributeDef } from "@/lib/portfolio-attributes";
+import { attributesForCategory, ROOM_COUNTS, type AttributeDef } from "@/lib/portfolio-attributes";
 import {
   Select,
   SelectContent,
@@ -13,8 +13,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CATEGORY_LABELS, TRANSACTION_LABELS, CURRENCY_OPTIONS } from "@/lib/portfolio-labels";
+import { TRANSACTION_LABELS } from "@/lib/portfolio-labels";
 import { RegionSelect } from "@/components/geo/region-select";
+import { CategorySelect } from "@/components/portfolio/category-select";
+import { FeatureMultiSelect } from "@/components/portfolio/feature-multi-select";
+import { PriceInput } from "@/components/ui/price-input";
+import { MultiSelect } from "@/components/ui/multi-select";
 import type {
   PortfolioCategory,
   TransactionType,
@@ -199,28 +203,14 @@ export function PortfolioFormFields({
         <Field label="Portföy Başlığı" required>
           <Input value={teaser.title} onChange={(e) => sf("title")(e.target.value)} />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Kategori">
-            <Select value={teaser.category} onValueChange={sf("category")}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(CATEGORY_LABELS).map(([v, label]) => (
-                  <SelectItem key={v} value={v}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field label="Alt Kategori">
-            <Input
-              value={teaser.subcategory}
-              onChange={(e) => sf("subcategory")(e.target.value)}
-              placeholder="Villa, Daire…"
-            />
-          </Field>
+        {/* 2.3: Kategori + dependent Alt Kategori → canonical CategorySelect (1.2). */}
+        <CategorySelect
+          value={{ category: teaser.category, subcategory: teaser.subcategory || null }}
+          onChange={(v) =>
+            setTeaser({ ...teaser, category: v.category, subcategory: v.subcategory ?? "" })
+          }
+        />
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field label="İşlem Tipi">
             <Select value={teaser.transaction_type} onValueChange={sf("transaction_type")}>
               <SelectTrigger>
@@ -287,36 +277,33 @@ export function PortfolioFormFields({
             })
           }
         />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Fiyat">
-            <Input
-              type="number"
-              value={teaser.price}
-              onChange={(e) => sf("price")(e.target.value)}
-            />
-          </Field>
-          <Field label="Para Birimi">
-            <Select value={teaser.currency} onValueChange={sf("currency")}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CURRENCY_OPTIONS.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
+        {/* 2.3: Fiyat + para birimi → PriceInput (1.5) with thousand separators. */}
+        <Field label="Fiyat">
+          <PriceInput
+            value={teaser.price === "" ? null : Number(teaser.price)}
+            onChange={(n) => sf("price")(n == null ? "" : String(n))}
+            currency={teaser.currency}
+            onCurrencyChange={(c) => sf("currency")(c)}
+          />
+        </Field>
       </SurfaceCard>
 
       <SurfaceCard className="space-y-4">
         <SectionTitle icon={ShieldCheck} title="Detaylar" />
         <div className="grid gap-4 sm:grid-cols-4">
-          <Field label="Oda (5+1)">
-            <Input value={teaser.room_count} onChange={(e) => sf("room_count")(e.target.value)} />
+          <Field label="Oda Sayısı" required>
+            <Select value={teaser.room_count} onValueChange={sf("room_count")}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seçin" />
+              </SelectTrigger>
+              <SelectContent>
+                {ROOM_COUNTS.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Brüt m²">
             <Input
@@ -340,11 +327,18 @@ export function PortfolioFormFields({
             />
           </Field>
         </div>
-        <Field label="Özellikler (virgülle)">
-          <Input
-            value={teaser.features}
-            onChange={(e) => sf("features")(e.target.value)}
-            placeholder="Havuz, Deniz manzarası, Otopark"
+        {/* 2.3: "virgülle yaz" yerine gruplu çoktan-seçmeli (1.4). */}
+        <Field label="Özellikler">
+          <FeatureMultiSelect
+            value={
+              teaser.features
+                ? teaser.features
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean)
+                : []
+            }
+            onChange={(arr) => sf("features")(arr.join(","))}
           />
         </Field>
         <AttrGrid defs={catPublicAttrs} attrs={attrs} onChange={setAttr} />
@@ -577,27 +571,16 @@ function AttrInput({
     );
   }
   if (def.type === "multiselect") {
+    // 2.3: canonical MultiSelect honors def.maxSelect (Cephe → 3). Stored as a
+    // comma-joined string in the flat attr bag.
     const selected = typeof value === "string" && value ? value.split(",") : [];
-    const toggle = (v: string) => {
-      const next = selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v];
-      onChange(next.join(","));
-    };
     return (
-      <div className="flex flex-wrap gap-1.5">
-        {def.options?.map((o) => {
-          const on = selected.includes(o.value);
-          return (
-            <button
-              key={o.value}
-              type="button"
-              onClick={() => toggle(o.value)}
-              className={`rounded-md px-2 py-1 text-xs font-medium transition-colors ${on ? "bg-gold/20 text-gold ring-1 ring-inset ring-gold/40" : "bg-surface-2 text-muted-foreground hover:text-foreground"}`}
-            >
-              {o.label}
-            </button>
-          );
-        })}
-      </div>
+      <MultiSelect
+        options={def.options ?? []}
+        value={selected}
+        onChange={(arr) => onChange(arr.join(","))}
+        maxSelect={def.maxSelect}
+      />
     );
   }
   return (
