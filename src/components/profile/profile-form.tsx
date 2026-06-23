@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { Loader2, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth/auth-context";
-import { updateMyProfile, type EditableProfile } from "@/lib/data/profile";
+import { updateMyProfile, uploadAvatar, type EditableProfile } from "@/lib/data/profile";
 
 const toList = (s: string) =>
   s
@@ -28,6 +29,7 @@ export function ProfileForm({ onSaved }: { onSaved?: () => void }) {
     company_name: profile?.company_name ?? "",
     location: profile?.location ?? "",
     bio: profile?.bio ?? "",
+    avatar_url: profile?.avatar_url ?? "",
     contact_phone: profile?.contact_phone ?? "",
     contact_email: profile?.contact_email ?? "",
     contact_whatsapp: profile?.contact_whatsapp ?? "",
@@ -35,9 +37,26 @@ export function ProfileForm({ onSaved }: { onSaved?: () => void }) {
     expertise_types: (profile?.expertise_types ?? []).join(", "),
   });
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  async function onAvatar(file: File) {
+    if (!user) return;
+    setUploadingAvatar(true);
+    try {
+      const url = await uploadAvatar(user.id, file);
+      setForm((f) => ({ ...f, avatar_url: url }));
+      toast.success("Fotoğraf yüklendi — kaydetmeyi unutmayın");
+    } catch (e) {
+      toast.error("Fotoğraf yüklenemedi", {
+        description: e instanceof Error ? e.message : String(e),
+      });
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -54,6 +73,7 @@ export function ProfileForm({ onSaved }: { onSaved?: () => void }) {
       company_name: form.company_name.trim() || null,
       location: form.location.trim() || null,
       bio: form.bio.trim() || null,
+      avatar_url: form.avatar_url.trim() || null,
       contact_phone: form.contact_phone.trim() || null,
       contact_email: form.contact_email.trim() || null,
       contact_whatsapp: form.contact_whatsapp.trim() || null,
@@ -76,59 +96,114 @@ export function ProfileForm({ onSaved }: { onSaved?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-foreground">Profil Bilgileri</h3>
-        <Field label="Ad Soyad" required value={form.full_name} onChange={set("full_name")} />
-        <Field
-          label="Kullanıcı Adı"
-          required
-          value={form.username}
-          onChange={set("username")}
-          hint="Profil bağlantınızda görünür; benzersiz olmalı."
-        />
-        <Field label="Ünvan" value={form.title} onChange={set("title")} />
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Şirket" value={form.company_name} onChange={set("company_name")} />
-          <Field label="Konum" value={form.location} onChange={set("location")} />
+    <form onSubmit={onSubmit} className="space-y-6">
+      {/* Avatar — profil fotoğrafı yükle/değiştir (önce yükle, sonra Kaydet). */}
+      <div className="flex items-center gap-4">
+        <div className="relative size-20 shrink-0 overflow-hidden rounded-full border border-border bg-surface-2">
+          {form.avatar_url ? (
+            <img src={form.avatar_url} alt="" className="size-full object-cover" />
+          ) : (
+            <div className="flex size-full items-center justify-center text-xl font-semibold text-muted-foreground">
+              {form.full_name.trim().slice(0, 1).toUpperCase() || "?"}
+            </div>
+          )}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="bio">Hakkında</Label>
-          <Textarea id="bio" rows={4} value={form.bio} onChange={set("bio")} />
+          <Label>Profil Fotoğrafı</Label>
+          <div className="flex items-center gap-2">
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-gold/40 px-3 py-1.5 text-sm text-gold hover:bg-gold/10">
+              {uploadingAvatar ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <ImagePlus className="size-4" />
+              )}
+              {uploadingAvatar ? "Yükleniyor…" : "Fotoğraf Yükle"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploadingAvatar}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) onAvatar(f);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            {form.avatar_url && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={uploadingAvatar}
+                onClick={() => setForm((f) => ({ ...f, avatar_url: "" }))}
+              >
+                Kaldır
+              </Button>
+            )}
+          </div>
+          <p className="text-[11px] text-muted-foreground">JPG/PNG · kare öneririz</p>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-foreground">İletişim & Uzmanlık</h3>
-        <p className="text-xs text-muted-foreground">
-          İletişim bilgileriniz müşterilere açıktır (paylaşılan portföy bağlantısında görünür).
-        </p>
-        <Field label="Telefon" value={form.contact_phone} onChange={set("contact_phone")} />
-        <Field
-          label="İletişim E-postası"
-          value={form.contact_email}
-          onChange={set("contact_email")}
-        />
-        <Field label="WhatsApp" value={form.contact_whatsapp} onChange={set("contact_whatsapp")} />
-        <Field
-          label="Uzmanlık Bölgeleri"
-          value={form.expertise_regions}
-          onChange={set("expertise_regions")}
-          hint="Virgülle ayırın: Bodrum, Yalıkavak"
-        />
-        <Field
-          label="Uzmanlık Tipleri"
-          value={form.expertise_types}
-          onChange={set("expertise_types")}
-          hint="Virgülle ayırın: Villa, Arsa"
-        />
-        <Button
-          type="submit"
-          disabled={saving}
-          className="bg-gradient-gold text-primary-foreground hover:opacity-90"
-        >
-          {saving ? "Kaydediliyor…" : "Kaydet"}
-        </Button>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-foreground">Profil Bilgileri</h3>
+          <Field label="Ad Soyad" required value={form.full_name} onChange={set("full_name")} />
+          <Field
+            label="Kullanıcı Adı"
+            required
+            value={form.username}
+            onChange={set("username")}
+            hint="Profil bağlantınızda görünür; benzersiz olmalı."
+          />
+          <Field label="Ünvan" value={form.title} onChange={set("title")} />
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Şirket" value={form.company_name} onChange={set("company_name")} />
+            <Field label="Konum" value={form.location} onChange={set("location")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="bio">Hakkında</Label>
+            <Textarea id="bio" rows={4} value={form.bio} onChange={set("bio")} />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-foreground">İletişim & Uzmanlık</h3>
+          <p className="text-xs text-muted-foreground">
+            İletişim bilgileriniz müşterilere açıktır (paylaşılan portföy bağlantısında görünür).
+          </p>
+          <Field label="Telefon" value={form.contact_phone} onChange={set("contact_phone")} />
+          <Field
+            label="İletişim E-postası"
+            value={form.contact_email}
+            onChange={set("contact_email")}
+          />
+          <Field
+            label="WhatsApp"
+            value={form.contact_whatsapp}
+            onChange={set("contact_whatsapp")}
+          />
+          <Field
+            label="Uzmanlık Bölgeleri"
+            value={form.expertise_regions}
+            onChange={set("expertise_regions")}
+            hint="Virgülle ayırın: Bodrum, Yalıkavak"
+          />
+          <Field
+            label="Uzmanlık Tipleri"
+            value={form.expertise_types}
+            onChange={set("expertise_types")}
+            hint="Virgülle ayırın: Villa, Arsa"
+          />
+          <Button
+            type="submit"
+            disabled={saving}
+            className="bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            {saving ? "Kaydediliyor…" : "Kaydet"}
+          </Button>
+        </div>
       </div>
     </form>
   );

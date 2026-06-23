@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/data/auth";
+import { processAvatarImage } from "@/lib/image-resize";
+
+const AVATARS_BUCKET = "avatars";
 
 /** Fields a user may edit on their own profile (status/role/tier are NOT here). */
 export type EditableProfile = Pick<
@@ -31,4 +34,22 @@ export async function updateMyProfile(userId: string, patch: Partial<EditablePro
     .select()
     .single();
   return { data, error };
+}
+
+/**
+ * Upload an avatar to the public `avatars` bucket at `<userId>/<uuid>.webp`
+ * (path prefix = uid so storage RLS can gate writes) and return its public URL.
+ * The caller stores the URL on profiles.avatar_url via updateMyProfile.
+ * REQUIRES the `avatars` bucket + storage policies (see the avatars migration).
+ */
+export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  const blob = await processAvatarImage(file);
+  const path = `${userId}/${crypto.randomUUID()}.webp`;
+  const { error } = await supabase.storage.from(AVATARS_BUCKET).upload(path, blob, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: "image/webp",
+  });
+  if (error) throw error;
+  return supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path).data.publicUrl;
 }
