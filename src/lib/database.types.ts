@@ -358,6 +358,7 @@ export type Database = {
           gross_m2: number | null;
           id: string;
           land_m2: number | null;
+          locked_document_kinds: string[];
           mode: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood: string | null;
           net_m2: number | null;
@@ -386,6 +387,7 @@ export type Database = {
           gross_m2?: number | null;
           id?: string;
           land_m2?: number | null;
+          locked_document_kinds?: string[];
           mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
@@ -414,6 +416,7 @@ export type Database = {
           gross_m2?: number | null;
           id?: string;
           land_m2?: number | null;
+          locked_document_kinds?: string[];
           mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
@@ -740,7 +743,7 @@ export type Database = {
       application_status: "new" | "reviewed" | "invited" | "rejected";
       currency: "TRY" | "USD" | "EUR";
       detail_request_status: "pending" | "approved" | "rejected";
-      document_kind: "tapu" | "ruhsat" | "imar_plani" | "proje" | "pdf" | "diger";
+      document_kind: "kat_plani" | "tapu" | "ruhsat" | "imar_plani" | "proje" | "pdf" | "diger";
       image_visibility: "public" | "locked";
       membership_tier: "standard" | "pro" | "elite";
       portfolio_category: "konut" | "ticari" | "arsa" | "turizm" | "isletme" | "ozel_varlik";
@@ -879,7 +882,7 @@ export const Constants = {
       application_status: ["new", "reviewed", "invited", "rejected"],
       currency: ["TRY", "USD", "EUR"],
       detail_request_status: ["pending", "approved", "rejected"],
-      document_kind: ["tapu", "ruhsat", "imar_plani", "proje", "pdf", "diger"],
+      document_kind: ["kat_plani", "tapu", "ruhsat", "imar_plani", "proje", "pdf", "diger"],
       image_visibility: ["public", "locked"],
       membership_tier: ["standard", "pro", "elite"],
       portfolio_category: ["konut", "ticari", "arsa", "turizm", "isletme", "ozel_varlik"],
