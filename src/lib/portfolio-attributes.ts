@@ -31,10 +31,35 @@ export type AttributeDef = {
   label: string;
   type: AttributeType;
   options?: { value: string; label: string }[];
+  /** For `multiselect`: maximum number of selections (e.g. cephe → 3). */
+  maxSelect?: number;
   visibility: AttributeVisibility;
   /** Categories this field applies to (wizard filters by the portfolio's category). */
   categories: PortfolioCategoryKey[];
 };
+
+/**
+ * Canonical oda sayısı options (Faz 1.3). room_count stays a first-class teaser
+ * COLUMN (portfolios.room_count) — this is just its canonical option list, used by
+ * wizard + filter + detail so they agree. Includes the X+2 variants (e.g. 4+2).
+ */
+export const ROOM_COUNTS: { value: string; label: string }[] = [
+  "1+0",
+  "1+1",
+  "2+1",
+  "2+2",
+  "3+1",
+  "3+2",
+  "4+1",
+  "4+2",
+  "5+1",
+  "5+2",
+  "6+1",
+  "6+2",
+  "7+1",
+  "7+2",
+  "8+",
+].map((r) => ({ value: r, label: r }));
 
 // Reusable category groups.
 const KONUT: PortfolioCategoryKey[] = ["konut"];
@@ -57,16 +82,35 @@ const FACADE = [
   { value: "guney", label: "Güney" },
   { value: "dogu", label: "Doğu" },
   { value: "bati", label: "Batı" },
+  { value: "kuzeydogu", label: "Kuzeydoğu" },
+  { value: "kuzeybati", label: "Kuzeybatı" },
+  { value: "guneydogu", label: "Güneydoğu" },
+  { value: "guneybati", label: "Güneybatı" },
+];
+// Bulunduğu Kat (Sahibinden-style): special floors + numeric 1..30 + catch-all.
+const FLOOR = [
+  { value: "bodrum", label: "Bodrum Kat" },
+  { value: "zemin", label: "Zemin Kat" },
+  { value: "bahce_kati", label: "Bahçe Katı" },
+  { value: "giris_kati", label: "Giriş Katı" },
+  { value: "yuksek_giris", label: "Yüksek Giriş" },
+  { value: "mustakil", label: "Müstakil" },
+  { value: "villa_tipi", label: "Villa / Müstakil Tipi" },
+  ...Array.from({ length: 30 }, (_, i) => ({ value: String(i + 1), label: `${i + 1}. Kat` })),
+  { value: "30+", label: "30+ Kat" },
+  { value: "cati_kati", label: "Çatı Katı" },
+  { value: "teras_kati", label: "Teras Katı" },
 ];
 const PARKING = [
-  { value: "kapali", label: "Kapalı Otopark" },
   { value: "acik", label: "Açık Otopark" },
+  { value: "kapali", label: "Kapalı Otopark" },
+  { value: "acik_kapali", label: "Hem Açık Hem Kapalı" },
   { value: "yok", label: "Yok" },
 ];
 const USAGE = [
   { value: "bos", label: "Boş" },
   { value: "kiracili", label: "Kiracılı" },
-  { value: "malik", label: "Mülk Sahibi" },
+  { value: "malik", label: "Mülk Sahibi Oturuyor" },
 ];
 const TAPU = [
   { value: "kat_mulkiyeti", label: "Kat Mülkiyetli" },
@@ -91,7 +135,8 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
   {
     key: "cephe",
     label: "Cephe",
-    type: "select",
+    type: "multiselect",
+    maxSelect: 3,
     visibility: "public",
     categories: ["konut", "ticari"],
     options: FACADE,
@@ -99,9 +144,10 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
   {
     key: "kat",
     label: "Bulunduğu Kat",
-    type: "text",
+    type: "select",
     visibility: "public",
     categories: ["konut", "ticari"],
+    options: FLOOR,
   },
   {
     key: "bina_kat_sayisi",
@@ -124,6 +170,13 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
     visibility: "public",
     categories: [...BUILDINGS],
     options: PARKING,
+  },
+  {
+    key: "otopark_kapasite",
+    label: "Otopark Kapasitesi",
+    type: "number",
+    visibility: "public",
+    categories: [...BUILDINGS],
   },
   {
     key: "asansor",
@@ -187,19 +240,8 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
     visibility: "public",
     categories: [...KONUT],
   },
-  {
-    key: "yapi_tipi",
-    label: "Yapı Tipi",
-    type: "select",
-    visibility: "public",
-    categories: [...KONUT],
-    options: [
-      { value: "betonarme", label: "Betonarme" },
-      { value: "celik", label: "Çelik" },
-      { value: "ahsap", label: "Ahşap" },
-      { value: "prefabrik", label: "Prefabrik" },
-    ],
-  },
+  // "Yapı Tipi" retired (PDF s.6 — nobody fills it). Legacy values are dropped on
+  // save via DEPRECATED_ATTRIBUTE_KEYS so editing an old portfolio never crashes.
 
   // ---- İŞYERI (ticari) ----
   {
@@ -419,6 +461,14 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
 
 const BY_KEY = new Map(PORTFOLIO_ATTRIBUTES.map((a) => [a.key, a]));
 
+/**
+ * Keys removed from the registry but possibly present on legacy rows. splitAttributes
+ * DROPS these (instead of throwing on an unknown key) so editing/re-saving an old
+ * portfolio that still carries a retired field never crashes. Genuinely unknown keys
+ * still throw — the registry remains the only source of truth.
+ */
+export const DEPRECATED_ATTRIBUTE_KEYS = new Set<string>(["yapi_tipi"]);
+
 export const PUBLIC_ATTRIBUTES = PORTFOLIO_ATTRIBUTES.filter((a) => a.visibility === "public");
 export const LOCKED_ATTRIBUTES = PORTFOLIO_ATTRIBUTES.filter((a) => a.visibility === "locked");
 
@@ -452,7 +502,10 @@ export function splitAttributes(input: AttributesInput): {
   for (const [key, value] of Object.entries(input)) {
     if (value === undefined || value === null || value === "") continue;
     const def = BY_KEY.get(key);
-    if (!def) throw new Error(`Bilinmeyen özellik anahtarı: "${key}" (registry'de tanımlı değil)`);
+    if (!def) {
+      if (DEPRECATED_ATTRIBUTE_KEYS.has(key)) continue; // retired field → drop, don't crash
+      throw new Error(`Bilinmeyen özellik anahtarı: "${key}" (registry'de tanımlı değil)`);
+    }
     if (def.visibility === "locked") lockedAttrs[key] = value;
     else publicAttrs[key] = value;
   }

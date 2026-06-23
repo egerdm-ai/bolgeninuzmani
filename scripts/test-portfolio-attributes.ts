@@ -7,10 +7,13 @@ import {
   splitAttributes,
   assertNoLockedInPublic,
   attributeVisibility,
+  attributeDef,
   attributesForCategory,
   PORTFOLIO_ATTRIBUTES,
   PUBLIC_ATTRIBUTES,
   LOCKED_ATTRIBUTES,
+  ROOM_COUNTS,
+  DEPRECATED_ATTRIBUTE_KEYS,
 } from "../src/lib/portfolio-attributes.ts";
 
 const sampleValue = (type: string) => (type === "boolean" ? true : type === "number" ? 1 : "x");
@@ -123,6 +126,45 @@ ok("registry integrity: unique keys + every field has >=1 category", () => {
   for (const a of PORTFOLIO_ATTRIBUTES) {
     assert.equal(a.categories.length > 0, true, `${a.key} must declare >=1 category`);
   }
+});
+
+// ---- Faz 1.3 enum source extensions ----
+
+ok("cephe is a multiselect capped at 3", () => {
+  const d = attributeDef("cephe");
+  assert.equal(d?.type, "multiselect");
+  assert.equal(d?.maxSelect, 3);
+});
+
+ok("bulunduğu kat is now a select with floor options", () => {
+  const d = attributeDef("kat");
+  assert.equal(d?.type, "select");
+  assert.equal((d?.options?.length ?? 0) > 10, true);
+});
+
+ok("otopark has 'hem açık hem kapalı' + a separate capacity field", () => {
+  const d = attributeDef("otopark");
+  assert.equal(
+    d?.options?.some((o) => o.value === "acik_kapali"),
+    true,
+  );
+  const cap = attributeDef("otopark_kapasite");
+  assert.equal(cap?.type, "number");
+  assert.equal(cap?.visibility, "public");
+});
+
+ok("Yapı Tipi is removed + dropped as deprecated (no throw on legacy rows)", () => {
+  assert.equal(attributeDef("yapi_tipi"), undefined);
+  assert.equal(DEPRECATED_ATTRIBUTE_KEYS.has("yapi_tipi"), true);
+  const { publicAttrs, lockedAttrs } = splitAttributes({ yapi_tipi: "celik", cephe: "guney" });
+  assert.equal("yapi_tipi" in publicAttrs, false);
+  assert.equal("yapi_tipi" in lockedAttrs, false);
+  assert.equal(publicAttrs.cephe, "guney"); // real value still routes through
+});
+
+ok("ROOM_COUNTS includes 4+2 and spans 1+0..8+", () => {
+  const vals = ROOM_COUNTS.map((r) => r.value);
+  for (const v of ["1+0", "4+2", "8+"]) assert.equal(vals.includes(v), true, `${v} missing`);
 });
 
 console.log(`\n${passed} checks passed ✓`);
