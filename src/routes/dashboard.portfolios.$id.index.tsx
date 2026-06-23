@@ -159,9 +159,15 @@ function OwnerPortfolioDetail() {
   const isOwner = user?.id === p.owner_id;
   const callOnly = p.mode === "call_only";
   const canSeeLocked = !callOnly && (isOwner || access);
-  const galleryImages: DetailImage[] = (
-    callOnly ? full.images.filter((i) => i.visibility === "public") : full.images
-  ).map((i) => ({ url: i.url, thumbUrl: i.thumbUrl, locked: i.visibility === "locked" }));
+  const visibleImages = callOnly
+    ? full.images.filter((i) => i.visibility === "public")
+    : full.images;
+  // The chosen cover ("Kapak yap") leads the hero; the rest keep their sort_order
+  // (Array.sort is stable). Without this the hero always showed sort_order[0], so
+  // setting a cover appeared to do nothing on the detail page.
+  const galleryImages: DetailImage[] = [...visibleImages]
+    .sort((a, b) => Number(b.is_cover) - Number(a.is_cover))
+    .map((i) => ({ url: i.url, thumbUrl: i.thumbUrl, locked: i.visibility === "locked" }));
 
   const ownerAgent: DetailAgent | null = ownerContact
     ? {
