@@ -121,7 +121,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Combo({
+export function Combo({
   value,
   placeholder,
   options,
