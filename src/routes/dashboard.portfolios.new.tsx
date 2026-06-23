@@ -79,7 +79,9 @@ function NewPortfolio() {
           { label: "Yeni Portföy Ekle" },
         ]}
       />
-      <form onSubmit={(e) => submit(e, "active")} className="space-y-6">
+      {/* Enter must NOT auto-publish: implicit submit is a no-op; "Yayınla" and
+          "Taslak Kaydet" are explicit buttons so the saved status matches intent. */}
+      <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
@@ -112,7 +114,8 @@ function NewPortfolio() {
             Taslak Kaydet
           </Button>
           <Button
-            type="submit"
+            type="button"
+            onClick={(e) => submit(e, "active")}
             className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
             disabled={busy || !teaser.city || !teaser.district}
             title={
