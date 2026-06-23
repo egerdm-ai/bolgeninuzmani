@@ -19,6 +19,83 @@ export const TRANSACTION_LABELS: Record<Txn, string> = {
   kiralik: "Kiralık",
 };
 
+// Canonical subcategory tree (Faz 1.2). Keyed by the DB portfolio_category enum
+// (NOT the mock taxonomy.ts, which drifts: "endustriyel" ∉ enum). Stored as
+// portfolios.subcategory (free-text column) but chosen from this list so the
+// value space stays consistent across wizard / filter / detail. Ticari is
+// further subdividable here via its option list.
+export type SubcategoryOption = { value: string; label: string };
+
+export const SUBCATEGORY_OPTIONS: Record<Category, SubcategoryOption[]> = {
+  konut: [
+    { value: "daire", label: "Daire" },
+    { value: "villa", label: "Villa" },
+    { value: "mustakil_ev", label: "Müstakil Ev" },
+    { value: "dubleks", label: "Dubleks" },
+    { value: "rezidans", label: "Rezidans" },
+    { value: "yali", label: "Yalı" },
+    { value: "yali_dairesi", label: "Yalı Dairesi" },
+    { value: "kosk", label: "Köşk" },
+    { value: "yazlik", label: "Yazlık" },
+    { value: "ciftlik_evi", label: "Çiftlik Evi" },
+  ],
+  ticari: [
+    { value: "dukkan", label: "Dükkan" },
+    { value: "ofis", label: "Ofis" },
+    { value: "magaza", label: "Mağaza" },
+    { value: "plaza_kati", label: "Plaza Katı" },
+    { value: "depo", label: "Depo" },
+    { value: "atolye", label: "Atölye" },
+    { value: "is_hani_kati", label: "İş Hanı Katı" },
+    { value: "bufe", label: "Büfe / Kiosk" },
+  ],
+  arsa: [
+    { value: "konut_imarli", label: "Konut İmarlı" },
+    { value: "ticari_imarli", label: "Ticari İmarlı" },
+    { value: "sanayi_imarli", label: "Sanayi İmarlı" },
+    { value: "turizm_imarli", label: "Turizm İmarlı" },
+    { value: "tarla", label: "Tarla" },
+    { value: "bag_bahce", label: "Bağ-Bahçe" },
+    { value: "zeytinlik", label: "Zeytinlik" },
+  ],
+  turizm: [
+    { value: "otel", label: "Otel" },
+    { value: "butik_otel", label: "Butik Otel" },
+    { value: "apart_otel", label: "Apart Otel" },
+    { value: "tatil_koyu", label: "Tatil Köyü" },
+    { value: "pansiyon", label: "Pansiyon" },
+    { value: "termal_tesis", label: "Termal Tesis" },
+  ],
+  isletme: [
+    { value: "fabrika", label: "Fabrika" },
+    { value: "uretim_tesisi", label: "Üretim Tesisi" },
+    { value: "depo_antrepo", label: "Depo / Antrepo" },
+    { value: "ciftlik", label: "Çiftlik" },
+    { value: "komple_bina", label: "Komple Bina" },
+    { value: "benzin_istasyonu", label: "Benzin İstasyonu" },
+    { value: "avm", label: "AVM" },
+  ],
+  ozel_varlik: [
+    { value: "tarihi_yapi", label: "Tarihi Yapı" },
+    { value: "ada_koru", label: "Ada / Koru" },
+    { value: "marina", label: "Marina" },
+    { value: "yat", label: "Yat" },
+    { value: "koleksiyon", label: "Sanat / Koleksiyon" },
+    { value: "diger", label: "Diğer" },
+  ],
+};
+
+/** Subcategory options for a category (empty array = none defined). */
+export function subcategoriesForCategory(category: Category): SubcategoryOption[] {
+  return SUBCATEGORY_OPTIONS[category] ?? [];
+}
+
+/** Human label for a stored subcategory value (falls back to the raw value). */
+export function subcategoryLabel(category: Category, value: string | null): string | null {
+  if (!value) return null;
+  return SUBCATEGORY_OPTIONS[category]?.find((o) => o.value === value)?.label ?? value;
+}
+
 export const STATUS_LABELS: Record<Status, string> = {
   draft: "Taslak",
   active: "Yayında",
