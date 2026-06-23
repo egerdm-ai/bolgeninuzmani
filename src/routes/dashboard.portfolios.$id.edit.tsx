@@ -23,8 +23,10 @@ import {
   buildTeaserInput,
   emptyTeaser,
   emptyAttrs,
+  emptyLocation,
   type TeaserFormState,
   type AttrFormState,
+  type LocationValue,
 } from "@/components/portfolio/portfolio-form-fields";
 
 // Merge public + locked attribute bags into the flat form state (numbers → strings).
@@ -52,6 +54,7 @@ function EditPortfolio() {
   const { user } = useAuth();
 
   const [teaser, setTeaser] = useState<TeaserFormState>(emptyTeaser);
+  const [location, setLocation] = useState<LocationValue>(emptyLocation);
   const [attrs, setAttrs] = useState<AttrFormState>(emptyAttrs);
   const [status, setStatus] = useState<PortfolioStatus>("draft");
   const [existingImages, setExistingImages] = useState<{ url: string; is_cover: boolean }[]>([]);
@@ -89,10 +92,16 @@ function EditPortfolio() {
           features: (p.features ?? []).join(", "),
           mode: p.mode,
         });
-        // K1 (Faz 2.1): private/locked fields are no longer edited here. Load only the
-        // PUBLIC attribute bag; the row's portfolio_private (exact coords + any legacy
-        // adres/malik/notlar/locked-attrs) is left untouched on save (not nulled).
+        // K1 (Faz 2.1): private free fields (adres/malik/notlar/locked-attrs) are no
+        // longer edited here — load only the PUBLIC attribute bag.
         setAttrs(mergeAttrs(p.attributes, null));
+        // 2.2: location step — exact pin (locked) + teaser precision/radius.
+        setLocation({
+          lat: full.private?.exact_lat ?? null,
+          lng: full.private?.exact_lng ?? null,
+          precision: p.location_precision === "exact" ? "exact" : "approx",
+          radiusKm: p.approx_radius_km ?? 1,
+        });
         setExistingImages(full.images.map((i) => ({ url: i.url, is_cover: i.is_cover })));
         setLoading(false);
       })
@@ -119,9 +128,18 @@ function EditPortfolio() {
     }
     setSaving(true);
     try {
-      // priv = undefined → updatePortfolio does NOT touch portfolio_private, so legacy
-      // locked data is preserved (D13: no silent deletion). attrs is public-only.
-      await updatePortfolio(id, buildTeaserInput(teaser, status), undefined, attrs);
+      // 2.2: precision/radius → teaser; exact pin → portfolio_private (only when set, so
+      // legacy private data is never nulled — D13). attrs is public-only.
+      const teaserInput = {
+        ...buildTeaserInput(teaser, status),
+        location_precision: location.precision,
+        approx_radius_km: location.precision === "approx" ? location.radiusKm : null,
+      };
+      const priv =
+        location.lat != null && location.lng != null
+          ? { exact_lat: location.lat, exact_lng: location.lng }
+          : undefined;
+      await updatePortfolio(id, teaserInput, priv, attrs);
       toast.success("Portföy güncellendi");
       navigate({ to: "/dashboard/portfolios/$id", params: { id } });
     } catch (err) {
@@ -192,6 +210,8 @@ function EditPortfolio() {
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
+          location={location}
+          setLocation={setLocation}
           attrs={attrs}
           setAttrs={setAttrs}
           existingImages={existingImages}

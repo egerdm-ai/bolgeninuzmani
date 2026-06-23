@@ -12,6 +12,8 @@ import {
   buildTeaserInput,
   emptyTeaser,
   emptyAttrs,
+  emptyLocation,
+  type LocationValue,
 } from "@/components/portfolio/portfolio-form-fields";
 import { StickyActionBar } from "@/components/portfolio/sticky-action-bar";
 
@@ -23,6 +25,7 @@ function NewPortfolio() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [teaser, setTeaser] = useState(emptyTeaser);
+  const [location, setLocation] = useState<LocationValue>(emptyLocation);
   const [attrs, setAttrs] = useState(emptyAttrs);
   const [images, setImages] = useState<PendingImage[]>([]);
   const [saving, setSaving] = useState<null | "draft" | "active">(null);
@@ -41,12 +44,21 @@ function NewPortfolio() {
     }
     setSaving(status);
     try {
-      // K1 (Faz 2.1): no private/locked fields collected here → no portfolio_private
-      // row is forced (konum pini comes in Faz 2.2). Empty priv keeps it absent.
+      // 2.2: precision/radius → teaser; exact pin → portfolio_private (locked). Only
+      // create the private row when a pin was actually placed.
+      const teaserInput = {
+        ...buildTeaserInput(teaser, status),
+        location_precision: location.precision,
+        approx_radius_km: location.precision === "approx" ? location.radiusKm : null,
+      };
+      const priv =
+        location.lat != null && location.lng != null
+          ? { exact_lat: location.lat, exact_lng: location.lng }
+          : {};
       const { id, images: imgRes } = await createPortfolio(
         user.id,
-        buildTeaserInput(teaser, status),
-        {},
+        teaserInput,
+        priv,
         images,
         attrs,
       );
@@ -84,6 +96,8 @@ function NewPortfolio() {
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
+          location={location}
+          setLocation={setLocation}
           images={images}
           setImages={setImages}
           attrs={attrs}

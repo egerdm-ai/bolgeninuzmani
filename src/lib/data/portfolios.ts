@@ -63,6 +63,8 @@ export type PortfolioTeaserInput = {
   neighborhood?: string | null;
   status?: PortfolioStatus;
   mode?: PortfolioMode; // D36 controlled|call_only (public teaser column)
+  location_precision?: "exact" | "approx"; // Faz 2.2 teaser-safe (exact reveals pin)
+  approx_radius_km?: number | null; // Faz 2.2 teaser-safe fuzz radius (km)
 };
 
 /** Locked fields (D20) — collected on an owner-only step; go to portfolio_private. */
@@ -406,12 +408,16 @@ export async function updatePortfolio(
   // Only touch portfolio_private when the caller actually manages it (edit form
   // always sends priv) — avoids wiping locked data on a teaser-only update.
   if (priv !== undefined || Object.keys(lockedAttrs).length > 0) {
+    // Only write `attributes` when there ARE locked attrs — otherwise a location-only
+    // priv (just exact_lat/lng from the konum pini) would overwrite legacy
+    // portfolio_private.attributes with {} (silent deletion). D13: never wipe legacy
+    // locked data; the upsert touches only the columns we actually provide.
+    const base = { portfolio_id: id, ...(priv ?? {}) };
+    const payload =
+      Object.keys(lockedAttrs).length > 0 ? { ...base, attributes: lockedAttrs as Json } : base;
     const { error: pErr } = await supabase
       .from("portfolio_private")
-      .upsert(
-        { portfolio_id: id, ...(priv ?? {}), attributes: lockedAttrs as Json },
-        { onConflict: "portfolio_id" },
-      );
+      .upsert(payload, { onConflict: "portfolio_id" });
     if (pErr) throw pErr;
   }
 }
@@ -497,15 +503,13 @@ async function uploadOneImage(
   await up(path, display);
   await up(deriveThumbPath(path), thumb);
   await withRetry(async () => {
-    const { error } = await supabase
-      .from("portfolio_images")
-      .insert({
-        portfolio_id: portfolioId,
-        path,
-        sort_order: sortOrder,
-        is_cover: isCover,
-        visibility,
-      });
+    const { error } = await supabase.from("portfolio_images").insert({
+      portfolio_id: portfolioId,
+      path,
+      sort_order: sortOrder,
+      is_cover: isCover,
+      visibility,
+    });
     if (error) throw error;
   });
 }

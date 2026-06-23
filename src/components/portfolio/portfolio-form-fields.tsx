@@ -19,6 +19,7 @@ import { CategorySelect } from "@/components/portfolio/category-select";
 import { FeatureMultiSelect } from "@/components/portfolio/feature-multi-select";
 import { PriceInput } from "@/components/ui/price-input";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { LocationPicker, type LocationValue } from "@/components/portfolio/location-picker";
 import type {
   PortfolioCategory,
   TransactionType,
@@ -94,6 +95,15 @@ export const emptyPrivate: PrivateFormState = {
 export type AttrFormState = Record<string, string | boolean>;
 export const emptyAttrs: AttrFormState = {};
 
+// Faz 2.2 location step state (exact pin → portfolio_private; precision/radius → teaser).
+export type { LocationValue };
+export const emptyLocation: LocationValue = {
+  lat: null,
+  lng: null,
+  precision: "approx",
+  radiusKm: 1,
+};
+
 const toNum = (s: string): number | null => (s.trim() === "" ? null : Number(s));
 const toList = (s: string) =>
   s
@@ -149,6 +159,8 @@ export function buildPrivateInput(pv: PrivateFormState): PortfolioPrivateInput {
 export function PortfolioFormFields({
   teaser,
   setTeaser,
+  location = emptyLocation,
+  setLocation = () => {},
   images = [],
   setImages = () => {},
   attrs,
@@ -158,6 +170,8 @@ export function PortfolioFormFields({
 }: {
   teaser: TeaserFormState;
   setTeaser: (t: TeaserFormState) => void;
+  location?: LocationValue;
+  setLocation?: (l: LocationValue) => void;
   images?: PendingImage[];
   setImages?: (i: PendingImage[]) => void;
   attrs: AttrFormState;
@@ -277,6 +291,14 @@ export function PortfolioFormFields({
             })
           }
         />
+        {/* 2.2: harita pini + tam/yaklaşık + çap. Exact koordinat portfolio_private'a
+            gider (kilitli); teaser yalnızca approx pin/çapı görür (D30). */}
+        {!callOnly && (
+          <div className="space-y-1.5">
+            <Label>Harita Konumu</Label>
+            <LocationPicker value={location} onChange={setLocation} />
+          </div>
+        )}
         {/* 2.3: Fiyat + para birimi → PriceInput (1.5) with thousand separators. */}
         <Field label="Fiyat">
           <PriceInput

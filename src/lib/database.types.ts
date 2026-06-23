@@ -359,6 +359,8 @@ export type Database = {
           id: string;
           land_m2: number | null;
           locked_document_kinds: string[];
+          location_precision: string;
+          approx_radius_km: number | null;
           mode: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood: string | null;
           net_m2: number | null;
@@ -388,6 +390,8 @@ export type Database = {
           id?: string;
           land_m2?: number | null;
           locked_document_kinds?: string[];
+          location_precision?: string;
+          approx_radius_km?: number | null;
           mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
@@ -417,6 +421,8 @@ export type Database = {
           id?: string;
           land_m2?: number | null;
           locked_document_kinds?: string[];
+          location_precision?: string;
+          approx_radius_km?: number | null;
           mode?: Database["public"]["Enums"]["portfolio_mode"];
           neighborhood?: string | null;
           net_m2?: number | null;
