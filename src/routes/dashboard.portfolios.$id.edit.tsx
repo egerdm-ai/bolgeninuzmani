@@ -197,7 +197,10 @@ function EditPortfolio() {
           </div>
         }
       />
-      <form onSubmit={submit} className="space-y-6">
+      {/* The form fields + media both live ABOVE the action bar so the sticky bar's
+          containing block spans the whole page → it stays bottom-pinned through the
+          entire form AND the media section (it used to scroll away past the form). */}
+      <form id="portfolio-edit-form" onSubmit={submit} className="space-y-6">
         <PortfolioFormFields
           teaser={teaser}
           setTeaser={setTeaser}
@@ -208,28 +211,30 @@ function EditPortfolio() {
           existingImages={existingImages}
           hideImages
         />
-        <StickyActionBar>
-          <Button asChild variant="outline">
-            <Link to="/dashboard/portfolios/$id" params={{ id }}>
-              İptal
-            </Link>
-          </Button>
-          <Button
-            type="submit"
-            className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
-            disabled={saving || !teaser.city || !teaser.district}
-            title={!teaser.city || !teaser.district ? "İl ve ilçe seçin" : undefined}
-          >
-            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            {saving ? "Kaydediliyor…" : "Kaydet"}
-          </Button>
-        </StickyActionBar>
       </form>
 
       <div className="space-y-3">
         <h2 className="font-display text-lg font-semibold text-foreground">Medya</h2>
         <PortfolioMediaManager portfolioId={id} />
       </div>
+
+      <StickyActionBar>
+        <Button asChild variant="outline">
+          <Link to="/dashboard/portfolios/$id" params={{ id }}>
+            İptal
+          </Link>
+        </Button>
+        <Button
+          type="submit"
+          form="portfolio-edit-form"
+          className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          disabled={saving || !teaser.city || !teaser.district}
+          title={!teaser.city || !teaser.district ? "İl ve ilçe seçin" : undefined}
+        >
+          {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          {saving ? "Kaydediliyor…" : "Kaydet"}
+        </Button>
+      </StickyActionBar>
     </PageContainer>
   );
 }
