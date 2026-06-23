@@ -1,5 +1,14 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, BedDouble, Maximize, ShieldCheck, Send, Bookmark } from "lucide-react";
+import {
+  MapPin,
+  BedDouble,
+  Maximize,
+  ShieldCheck,
+  Send,
+  Bookmark,
+  Eye,
+  Pencil,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BrokerAvatar } from "./broker-avatar";
@@ -19,6 +28,7 @@ export function SearchResultCard({
   p,
   selected,
   saved,
+  isOwn,
   onSelect,
   onHover,
   onToggleSave,
@@ -26,6 +36,8 @@ export function SearchResultCard({
   p: PortfolioWithCover;
   selected?: boolean;
   saved?: boolean;
+  /** K3: the viewer's OWN portfolio → "Senin portföyün" + Önizle/Düzenle (no Detay Talebi). */
+  isOwn?: boolean;
   onSelect?: (p: PortfolioWithCover) => void;
   onHover?: (p: PortfolioWithCover | null) => void;
   onToggleSave?: (id: string) => void;
@@ -134,32 +146,22 @@ export function SearchResultCard({
         )}
       </div>
 
-      {/* Owner identity + CTAs */}
-      {agent && (
+      {/* K3: own portfolio → no Detay Talebi; confirm-live + edit shortcuts. */}
+      {isOwn ? (
         <div className="flex items-center gap-2 border-t border-border px-3 py-2.5">
-          <BrokerAvatar name={agent.full_name} src={agent.avatar_url || undefined} size="sm" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1">
-              <span className="truncate text-xs font-semibold text-foreground">
-                {agent.full_name}
-              </span>
-              <ShieldCheck className="size-3 shrink-0 text-gold" />
-            </div>
-            {agent.company_name && (
-              <span className="truncate text-[11px] text-muted-foreground">
-                {agent.company_name}
-              </span>
-            )}
-          </div>
+          <span className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2 py-0.5 text-[11px] font-semibold text-gold">
+            <ShieldCheck className="size-3" /> Senin portföyün
+          </span>
+          <div className="flex-1" />
           <Button
             asChild
             size="sm"
             variant="outline"
-            className="h-7 px-2 text-[11px]"
+            className="h-7 gap-1 px-2 text-[11px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <Link to="/v/$username" params={{ username: agent.username }}>
-              Profili Gör
+            <Link to="/dashboard/portfolios/$id" params={{ id: p.id }}>
+              <Eye className="size-3" /> Önizle
             </Link>
           </Button>
           <Button
@@ -168,11 +170,51 @@ export function SearchResultCard({
             className="h-7 gap-1 bg-gradient-gold px-2 text-[11px] text-primary-foreground hover:opacity-90"
             onClick={(e) => e.stopPropagation()}
           >
-            <Link to="/dashboard/portfolios/$id" params={{ id: p.id }}>
-              <Send className="size-3" /> Detay Talep Et
+            <Link to="/dashboard/portfolios/$id/edit" params={{ id: p.id }}>
+              <Pencil className="size-3" /> Düzenle
             </Link>
           </Button>
         </div>
+      ) : (
+        agent && (
+          <div className="flex items-center gap-2 border-t border-border px-3 py-2.5">
+            <BrokerAvatar name={agent.full_name} src={agent.avatar_url || undefined} size="sm" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1">
+                <span className="truncate text-xs font-semibold text-foreground">
+                  {agent.full_name}
+                </span>
+                <ShieldCheck className="size-3 shrink-0 text-gold" />
+              </div>
+              {agent.company_name && (
+                <span className="truncate text-[11px] text-muted-foreground">
+                  {agent.company_name}
+                </span>
+              )}
+            </div>
+            <Button
+              asChild
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link to="/v/$username" params={{ username: agent.username }}>
+                Profili Gör
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="sm"
+              className="h-7 gap-1 bg-gradient-gold px-2 text-[11px] text-primary-foreground hover:opacity-90"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Link to="/dashboard/portfolios/$id" params={{ id: p.id }}>
+                <Send className="size-3" /> Detay Talep Et
+              </Link>
+            </Button>
+          </div>
+        )
       )}
     </div>
   );

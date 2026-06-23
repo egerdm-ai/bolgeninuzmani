@@ -269,10 +269,12 @@ const coverUrlsFromJoin = (
 };
 
 /**
- * Keşfet (Slice 5): other agents' ACTIVE portfolios as TEASER, server-side
- * filtered + paginated. RLS (`portfolios_select_network`) already restricts to
- * active + verified viewer; we additionally exclude the viewer's own. Teaser
- * columns only (D13-safe) + public cover.
+ * Keşfet (Slice 5 + K3): ACTIVE portfolios as TEASER, server-side filtered +
+ * paginated. RLS (`portfolios_select_network`) restricts to active + verified
+ * viewer. K3: the viewer's OWN active portfolios are INCLUDED (so an agent can
+ * confirm a freshly-published portfolio is live + see its network teaser); the
+ * card marks them "Senin portföyün" with Önizle/Düzenle (no Detay Talebi).
+ * Teaser columns only (D13-safe) + public cover.
  */
 export async function listNetworkPortfolios(
   viewerId: string,
@@ -280,6 +282,7 @@ export async function listNetworkPortfolios(
   page: number,
   pageSize = 12,
 ): Promise<NetworkResult> {
+  void viewerId; // K3: own portfolios are no longer excluded (kept for API stability)
   let query = supabase
     .from("portfolios")
     // estimated: exact for small tables, planner estimate at scale (cheap COUNT).
@@ -288,8 +291,7 @@ export async function listNetworkPortfolios(
       "*, portfolio_images(path, is_cover, sort_order, visibility), owner:profiles!portfolios_owner_id_fkey(username, full_name, avatar_url, company_name)",
       { count: "estimated" },
     )
-    .eq("status", "active")
-    .neq("owner_id", viewerId);
+    .eq("status", "active");
 
   // Structured region filters use EXACT canonical match (RegionSelect values) so the
   // Keşfet count and the region-summary count stay consistent (no ilike drift).
@@ -548,7 +550,7 @@ export async function uploadImages(
   const startIndex = count ?? 0;
 
   // Bounded concurrency + per-image retry + isolation (raw ~4MB file is never stored;
-  // each image → display ≤1600px + thumb ≤400px WebP). One failure never sinks the rest.
+  // each image → display ≤1600px + thumb ≤640px WebP). One failure never sinks the rest.
   await mapWithConcurrency(files, UPLOAD_CONCURRENCY, async (file, i) => {
     try {
       await uploadOneImage(

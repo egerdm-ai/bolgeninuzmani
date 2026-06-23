@@ -8,6 +8,7 @@ import {
   ChevronRight,
   X,
   Send,
+  Eye,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
@@ -386,6 +387,7 @@ function Kesfet() {
                     p={p}
                     selected={p.id === selectedId}
                     saved={savedState.isSaved(p.id)}
+                    isOwn={p.owner_id === user?.id}
                     onToggleSave={savedState.enabled ? savedState.toggle : undefined}
                   />
                 </div>
@@ -421,6 +423,7 @@ function Kesfet() {
                         {selected && (
                           <MapPreviewCard
                             p={selected}
+                            isOwn={selected.owner_id === user?.id}
                             onClose={() => setSelectedId(null)}
                             onOpen={() =>
                               navigate({
@@ -469,10 +472,12 @@ function Kesfet() {
 
 function MapPreviewCard({
   p,
+  isOwn,
   onClose,
   onOpen,
 }: {
   p: PortfolioWithCover;
+  isOwn?: boolean;
   onClose: () => void;
   onOpen: () => void;
 }) {
@@ -518,7 +523,15 @@ function MapPreviewCard({
             onClick={onOpen}
             className="mt-1.5 h-7 gap-1 self-start bg-gradient-gold px-2.5 text-[11px] text-primary-foreground hover:opacity-90"
           >
-            <Send className="size-3" /> Detay Talep Et
+            {isOwn ? (
+              <>
+                <Eye className="size-3" /> Önizle
+              </>
+            ) : (
+              <>
+                <Send className="size-3" /> Detay Talep Et
+              </>
+            )}
           </Button>
         </div>
       </div>
