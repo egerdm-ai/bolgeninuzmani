@@ -131,12 +131,12 @@ function BackgroundGlow() {
 
 function Logo({ stacked = false }: { stacked?: boolean }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex items-center gap-3">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground shadow-gold">
         <ShieldCheck className="size-5" />
       </span>
-      <span className="flex min-w-0 flex-col leading-none">
-        <span className="truncate font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+      <span className="flex flex-col leading-none">
+        <span className="whitespace-nowrap font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           Bölgenin Uzmanı
         </span>
         {stacked && (
@@ -189,20 +189,10 @@ function Navbar() {
           </Button>
         </div>
 
-        {/* Mobile/tablet: compact Giriş Yap + primary "Başvur" + hamburger (< lg) */}
-        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
-          <Button asChild variant="ghost" size="sm" className="text-secondary-foreground">
-            <Link to="/login">Giriş Yap</Link>
-          </Button>
-          <Button
-            asChild
-            size="sm"
-            className="gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
-          >
-            <a href={`#${APPLY_ID}`} onClick={scrollToApply}>
-              Başvur <ArrowRight className="size-3.5" />
-            </a>
-          </Button>
+        {/* Mobile/tablet (< lg): only the hamburger, so the brand name is never cut.
+            The primary CTA is always visible via the bottom MobileStickyCta; Giriş Yap +
+            Üyelik Başvurusu live inside the menu (flows unchanged). */}
+        <div className="flex shrink-0 items-center lg:hidden">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" aria-label="Menü">
