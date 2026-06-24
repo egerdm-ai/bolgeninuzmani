@@ -69,10 +69,17 @@ function circle(lat: number, lng: number, radiusKm: number) {
 export function LocationPicker({
   value,
   onChange,
+  regionCenter,
+  regionLabel,
   className,
 }: {
   value: LocationValue;
   onChange: (v: LocationValue) => void;
+  /** Selected İlçe centroid — the map opens here (and "Merkeze Pin Koy" drops here)
+   *  when no pin is placed yet, so the pin lands in the chosen region. */
+  regionCenter?: { lat: number; lng: number } | null;
+  /** İlçe adı — used in the "pin bölge dışında" uyarısı. */
+  regionLabel?: string;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -82,10 +89,12 @@ export function LocationPicker({
   const markerRef = useRef<any>(null);
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
+  const regionRef = useRef(regionCenter);
   const drawRef = useRef<() => void>(() => {});
   const setPinRef = useRef<(lng: number, lat: number) => void>(() => {});
   onChangeRef.current = onChange;
   valueRef.current = value;
+  regionRef.current = regionCenter;
   const [ready, setReady] = useState(false);
 
   // Create the map ONCE.
@@ -98,12 +107,19 @@ export function LocationPicker({
       const maplibregl = (await import("maplibre-gl")).default;
       if (cancelled || !ref.current) return;
       const v = valueRef.current;
+      const rc = regionRef.current;
       const hasPin = v.lat != null && v.lng != null;
+      // Open on the pin if set, else on the selected İlçe centroid, else Türkiye-wide.
+      const center: [number, number] = hasPin
+        ? [v.lng as number, v.lat as number]
+        : rc
+          ? [rc.lng, rc.lat]
+          : FALLBACK;
       const map = new maplibregl.Map({
         container: ref.current,
         style: rasterStyle(currentTheme()) as never,
-        center: hasPin ? [v.lng as number, v.lat as number] : FALLBACK,
-        zoom: hasPin ? 14 : 6,
+        center,
+        zoom: hasPin ? 14 : rc ? 12 : 6,
         attributionControl: false,
       });
       mapRef.current = map;
@@ -206,6 +222,27 @@ export function LocationPicker({
     if (ready) draw();
   }, [ready, value.precision, value.radiusKm, value.lat, value.lng]);
 
+  // When the selected İlçe changes and no pin is placed yet, fly the map to that
+  // district centroid so the user drops the pin in the RIGHT region (the big "pin
+  // outside the region" cause). A placed pin is never moved.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map || !regionCenter) return;
+    if (valueRef.current.lat != null) return;
+    map.flyTo({ center: [regionCenter.lng, regionCenter.lat], zoom: 12 });
+  }, [ready, regionCenter?.lat, regionCenter?.lng]);
+
+  // Sanity check: a placed pin far from the selected İlçe centroid almost always means
+  // a wrong-region click (e.g. map left on İstanbul). ~30 km tolerates large districts.
+  const farFromRegion =
+    !!regionCenter &&
+    value.lat != null &&
+    value.lng != null &&
+    Math.hypot(
+      (value.lat - regionCenter.lat) * 111,
+      (value.lng - regionCenter.lng) * 111 * Math.cos((value.lat * Math.PI) / 180),
+    ) > 30;
+
   // Touch-reliable placement: pan so the target is under the center crosshair, then
   // drop the pin at the map center (no precise tap needed — fixes mobile discoverability).
   const placeAtCenter = () => {
@@ -286,10 +323,17 @@ export function LocationPicker({
         </div>
       )}
 
+      {farFromRegion && (
+        <p className="text-[11px] font-medium text-warning">
+          Pin seçtiğiniz bölgenin {regionLabel ? `(${regionLabel}) ` : ""}dışında görünüyor — doğru
+          konuma taşıyın.
+        </p>
+      )}
+
       <p className="text-[11px] text-muted-foreground">
         {value.precision === "exact"
           ? "Tam konum: teaser haritasında gerçek nokta görünür."
-          : "Yaklaşık: teaser yalnızca çap dairesini görür; tam koordinat kilitli kalır (D30)."}
+          : "Yaklaşık: teaser, pini seçtiğiniz ilçe içinde gösterir; tam koordinat kilitli kalır (D30)."}
       </p>
     </div>
   );

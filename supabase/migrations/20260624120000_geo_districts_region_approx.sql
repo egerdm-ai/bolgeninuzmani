@@ -10,17 +10,20 @@
 --   2. seeds all 973 rows (idempotent: on conflict do update).
 --   3. derive_approx_centroid(lat,lng,seed): deterministic jitter (±0.01°, ~±1.1km)
 --      around a centroid, seeded by the portfolio id.
---   4. sync_portfolio_approx_from_region(): BEFORE INSERT/UPDATE on portfolios — sets
---      portfolios.approx_lat/lng from geo_districts[(city,district)] + jitter. If the
---      (city,district) is unknown (legacy/free-text) → approx NULL (no error, no pin).
---   5. DROPS the old portfolio_private exact→approx trigger: exact coords NO LONGER
---      drive the approx pin.
+--   4. PRECISION-AWARE approx (supersedes Faz 2.2):
+--        "Yaklaşık" → approx = geo_districts[(city,district)] centroid + jitter
+--          (decoupled from exact, ALWAYS inside the selected ilçe; unknown → NULL).
+--        "Tam konum" → approx = exact (owner's explicit reveal).
+--      Two triggers: portfolios BEFORE (region/exact by precision) + portfolio_private
+--      AFTER (exact mode copies exact → approx).
+--   5. Replaces the m2 / Faz 2.2 exact-coarse approx triggers.
 --
 -- ====================== WHY THIS IS SAFE (D13/D30) ===========================
--- (1) approx is now derived from the PUBLIC ilçe centroid (+ jitter), NOT from the
---     locked exact coordinates. This makes the teaser pin EVEN COARSER and fully
---     DECOUPLES it from exact — exact_lat/lng (D13) stay locked in portfolio_private
---     and no longer influence anything public. Privacy strictly improves.
+-- (1) In "Yaklaşık" mode approx is derived from the PUBLIC ilçe centroid (+ jitter),
+--     NOT from the locked exact coords — fully DECOUPLED, privacy strictly improves.
+--     In "Tam konum" mode the owner EXPLICITLY reveals the exact point (approx = exact).
+--     exact_lat/lng stay locked in portfolio_private; only the owner's exact-mode choice
+--     copies the value into the public approx column.
 -- (2) geo_districts holds only public administrative centroids (region name + lat/lng)
 --     — no D13 field. RLS enable+force; authenticated SELECT only; no insert/update/
 --     delete grant or policy (reference data, seeded here).
@@ -1059,51 +1062,112 @@ comment on function public.derive_approx_centroid(numeric, numeric, uuid) is
 revoke execute on function public.derive_approx_centroid(numeric, numeric, uuid) from public, anon;
 grant  execute on function public.derive_approx_centroid(numeric, numeric, uuid) to authenticated;
 
--- 4. SYNC TRIGGER (portfolios.city/district → approx) --------------------------
-create or replace function public.sync_portfolio_approx_from_region()
+-- 4. REGION CENTROID → APPROX HELPER (no exact reference) ----------------------
+-- approx for a portfolio from its (city,district) centroid + deterministic jitter,
+-- or NULL when the region is unknown/legacy. Reads only PUBLIC geo_districts — never
+-- exact. (Everything from the table down to "-- 5. RETIRE" is exact-free by design;
+-- the D13 leak test scans exactly that slice.)
+create or replace function public.portfolio_region_approx(
+  _city     text,
+  _district text,
+  _id       uuid
+)
+returns table (approx_lat double precision, approx_lng double precision)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select j.approx_lat, j.approx_lng
+  from public.geo_districts g
+  cross join lateral public.derive_approx_centroid(g.lat, g.lng, _id) j
+  where g.province = _city and g.district = _district;
+$$;
+
+revoke execute on function public.portfolio_region_approx(text, text, uuid) from public, anon;
+grant  execute on function public.portfolio_region_approx(text, text, uuid) to authenticated;
+
+-- 5. RETIRE the old approx paths ----------------------------------------------
+-- Drop the m2 / Faz 2.2 exact-coarse trigger AND the region-only trigger above-style;
+-- section 6 installs the precision-aware replacement. (This comment line is also the
+-- boundary marker for the D13 leak test slice.)
+drop trigger if exists portfolio_private_sync_approx      on public.portfolio_private;  -- m2 / 2.2
+drop trigger if exists portfolios_sync_approx_on_precision on public.portfolios;         -- Faz 2.2
+drop trigger if exists portfolios_sync_approx_region      on public.portfolios;          -- region-only
+
+-- 6. PRECISION-AWARE APPROX (supersedes Faz 2.2) ------------------------------
+-- "Yaklaşık" → approx = İLÇE centroid + jitter (decoupled from exact, ALWAYS inside the
+-- selected district). "Tam konum" → approx = exact (the owner's explicit reveal).
+-- exact_lat/lng stay LOCKED in portfolio_private; only the owner's exact-mode choice
+-- copies that value into the public approx column. D30: in approx mode exact NEVER
+-- influences the teaser pin.
+
+-- (a) portfolios BEFORE INSERT/UPDATE: region centroid for "approx"; exact for "exact".
+create or replace function public.sync_portfolio_approx_region()
 returns trigger
 language plpgsql
 security definer
 set search_path = public, pg_temp
 as $$
 declare
-  c record;
-  j record;
+  r  record;
+  ex record;
 begin
-  -- Recompute only on insert or when the region changed (stable pin otherwise).
   if tg_op = 'INSERT'
      or new.city is distinct from old.city
-     or new.district is distinct from old.district then
-    if new.city is not null and new.district is not null then
-      select lat, lng into c
-      from public.geo_districts
-      where province = new.city and district = new.district;
-      if found then
-        select * into j from public.derive_approx_centroid(c.lat, c.lng, new.id);
-        new.approx_lat := j.approx_lat;
-        new.approx_lng := j.approx_lng;
-      else
-        new.approx_lat := null;  -- unknown/legacy region → no pin (no error)
-        new.approx_lng := null;
+     or new.district is distinct from old.district
+     or new.location_precision is distinct from old.location_precision then
+    if new.location_precision = 'exact' then
+      select exact_lat, exact_lng into ex
+        from public.portfolio_private where portfolio_id = new.id;
+      if ex.exact_lat is not null and ex.exact_lng is not null then
+        new.approx_lat := ex.exact_lat;
+        new.approx_lng := ex.exact_lng;
       end if;
+      -- no exact yet → leave approx; the portfolio_private trigger (b) fills it.
     else
-      new.approx_lat := null;
-      new.approx_lng := null;
+      select * into r from public.portfolio_region_approx(new.city, new.district, new.id);
+      new.approx_lat := r.approx_lat;  -- NULL when region unknown → no pin, no error
+      new.approx_lng := r.approx_lng;
     end if;
   end if;
   return new;
 end;
 $$;
 
-comment on function public.sync_portfolio_approx_from_region() is
-  'D30: BEFORE INSERT/UPDATE on portfolios — derives approx_lat/lng from geo_districts[(city,district)] centroid + jitter. exact coords are NOT used. Unknown region → NULL.';
-
-drop trigger if exists portfolios_sync_approx_region on public.portfolios;
-create trigger portfolios_sync_approx_region
+drop trigger if exists portfolios_sync_approx on public.portfolios;
+create trigger portfolios_sync_approx
   before insert or update on public.portfolios
   for each row
-  execute function public.sync_portfolio_approx_from_region();
+  execute function public.sync_portfolio_approx_region();
 
--- 5. RETIRE the old exact→approx path -----------------------------------------
--- approx no longer derives from the locked exact coordinates (privacy++).
+-- (b) portfolio_private AFTER exact change: only "Tam konum" copies exact → approx.
+create or replace function public.sync_portfolio_approx()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  prec text;
+begin
+  select location_precision into prec from public.portfolios where id = new.portfolio_id;
+  if prec = 'exact' then
+    update public.portfolios
+       set approx_lat = new.exact_lat, approx_lng = new.exact_lng
+     where id = new.portfolio_id;
+  end if;
+  -- "Yaklaşık": the teaser pin comes from the region centroid, NOT exact → no-op.
+  return new;
+end;
+$$;
+
 drop trigger if exists portfolio_private_sync_approx on public.portfolio_private;
+create trigger portfolio_private_sync_approx
+  after insert or update of exact_lat, exact_lng on public.portfolio_private
+  for each row
+  execute function public.sync_portfolio_approx();
+
+-- =============================================================================
+-- END region-centered, precision-aware approx
+-- =============================================================================

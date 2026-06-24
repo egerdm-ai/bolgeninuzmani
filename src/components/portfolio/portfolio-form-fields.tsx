@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { TRANSACTION_LABELS } from "@/lib/portfolio-labels";
 import { RegionSelect } from "@/components/geo/region-select";
+import { getDistrictCentroid } from "@/lib/geo";
 import { CategorySelect } from "@/components/portfolio/category-select";
 import { FeatureMultiSelect } from "@/components/portfolio/feature-multi-select";
 import { PriceInput } from "@/components/ui/price-input";
@@ -216,6 +217,10 @@ export function PortfolioFormFields({
   const [docKind, setDocKind] = useState<DocumentKind>("kat_plani");
 
   const callOnly = teaser.mode === "call_only";
+  // 2.2 fix #1: feed the selected İlçe centroid to the map so it opens in the right
+  // region and the placed pin lands inside it.
+  const regionCenter =
+    teaser.city && teaser.district ? getDistrictCentroid(teaser.city, teaser.district) : null;
 
   // Only the selected category's PUBLIC standard fields (Detaylar). K1 (Faz 2.1):
   // the locked model is konum/fotolar/belgeler — there are NO locked attribute fields,
@@ -336,7 +341,12 @@ export function PortfolioFormFields({
         {!callOnly && (
           <div className="space-y-1.5">
             <Label>Harita Konumu</Label>
-            <LocationPicker value={location} onChange={setLocation} />
+            <LocationPicker
+              value={location}
+              onChange={setLocation}
+              regionCenter={regionCenter}
+              regionLabel={teaser.district || undefined}
+            />
           </div>
         )}
         {/* 2.3: Fiyat + para birimi → PriceInput (1.5) with thousand separators. */}
