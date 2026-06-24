@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   ShieldCheck,
   Sparkles,
@@ -34,8 +35,10 @@ import {
   Send,
   TrendingUp,
   BadgeCheck,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { SectionHeader } from "@/components/landing/primitives";
 import { LandingHeroProductMockup } from "@/components/landing/hero-mockup";
 import { ApplicationForm } from "@/components/landing/application-form";
@@ -128,12 +131,12 @@ function BackgroundGlow() {
 
 function Logo({ stacked = false }: { stacked?: boolean }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex min-w-0 items-center gap-3">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-gold text-primary-foreground shadow-gold">
         <ShieldCheck className="size-5" />
       </span>
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+      <span className="flex min-w-0 flex-col leading-none">
+        <span className="truncate font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           Bölgenin Uzmanı
         </span>
         {stacked && (
@@ -152,9 +155,11 @@ function Logo({ stacked = false }: { stacked?: boolean }) {
 }
 
 function Navbar() {
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-6 px-6">
+      <div className="mx-auto flex h-16 max-w-[1320px] items-center justify-between gap-3 px-4 sm:gap-6 sm:px-6">
         <Logo />
         <nav className="hidden items-center gap-7 lg:flex">
           {navLinks.map((l) => (
@@ -168,12 +173,10 @@ function Navbar() {
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            className="hidden text-secondary-foreground sm:inline-flex"
-          >
+
+        {/* Desktop CTAs (unchanged flow): Giriş Yap → /login, Başvuru → APPLY_ID scroll */}
+        <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          <Button asChild variant="ghost" className="text-secondary-foreground">
             <Link to="/login">Giriş Yap</Link>
           </Button>
           <Button
@@ -184,6 +187,70 @@ function Navbar() {
               Üyelik Başvurusu Yap <ArrowRight className="size-4" />
             </a>
           </Button>
+        </div>
+
+        {/* Mobile/tablet: compact Giriş Yap + primary "Başvur" + hamburger (< lg) */}
+        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
+          <Button asChild variant="ghost" size="sm" className="text-secondary-foreground">
+            <Link to="/login">Giriş Yap</Link>
+          </Button>
+          <Button
+            asChild
+            size="sm"
+            className="gap-1 bg-gradient-gold text-primary-foreground hover:opacity-90"
+          >
+            <a href={`#${APPLY_ID}`} onClick={scrollToApply}>
+              Başvur <ArrowRight className="size-3.5" />
+            </a>
+          </Button>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" aria-label="Menü">
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 border-border bg-background">
+              <SheetTitle className="text-left font-display text-lg text-foreground">
+                Menü
+              </SheetTitle>
+              <nav className="mt-6 flex flex-col gap-1">
+                {navLinks.map((l) => (
+                  <a
+                    key={l.href}
+                    href={`#${l.href}`}
+                    onClick={(e) => {
+                      scrollTo(l.href)(e);
+                      close();
+                    }}
+                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground"
+                  >
+                    {l.label}
+                  </a>
+                ))}
+              </nav>
+              <div className="mt-6 flex flex-col gap-2 border-t border-border pt-6">
+                <Button asChild variant="outline">
+                  <Link to="/login" onClick={close}>
+                    Giriş Yap
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="gap-1.5 bg-gradient-gold text-primary-foreground hover:opacity-90"
+                >
+                  <a
+                    href={`#${APPLY_ID}`}
+                    onClick={(e) => {
+                      scrollToApply(e);
+                      close();
+                    }}
+                  >
+                    Üyelik Başvurusu Yap <ArrowRight className="size-4" />
+                  </a>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
