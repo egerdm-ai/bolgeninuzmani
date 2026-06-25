@@ -5,7 +5,13 @@ import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyStateCard } from "@/components/vault/cards";
 import { ProfessionalDirectoryCard } from "@/components/profile/professional-directory-card";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { featureFlags } from "@/lib/feature-flags";
 import { listProfessionals, type ProfessionalListItem } from "@/lib/data/professionals";
 
@@ -17,6 +23,7 @@ export const Route = createFileRoute("/dashboard/professionals/")({
 });
 
 const lc = (s: string) => s.toLocaleLowerCase("tr-TR");
+const ALL = "all";
 
 function Professionals() {
   const [rows, setRows] = useState<ProfessionalListItem[] | null>(null);
@@ -35,11 +42,11 @@ function Professionals() {
   }, []);
 
   const regions = useMemo(
-    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_regions))].sort().slice(0, 12),
+    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_regions))].sort(),
     [rows],
   );
   const types = useMemo(
-    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_types))].sort().slice(0, 10),
+    () => [...new Set((rows ?? []).flatMap((p) => p.expertise_types))].sort(),
     [rows],
   );
 
@@ -69,36 +76,41 @@ function Professionals() {
         />
       </div>
 
-      {/* Expertise filters */}
+      {/* Expertise filters — dropdowns (E3.3) */}
       {(regions.length > 0 || types.length > 0) && (
-        <div className="space-y-2">
+        <div className="grid gap-2 sm:grid-cols-2">
           {regions.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Bölge
-              </span>
-              {regions.map((r) => (
-                <Chip
-                  key={r}
-                  active={region === r}
-                  onClick={() => setRegion(region === r ? null : r)}
-                >
-                  {r}
-                </Chip>
-              ))}
-            </div>
+            <Select
+              value={region ?? ALL}
+              onValueChange={(v) => setRegion(v === ALL ? null : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tüm bölgeler" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Tüm bölgeler</SelectItem>
+                {regions.map((r) => (
+                  <SelectItem key={r} value={r}>
+                    {r}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
           {types.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="mr-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Uzmanlık
-              </span>
-              {types.map((t) => (
-                <Chip key={t} active={type === t} onClick={() => setType(type === t ? null : t)}>
-                  {t}
-                </Chip>
-              ))}
-            </div>
+            <Select value={type ?? ALL} onValueChange={(v) => setType(v === ALL ? null : v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Tüm uzmanlıklar" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Tüm uzmanlıklar</SelectItem>
+                {types.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         </div>
       )}
@@ -121,30 +133,5 @@ function Professionals() {
         </div>
       )}
     </PageContainer>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
-        active
-          ? "border-gold/40 bg-gold/10 text-gold"
-          : "border-border bg-surface-2 text-muted-foreground hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
   );
 }
