@@ -333,7 +333,7 @@ export function LocationPicker({
       <p className="text-[11px] text-muted-foreground">
         {value.precision === "exact"
           ? "Tam konum: teaser haritasında gerçek nokta görünür."
-          : "Yaklaşık: teaser, pini seçtiğiniz ilçe içinde gösterir; tam koordinat kilitli kalır (D30)."}
+          : "Yaklaşık: teaser pini çap kadar bulanıklaştırır (pine yakın, tam değil); tam koordinat kilitli kalır (D30)."}
       </p>
     </div>
   );
