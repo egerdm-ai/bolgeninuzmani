@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   SlidersHorizontal,
-  Loader2,
   ChevronLeft,
   ChevronRight,
   X,
@@ -14,7 +13,6 @@ import { PageContainer } from "@/components/layout/app-shell";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -25,11 +23,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth/auth-context";
 import { Constants } from "@/lib/database.types";
-import {
-  listNetworkPortfolios,
-  type NetworkFilters,
-  type PortfolioWithCover,
-} from "@/lib/data/portfolios";
+import { listNetworkPortfolios, type PortfolioWithCover } from "@/lib/data/portfolios";
 import {
   CATEGORY_LABELS,
   TRANSACTION_LABELS,
@@ -40,11 +34,18 @@ import { SearchResultCard } from "@/components/vault/search-result-card";
 import { ThumbImage } from "@/components/portfolio/thumb-image";
 import { CoverPlaceholder } from "@/components/portfolio/cover-placeholder";
 import { PortfolioMap, type MapPoint } from "@/components/portfolio/portfolio-map";
+import { KesfetFilterPanel } from "@/components/portfolio/kesfet-filter-panel";
+import {
+  EMPTY_KESFET_FILTERS,
+  kesfetFiltersToNetwork,
+  deriveChips,
+  countActiveFilters,
+  type KesfetFilters,
+} from "@/lib/kesfet-filters";
 import { useSavedPortfolios } from "@/lib/use-saved-portfolios";
 import { featureFlags } from "@/lib/feature-flags";
-import { RegionSelect, type RegionValue } from "@/components/geo/region-select";
 
-// Lovable labels → DB feature values (seed uses the right-hand names).
+// Quick chips: fast toggles for the most-used features (write into features[]).
 const QUICK_FEATURES = [
   { label: "Deniz Manzaralı", value: "Deniz Manzarası" },
   { label: "Havuzlu", value: "Havuz" },
@@ -60,10 +61,8 @@ export const Route = createFileRoute("/dashboard/search")({
 
 const PAGE_SIZE = 12;
 const ALL = "all";
-// Options come straight from the DB enums (no wrong/missing values).
 const CATEGORIES = Constants.public.Enums.portfolio_category;
 const TRANSACTIONS = Constants.public.Enums.transaction_type;
-const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "6+1"];
 
 function useDebounced<T>(value: T, ms: number): T {
   const [v, setV] = useState(value);
@@ -79,101 +78,51 @@ function Kesfet() {
   const savedState = useSavedPortfolios();
   const navigate = useNavigate();
   const { q: initialQ } = Route.useSearch();
-  // Typed fields debounce; selects apply immediately.
-  const [q, setQ] = useState(initialQ ?? "");
-  const [priceMin, setPriceMin] = useState("");
-  const [priceMax, setPriceMax] = useState("");
-  const [category, setCategory] = useState<string>(ALL);
-  const [transaction, setTransaction] = useState<string>(ALL);
-  const [rooms, setRooms] = useState<string>(ALL);
-  const [region, setRegion] = useState<RegionValue>({
-    city: null,
-    district: null,
-    neighborhood: null,
+
+  const [filters, setFilters] = useState<KesfetFilters>({
+    ...EMPTY_KESFET_FILTERS,
+    q: initialQ ?? "",
   });
-  const [quickMode, setQuickMode] = useState<"controlled" | "call_only" | null>(null);
-  const [feature, setFeature] = useState<string | null>(null);
-  const [rooms5plus, setRooms5plus] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showMore, setShowMore] = useState(false);
   const [page, setPage] = useState(0);
   const [result, setResult] = useState<{ items: PortfolioWithCover[]; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fetching, setFetching] = useState(false);
 
-  const dq = useDebounced(q, 300);
-  const dMin = useDebounced(priceMin, 400);
-  const dMax = useDebounced(priceMax, 400);
+  // Typed fields (search/price/m²) debounce; the whole mapped filter set is debounced
+  // together so a keystroke and a chip toggle share one cheap settle window.
+  const networkFilters = useMemo(() => kesfetFiltersToNetwork(filters), [filters]);
+  const debounced = useDebounced(networkFilters, 250);
 
-  const filters = useMemo<NetworkFilters>(
-    () => ({
-      q: dq.trim() || undefined,
-      city: region.city ?? undefined,
-      district: region.district ?? undefined,
-      neighborhood: region.neighborhood ?? undefined,
-      mode: quickMode ?? undefined,
-      feature: feature ?? undefined,
-      roomCounts: rooms5plus ? ["5+1", "6+1"] : undefined,
-      category: (category === ALL ? undefined : category) as NetworkFilters["category"],
-      transaction_type: (transaction === ALL
-        ? undefined
-        : transaction) as NetworkFilters["transaction_type"],
-      room_count: rooms === ALL ? undefined : rooms,
-      priceMin: dMin ? Number(dMin) : undefined,
-      priceMax: dMax ? Number(dMax) : undefined,
-    }),
-    [dq, region, category, transaction, rooms, quickMode, feature, rooms5plus, dMin, dMax],
-  );
-
-  // Filters changed → back to page 0 (instant filter; no "Filtrele" button).
-  useEffect(() => setPage(0), [filters]);
+  // Filters changed → back to page 0.
+  useEffect(() => setPage(0), [debounced]);
 
   useEffect(() => {
     if (!user) return;
     let active = true;
-    // Keep the previous results on screen during a refetch (thin loading bar
-    // instead of a full spinner / blank flash on every filter keystroke).
     setFetching(true);
     setError(null);
-    listNetworkPortfolios(user.id, filters, page, PAGE_SIZE)
+    listNetworkPortfolios(user.id, debounced, page, PAGE_SIZE)
       .then((r) => active && setResult(r))
       .catch((e) => active && setError(e instanceof Error ? e.message : String(e)))
       .finally(() => active && setFetching(false));
     return () => {
       active = false;
     };
-  }, [user, filters, page]);
+  }, [user, debounced, page]);
 
-  const reset = () => {
-    setQ("");
-    setPriceMin("");
-    setPriceMax("");
-    setCategory(ALL);
-    setTransaction(ALL);
-    setRooms(ALL);
-  };
+  const toggleFeature = (v: string) =>
+    setFilters((f) => ({
+      ...f,
+      features: f.features.includes(v)
+        ? f.features.filter((x) => x !== v)
+        : [...f.features, v],
+    }));
 
-  // Active-filter chips (each clears its own field).
-  const chips: { key: string; label: string; clear: () => void }[] = [];
-  if (q.trim()) chips.push({ key: "q", label: `“${q.trim()}”`, clear: () => setQ("") });
-  if (category !== ALL)
-    chips.push({
-      key: "cat",
-      label: CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS],
-      clear: () => setCategory(ALL),
-    });
-  if (transaction !== ALL)
-    chips.push({
-      key: "txn",
-      label: TRANSACTION_LABELS[transaction as keyof typeof TRANSACTION_LABELS],
-      clear: () => setTransaction(ALL),
-    });
-  if (rooms !== ALL)
-    chips.push({ key: "rooms", label: `${rooms} oda`, clear: () => setRooms(ALL) });
-  if (priceMin) chips.push({ key: "pmin", label: `≥ ${priceMin}`, clear: () => setPriceMin("") });
-  if (priceMax) chips.push({ key: "pmax", label: `≤ ${priceMax}`, clear: () => setPriceMax("") });
-
+  const chips = deriveChips(filters);
+  const activeCount = countActiveFilters(filters);
   const total = result?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -184,19 +133,29 @@ function Kesfet() {
         subtitle="Ağdaki doğrulanmış emlakçıların yayındaki portföyleri (teaser)."
       />
 
-      {/* Primary filter bar — one clean row */}
+      {/* Compact filter bar (Airbnb-style): search + a couple of quick selects + Filtreler */}
       <div className="space-y-3 rounded-2xl border border-border bg-surface p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={filters.q}
+              onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
               placeholder="Başlık, şehir, ilçe veya mahalle ara…"
               className="pl-9"
             />
           </div>
-          <Select value={category} onValueChange={setCategory}>
+          <Select
+            value={filters.category ?? ALL}
+            onValueChange={(c) =>
+              setFilters((f) => ({
+                ...f,
+                category: c === ALL ? null : (c as KesfetFilters["category"]),
+                subcategory: null,
+                attrs: {},
+              }))
+            }
+          >
             <SelectTrigger className="sm:w-40">
               <SelectValue />
             </SelectTrigger>
@@ -209,7 +168,15 @@ function Kesfet() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={transaction} onValueChange={setTransaction}>
+          <Select
+            value={filters.transaction ?? ALL}
+            onValueChange={(t) =>
+              setFilters((f) => ({
+                ...f,
+                transaction: t === ALL ? null : (t as KesfetFilters["transaction"]),
+              }))
+            }
+          >
             <SelectTrigger className="sm:w-32">
               <SelectValue />
             </SelectTrigger>
@@ -222,104 +189,50 @@ function Kesfet() {
               ))}
             </SelectContent>
           </Select>
-          <Button
-            variant="outline"
-            className="gap-1.5"
-            onClick={() => setShowMore((s) => !s)}
-            aria-expanded={showMore}
-          >
-            <SlidersHorizontal className="size-4" /> Daha fazla
+          <Button variant="outline" className="gap-1.5" onClick={() => setPanelOpen(true)}>
+            <SlidersHorizontal className="size-4" /> Filtreler
+            {activeCount > 0 && (
+              <span className="ml-0.5 flex size-5 items-center justify-center rounded-full bg-gold/20 text-[10px] font-bold text-gold ring-1 ring-inset ring-gold/40">
+                {activeCount}
+              </span>
+            )}
           </Button>
         </div>
 
-        {/* Region filter (canonical İl/İlçe/Mahalle → exact match) */}
-        <div className="border-t border-border pt-3">
-          <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Bölge
-            </span>
-            {(region.city || region.district || region.neighborhood) && (
-              <button
-                type="button"
-                onClick={() => setRegion({ city: null, district: null, neighborhood: null })}
-                className="text-xs text-gold hover:underline"
-              >
-                Bölgeyi temizle
-              </button>
-            )}
-          </div>
-          <RegionSelect value={region} onChange={setRegion} />
-        </div>
-
-        {/* Lovable quick-chip row — instant, horizontal-scrollable */}
+        {/* Quick feature chips — instant, horizontal-scrollable */}
         <div className="flex items-center gap-1.5 overflow-x-auto border-t border-border pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {QUICK_FEATURES.map((f) => (
             <QuickChip
               key={f.value}
-              active={feature === f.value}
-              onClick={() => setFeature(feature === f.value ? null : f.value)}
+              active={filters.features.includes(f.value)}
+              onClick={() => toggleFeature(f.value)}
             >
               {f.label}
             </QuickChip>
           ))}
-          <QuickChip active={rooms5plus} onClick={() => setRooms5plus((v) => !v)}>
-            5+ Oda
-          </QuickChip>
           <span className="mx-1 h-4 w-px shrink-0 bg-border" />
           <QuickChip
-            active={quickMode === "controlled"}
-            onClick={() => setQuickMode(quickMode === "controlled" ? null : "controlled")}
+            active={filters.mode === "controlled"}
+            onClick={() =>
+              setFilters((f) => ({
+                ...f,
+                mode: f.mode === "controlled" ? null : "controlled",
+              }))
+            }
           >
             Detay Talebi Açık
           </QuickChip>
           <QuickChip
-            active={quickMode === "call_only"}
-            onClick={() => setQuickMode(quickMode === "call_only" ? null : "call_only")}
+            active={filters.mode === "call_only"}
+            onClick={() =>
+              setFilters((f) => ({ ...f, mode: f.mode === "call_only" ? null : "call_only" }))
+            }
           >
             Kapalı Portföy
           </QuickChip>
         </div>
 
-        {/* Secondary filters (collapsed by default → uncluttered) */}
-        {showMore && (
-          <div className="grid gap-3 border-t border-border pt-3 sm:grid-cols-3">
-            <Field label="Oda sayısı">
-              <Select value={rooms} onValueChange={setRooms}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL}>Tümü</SelectItem>
-                  {ROOM_OPTIONS.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {r}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Min. fiyat">
-              <Input
-                type="number"
-                inputMode="numeric"
-                value={priceMin}
-                onChange={(e) => setPriceMin(e.target.value)}
-                placeholder="0"
-              />
-            </Field>
-            <Field label="Maks. fiyat">
-              <Input
-                type="number"
-                inputMode="numeric"
-                value={priceMax}
-                onChange={(e) => setPriceMax(e.target.value)}
-                placeholder="∞"
-              />
-            </Field>
-          </div>
-        )}
-
-        {/* Active chips + count + clear */}
+        {/* Applied chips + count + clear */}
         {(chips.length > 0 || result !== null) && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
             {result !== null && (
@@ -328,7 +241,7 @@ function Kesfet() {
             {chips.map((c) => (
               <button
                 key={c.key}
-                onClick={c.clear}
+                onClick={() => setFilters((f) => c.clear(f))}
                 className="inline-flex items-center gap-1 rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-xs font-medium text-gold hover:bg-gold/20"
               >
                 {c.label}
@@ -337,7 +250,7 @@ function Kesfet() {
             ))}
             {chips.length > 0 && (
               <button
-                onClick={reset}
+                onClick={() => setFilters((f) => ({ ...EMPTY_KESFET_FILTERS, currency: f.currency }))}
                 className="ml-auto text-xs text-muted-foreground hover:text-foreground"
               >
                 Filtreleri temizle
@@ -346,6 +259,15 @@ function Kesfet() {
           </div>
         )}
       </div>
+
+      <KesfetFilterPanel
+        value={filters}
+        onChange={setFilters}
+        onClear={() => setFilters((f) => ({ ...EMPTY_KESFET_FILTERS, currency: f.currency }))}
+        count={total}
+        open={panelOpen}
+        onOpenChange={setPanelOpen}
+      />
 
       {/* Thin loading bar on refetch (results stay on screen) */}
       <div className="h-0.5 overflow-hidden rounded-full bg-transparent">
@@ -360,12 +282,23 @@ function Kesfet() {
           Yüklenemedi: {error}
         </div>
       ) : result === null ? (
-        <div className="flex items-center justify-center rounded-2xl border border-border bg-surface py-16">
-          <Loader2 className="size-6 animate-spin text-gold" />
-        </div>
+        <ResultsSkeleton />
       ) : result.items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center text-sm text-muted-foreground">
-          Filtrelerinize uygun yayında portföy bulunamadı.
+        <div className="rounded-2xl border border-dashed border-border-strong bg-surface/50 px-6 py-16 text-center">
+          <p className="text-sm font-medium text-foreground">Eşleşen portföy bulunamadı.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Filtreleri gevşetmeyi deneyin{activeCount > 0 ? " veya temizleyin" : ""}.
+          </p>
+          {activeCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => setFilters((f) => ({ ...EMPTY_KESFET_FILTERS, currency: f.currency }))}
+            >
+              Filtreleri temizle
+            </Button>
+          )}
         </div>
       ) : (
         <>
@@ -470,6 +403,27 @@ function Kesfet() {
   );
 }
 
+function ResultsSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div
+          key={i}
+          className="flex gap-4 rounded-2xl border border-border bg-surface p-4"
+          aria-hidden
+        >
+          <div className="size-28 shrink-0 animate-pulse rounded-xl bg-surface-2" />
+          <div className="flex flex-1 flex-col gap-2 py-1">
+            <div className="h-4 w-2/3 animate-pulse rounded bg-surface-2" />
+            <div className="h-3 w-1/3 animate-pulse rounded bg-surface-2" />
+            <div className="mt-auto h-5 w-24 animate-pulse rounded bg-surface-2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function MapPreviewCard({
   p,
   isOwn,
@@ -535,15 +489,6 @@ function MapPreviewCard({
           </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="space-y-1.5">
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      {children}
     </div>
   );
 }
