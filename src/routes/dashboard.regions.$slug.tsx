@@ -102,27 +102,20 @@ function RegionDetail() {
           description="Şu an bu bölgede yayında portföy bulunmuyor."
         />
       ) : (
-        <div
-          className={
-            featureFlags.harita ? "grid gap-6 lg:grid-cols-[1fr_minmax(0,400px)]" : undefined
-          }
-        >
-          <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-6">
+          {/* E3.4 (Elif): harita üstte tam-geniş + kartlar altta grid. approx-only (D30). */}
+          {featureFlags.harita && points.length > 0 && (
+            <PortfolioMap
+              className="h-72 w-full overflow-hidden rounded-2xl border border-border sm:h-[420px]"
+              points={points}
+              onSelect={(pt) => navigate({ to: "/dashboard/portfolios/$id", params: { id: pt.id } })}
+            />
+          )}
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((p) => (
               <PortfolioTeaserCard key={p.id} context="app" p={toCard(p)} />
             ))}
           </div>
-          {featureFlags.harita && points.length > 0 && (
-            <aside className="hidden lg:block">
-              <PortfolioMap
-                className="sticky top-20 h-[calc(100vh-7rem)] overflow-hidden rounded-2xl border border-border"
-                points={points}
-                onSelect={(pt) =>
-                  navigate({ to: "/dashboard/portfolios/$id", params: { id: pt.id } })
-                }
-              />
-            </aside>
-          )}
         </div>
       )}
 
