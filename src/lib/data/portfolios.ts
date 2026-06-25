@@ -248,13 +248,28 @@ export type NetworkFilters = {
   neighborhood?: string;
   transaction_type?: TransactionType | null;
   category?: PortfolioCategory | null;
+  subcategory?: string;
   priceMin?: number | null;
   priceMax?: number | null;
+  /** Gross / net m² range (teaser columns gross_m2 / net_m2). */
+  grossMin?: number | null;
+  grossMax?: number | null;
+  netMin?: number | null;
+  netMax?: number | null;
   room_count?: string;
   /** Match any of these room counts (e.g. ["5+1","6+1"] for a "5+ Oda" quick chip). */
   roomCounts?: string[];
   mode?: PortfolioMode | null;
+  /** Single feature (legacy quick chip). */
   feature?: string;
+  /** Match ALL of these features (portfolios.features @> array). */
+  features?: string[];
+  /**
+   * PUBLIC teaser attributes (portfolios.attributes jsonb) — exact match each via
+   * @> (GIN-indexed). Built from the canonical PORTFOLIO_ATTRIBUTES registry.
+   * NEVER include a locked attribute here (those live in portfolio_private; D13).
+   */
+  attrs?: Record<string, string | number | boolean>;
 };
 
 export type NetworkResult = { items: PortfolioWithCover[]; total: number };
@@ -303,12 +318,22 @@ export async function listNetworkPortfolios(
   if (filters.neighborhood) query = query.eq("neighborhood", filters.neighborhood);
   if (filters.transaction_type) query = query.eq("transaction_type", filters.transaction_type);
   if (filters.category) query = query.eq("category", filters.category);
+  if (filters.subcategory) query = query.eq("subcategory", filters.subcategory);
   if (filters.mode) query = query.eq("mode", filters.mode);
   if (filters.feature) query = query.contains("features", [filters.feature]);
+  if (filters.features?.length) query = query.contains("features", filters.features);
   if (filters.priceMin != null) query = query.gte("price", filters.priceMin);
   if (filters.priceMax != null) query = query.lte("price", filters.priceMax);
+  if (filters.grossMin != null) query = query.gte("gross_m2", filters.grossMin);
+  if (filters.grossMax != null) query = query.lte("gross_m2", filters.grossMax);
+  if (filters.netMin != null) query = query.gte("net_m2", filters.netMin);
+  if (filters.netMax != null) query = query.lte("net_m2", filters.netMax);
   if (filters.room_count) query = query.eq("room_count", filters.room_count);
   if (filters.roomCounts?.length) query = query.in("room_count", filters.roomCounts);
+  // PUBLIC attributes jsonb (GIN @>). All keys here are teaser-safe per the registry;
+  // a locked key would live in portfolio_private.attributes and never reach this table.
+  if (filters.attrs && Object.keys(filters.attrs).length)
+    query = query.contains("attributes", filters.attrs);
   if (filters.q) {
     // sanitize for the PostgREST or() filter grammar
     const safe = filters.q.replace(/[,()*%]/g, " ").trim();

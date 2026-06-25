@@ -112,6 +112,18 @@ const USAGE = [
   { value: "kiracili", label: "Kiracılı" },
   { value: "malik", label: "Mülk Sahibi Oturuyor" },
 ];
+// Bina yaşı — Sahibinden-style non-overlapping buckets. Stored as the bucket VALUE
+// so wizard + Keşfet filter + detail all agree (exact jsonb match on the filter side).
+const BUILDING_AGE = [
+  { value: "0", label: "Sıfır (0)" },
+  { value: "1-5", label: "1-5" },
+  { value: "6-10", label: "6-10" },
+  { value: "11-15", label: "11-15" },
+  { value: "16-20", label: "16-20" },
+  { value: "21-25", label: "21-25" },
+  { value: "26-30", label: "26-30" },
+  { value: "31+", label: "31 ve üzeri" },
+];
 const TAPU = [
   { value: "kat_mulkiyeti", label: "Kat Mülkiyetli" },
   { value: "kat_irtifaki", label: "Kat İrtifaklı" },
@@ -159,9 +171,10 @@ export const PORTFOLIO_ATTRIBUTES: AttributeDef[] = [
   {
     key: "bina_yasi",
     label: "Bina Yaşı",
-    type: "text",
+    type: "select",
     visibility: "public",
     categories: [...BUILDINGS],
+    options: BUILDING_AGE,
   },
   {
     key: "otopark",
