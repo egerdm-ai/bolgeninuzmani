@@ -9,6 +9,7 @@ import {
   ChevronRight,
   FileText,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { SurfaceCard } from "@/components/vault/cards";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -466,59 +467,53 @@ export function PortfolioFormFields({
           {images.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {images.map((item, i) => (
-                <div
-                  key={i}
-                  className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border"
-                >
-                  <img
-                    src={URL.createObjectURL(item.file)}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                  {/* cover badge (public only) */}
-                  {item.isCover && item.visibility === "public" && (
-                    <span className="absolute left-1 top-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
-                      Kapak
-                    </span>
-                  )}
-                  <button
-                    type="button"
-                    title="Sil"
-                    onClick={() => setImages(images.filter((_, j) => j !== i))}
-                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-background/80 text-foreground"
-                  >
-                    <X className="size-3" />
-                  </button>
-                  {/* control bar: reorder · cover · visibility */}
-                  <div className="absolute inset-x-1 bottom-1 flex items-center justify-between gap-1">
-                    <div className="flex gap-0.5">
-                      <TileBtn title="Geri al" disabled={i === 0} onClick={() => moveImage(i, -1)}>
-                        <ChevronLeft className="size-3" />
+                <div key={i} className="overflow-hidden rounded-lg border border-border">
+                  <div className="relative aspect-[4/3] bg-surface-2">
+                    <img
+                      src={URL.createObjectURL(item.file)}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                    {/* cover badge (public only) */}
+                    {item.isCover && item.visibility === "public" && (
+                      <span className="absolute left-1 top-1 rounded bg-gradient-gold px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                        Kapak
+                      </span>
+                    )}
+                  </div>
+                  {/* control strip below image — ≥44px touch targets on mobile (E2) */}
+                  <div className="flex flex-wrap items-center gap-1 p-1.5">
+                    <TileBtn title="Geri al" disabled={i === 0} onClick={() => moveImage(i, -1)}>
+                      <ChevronLeft className="size-4" />
+                    </TileBtn>
+                    <TileBtn
+                      title="İleri al"
+                      disabled={i === images.length - 1}
+                      onClick={() => moveImage(i, 1)}
+                    >
+                      <ChevronRight className="size-4" />
+                    </TileBtn>
+                    {!callOnly && item.visibility === "public" && !item.isCover && (
+                      <TileBtn title="Kapak yap" onClick={() => setCover(i)}>
+                        <Star className="size-4" />
                       </TileBtn>
-                      <TileBtn
-                        title="İleri al"
-                        disabled={i === images.length - 1}
-                        onClick={() => moveImage(i, 1)}
+                    )}
+                    {!callOnly && (
+                      <button
+                        type="button"
+                        onClick={() => toggleVisibility(i)}
+                        className={`inline-flex h-11 items-center rounded px-2 text-xs font-semibold sm:h-7 ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-surface-2 text-muted-foreground"}`}
                       >
-                        <ChevronRight className="size-3" />
-                      </TileBtn>
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                      {!callOnly && item.visibility === "public" && !item.isCover && (
-                        <TileBtn title="Kapak yap" onClick={() => setCover(i)}>
-                          <Star className="size-3" />
-                        </TileBtn>
-                      )}
-                      {!callOnly && (
-                        <button
-                          type="button"
-                          onClick={() => toggleVisibility(i)}
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${item.visibility === "locked" ? "bg-gold/30 text-gold" : "bg-background/80 text-muted-foreground"}`}
-                        >
-                          {item.visibility === "locked" ? "Kilitli" : "Açık"}
-                        </button>
-                      )}
-                    </div>
+                        {item.visibility === "locked" ? "Kilitli" : "Açık"}
+                      </button>
+                    )}
+                    <TileBtn
+                      title="Sil"
+                      className="ml-auto text-destructive"
+                      onClick={() => setImages(images.filter((_, j) => j !== i))}
+                    >
+                      <X className="size-4" />
+                    </TileBtn>
                   </div>
                 </div>
               ))}
@@ -595,11 +590,13 @@ function TileBtn({
   title,
   disabled,
   onClick,
+  className,
   children,
 }: {
   title: string;
   disabled?: boolean;
   onClick: () => void;
+  className?: string;
   children: ReactNode;
 }) {
   return (
@@ -608,7 +605,10 @@ function TileBtn({
       title={title}
       disabled={disabled}
       onClick={onClick}
-      className="flex size-5 items-center justify-center rounded bg-background/80 text-foreground disabled:opacity-40"
+      className={cn(
+        "flex size-11 items-center justify-center rounded bg-surface-2 text-foreground hover:bg-surface-3 disabled:opacity-40 sm:size-7",
+        className,
+      )}
     >
       {children}
     </button>

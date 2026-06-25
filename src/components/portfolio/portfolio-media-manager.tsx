@@ -357,7 +357,7 @@ function IconBtn({
       type="button"
       variant="outline"
       size="icon"
-      className="size-7"
+      className="size-11 sm:size-7"
       title={title}
       disabled={disabled}
       onClick={onClick}
