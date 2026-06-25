@@ -37,7 +37,7 @@ import {
   hasPortfolioAccess,
   type DetailRequest,
 } from "@/lib/data/access";
-import { STATUS_LABELS, formatPortfolioPrice } from "@/lib/portfolio-labels";
+import { STATUS_LABELS } from "@/lib/portfolio-labels";
 import { attributeDef } from "@/lib/portfolio-attributes";
 import { StatusBadge } from "@/components/vault/badges";
 import { LockedRevealList } from "@/components/portfolio/portfolio-badges";
@@ -230,6 +230,13 @@ function OwnerPortfolioDetail() {
               <PlayCircle className="size-4" /> Videoyu İzle
             </a>
           )}
+          {/* E3.5: hiyerarşi açıklama → özellikler/specs → detay tablosu (açıklama önce). */}
+          {p.public_description && (
+            <section className="border-t border-bu-border pt-8">
+              <h2 className={s.sectionTitle}>Açıklama</h2>
+              <p className="mt-3 leading-relaxed text-bu-text-2">{p.public_description}</p>
+            </section>
+          )}
           <div className="border-t border-bu-border pt-6">
             <QuickInfoStrip
               roomCount={p.room_count}
@@ -239,12 +246,6 @@ function OwnerPortfolioDetail() {
               attributes={p.attributes as Record<string, unknown>}
             />
           </div>
-          {p.public_description && (
-            <section className="border-t border-bu-border pt-8">
-              <h2 className={s.sectionTitle}>Açıklama</h2>
-              <p className="mt-3 leading-relaxed text-bu-text-2">{p.public_description}</p>
-            </section>
-          )}
           <AttributesSection
             category={p.category}
             features={p.features}
@@ -262,39 +263,32 @@ function OwnerPortfolioDetail() {
 
         {/* Right sticky panel */}
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-          <div className={cn(s.card, s.cardPadding)}>
-            <p className="text-xs uppercase tracking-wider text-bu-text-2">Fiyat</p>
-            <p className="mt-1 font-display text-3xl font-bold text-bu-gold">
-              {formatPortfolioPrice(p.price, p.currency)}
-            </p>
-            {isOwner && (
-              <>
-                <div className="mt-4 flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1 gap-1.5"
-                    onClick={() =>
-                      navigate({ to: "/dashboard/portfolios/$id/edit", params: { id } })
-                    }
-                  >
-                    <Pencil className="size-4" /> Düzenle
-                  </Button>
-                  <Button
-                    asChild
-                    className="flex-1 gap-1.5 bg-gradient-gold text-bu-text-inv hover:opacity-90"
-                  >
-                    <Link to="/dashboard/portfolios/$id/share" params={{ id }}>
-                      <Share2 className="size-4" /> Paylaş
-                    </Link>
-                  </Button>
-                </div>
-                <div className="mt-4 flex items-center justify-between border-t border-bu-border pt-4">
-                  <span className="text-sm text-bu-text-2">Durum</span>
-                  <StatusBadge label={STATUS_LABELS[p.status]} tone={STATUS_TONE[p.status]} />
-                </div>
-              </>
-            )}
-          </div>
+          {/* E3.5: price is shown once (in the header). The owner action hub stays. */}
+          {isOwner && (
+            <div className={cn(s.card, s.cardPadding)}>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 gap-1.5"
+                  onClick={() => navigate({ to: "/dashboard/portfolios/$id/edit", params: { id } })}
+                >
+                  <Pencil className="size-4" /> Düzenle
+                </Button>
+                <Button
+                  asChild
+                  className="flex-1 gap-1.5 bg-gradient-gold text-bu-text-inv hover:opacity-90"
+                >
+                  <Link to="/dashboard/portfolios/$id/share" params={{ id }}>
+                    <Share2 className="size-4" /> Paylaş
+                  </Link>
+                </Button>
+              </div>
+              <div className="mt-4 flex items-center justify-between border-t border-bu-border pt-4">
+                <span className="text-sm text-bu-text-2">Durum</span>
+                <StatusBadge label={STATUS_LABELS[p.status]} tone={STATUS_TONE[p.status]} />
+              </div>
+            </div>
+          )}
 
           {/* Locked / call_only section */}
           {callOnly ? (
